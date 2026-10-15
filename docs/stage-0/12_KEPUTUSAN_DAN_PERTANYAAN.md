@@ -1,0 +1,68 @@
+# 12 · Log Keputusan & Pertanyaan Terbuka
+
+Aturan dokumen ini: **tidak ada keputusan berdasarkan asumsi.** Hal yang belum diketahui dicatat sebagai pertanyaan terbuka. Kolom "Sumber" menunjukkan siapa yang memutuskan:
+- **Tim**: diputuskan langsung oleh tim.
+- **Delegasi**: tim meminta dipilihkan yang terbaik/terhemat. Pilihan beserta alasannya dicatat dan boleh diubah tim kapan saja.
+- **Spike**: ditentukan oleh hasil uji di Stage 0.
+
+---
+
+## 1. Log keputusan
+
+| ID | Tanggal | Keputusan | Sumber | Alasan / catatan |
+|---|---|---|---|---|
+| D-01 | 13 Okt | Ide final: **TILIK** (v4 + audit etika) | Tim | Lihat `docs/research/` |
+| D-02 | 15 Okt | Nama produk **TILIK**, nama tim **IRIS-Heisenberg** | Tim | |
+| D-03 | 15 Okt | Orkestrasi suara: **Pipecat** (pipeline sendiri), bukan ElevenLabs Agents Platform | Tim | Kode inti karya tim (aturan orisinalitas), skor teknis |
+| D-04 | 15 Okt | **ElevenLabs** untuk TTS **dan** STT (Scribe) | Tim | Satu vendor suara |
+| D-05 | 15 Okt | LLM: **OpenAI**. Model spesifik ditentukan di S-04 (termurah yang lolos) | Tim + Spike | |
+| D-06 | 15 Okt | Telepon: **Twilio** (akun trial yang sudah ada) | Tim | |
+| D-07 | 15 Okt | Commit & push atas nama **Mikael Adikara**. Tanpa co-author/kontributor AI di riwayat git | Tim | Penggunaan AI tetap diungkapkan di pitch deck sesuai aturan lomba (CMP-04) |
+| D-08 | 15 Okt | Semua dokumen dalam **Bahasa Indonesia** | Tim | |
+| D-09 | 15 Okt | Dokumen riset (v1–v4, audit etika) **dimasukkan ke repo** (`docs/research/`) | Tim | Jejak proses berpikir |
+| D-10 | 15 Okt | Pembagian kerja **per job/workstream**, tidak per orang | Tim | |
+| D-11 | 15 Okt | Biaya: **paling hemat**. ElevenLabs Starter. Twilio tetap trial. Hosting gratis | Tim | |
+| D-12 | 15 Okt | **MVP selesai 18 Okt** = deadline efektif | Tim | Deadline resmi panitia = Q-01 |
+| D-13 | 15 Okt | Wilayah demo: **DIY/Gunungkidul**, jejaring Code Stroke RSA UGM | Tim | |
+| D-14 | 15 Okt | Scope MVP = daftar MUST di [02_PRD](02_PRD.md) (disesuaikan dengan waktu 3 hari) | Delegasi | Tim meminta scope ditentukan sesuai kelayakan waktu |
+| D-15 | 15 Okt | WhatsApp: **WhatsApp Cloud API (Meta)** | Delegasi | Resmi (tidak berisiko blokir), nomor tes gratis, webhook tersedia. Alternatif: Twilio WhatsApp Sandbox (peserta harus "join" dulu) |
+| D-16 | 15 Okt | Database: **Supabase free** | Delegasi | Realtime untuk Board IGD, Storage untuk pesan suara, gratis |
+| D-17 | 15 Okt | Web: **Next.js + Tailwind + shadcn/ui** di **Vercel Hobby** | Delegasi | UI rapi, API route gratis untuk webhook WA |
+| D-18 | 15 Okt | Server suara: **laptop + Cloudflare Quick Tunnel** | Delegasi | Gratis. URL dinamis bisa ditangani karena URL dikirim saat membuat panggilan |
+| D-19 | 15 Okt | Rute RS: **tabel waktu tempuh statis** | Delegasi | Tanpa API berbayar |
+| D-20 | 15 Okt | Memori MVP: daftar fakta JSON, **tanpa embedding** | Delegasi | Hemat & cukup |
+| D-21 | 15 Okt | Evaluasi utama mode **teks** (0 kredit ElevenLabs) | Delegasi | Hemat kredit |
+| D-22 | 15 Okt | Fallback panggilan: **WebRTC (Pipecat SmallWebRTC)** | Delegasi | Gratis. Dipakai kalau S-01 gagal |
+| D-23 | – | Transport utama (PSTN vs WebRTC) | **Spike S-01** | Diisi setelah uji |
+| D-24 | – | Model TTS & voice ID ElevenLabs | **Spike S-02** | |
+| D-25 | – | Kode bahasa STT & dukungan Jawa | **Spike S-03** | |
+| D-26 | – | Model OpenAI (dialog & classifier) | **Spike S-04** | |
+| D-27 | – | Desain eskalasi konferensi final | **Spike S-05** | |
+
+## 2. Pertanyaan terbuka
+
+| ID | Pertanyaan | Memblokir? | Ditanyakan ke | Status |
+|---|---|---|---|---|
+| Q-01 | **Jam/tanggal resmi tutup submission** dan cara submit? Tim belum tahu, dan deadline efektif internal 18 Okt | ⭐ Ya (deliverable) | CP / Discord JOINTS | Terbuka |
+| Q-02 | Tema Healthcare sudah dikonfirmasi ke panitia? | Ya | Tim / panitia | Terbuka |
+| Q-03 | Subtema wajib dipilih persis dari daftar? | Tidak | CP | Terbuka |
+| Q-04 | Saldo trial Twilio tersisa berapa? | Tidak | Pemilik akun Twilio | Terbuka |
+| Q-05 | Tanggal **reset kredit** ElevenLabs & sisa kredit saat ini? Tarif kredit per model? | ⭐ Ya (alokasi) | Dashboard ElevenLabs | Terbuka |
+| Q-06 | Nomor HP siapa yang dipakai untuk peran Bu Sri, Mas Dika, Bu Tini (maks. 5 terverifikasi)? | ⭐ Ya | Tim | Terbuka |
+| Q-07 | Siapa penutur asli bahasa Jawa yang bisa memvalidasi frasa krama? | Tidak (MVP bisa minimal) | Tim | Terbuka |
+| Q-08 | Ada **nakes** (dokter/perawat) yang bisa mereview aturan tanda bahaya & skrip skrining? | Tidak untuk MVP (label "draf"), **Ya untuk final** | Tim | Terbuka |
+| Q-09 | Akun Meta (WhatsApp Cloud API) milik siapa/dibuat siapa? | Ya (WA) | Tim | Terbuka |
+| Q-10 | Laptop mana yang menjadi server suara (OS, versi Python/Node)? | ⭐ Ya | Tim | Terbuka |
+| Q-11 | Boleh memakai nama institusi nyata (Puskesmas/RSUD) di demo dengan label "(simulasi)", atau pakai nama fiktif? | Tidak | Tim | Terbuka (rekomendasi: label "(simulasi)", tanpa logo) |
+| Q-12 | Teks resmi KMK 951/2026 sudah dibaca (bukan hanya ringkasan)? | Tidak | Tim | Terbuka |
+| Q-13 | RS mana yang benar-benar punya **CT 24 jam** (RSUD Wonosari, RS Saptosari, RS Panti Rahayu, RSA UGM, Sardjito)? | Tidak untuk MVP (label "simulasi") | Tim (web resmi RS / telepon informasi) | Terbuka |
+| Q-14 | Siapa yang menyediakan HP jadul untuk properti demo final? | Tidak (final) | Tim | Terbuka |
+| Q-15 | Bersedia upgrade Twilio (berbayar) kalau ternyata dibutuhkan untuk demo final? Saat ini keputusannya: tidak (hemat) | Tidak | Tim | Terjawab sementara: tidak |
+| Q-16 | Apakah ada lansia (keluarga anggota tim) yang bersedia ikut uji di Stage 2, dengan persetujuan? | Tidak (Stage 2) | Tim | Terbuka |
+| Q-17 | Bahasa untuk nama variabel/fungsi & komentar kode (Indonesia atau Inggris)? | Ya (sebelum kode ditulis) | Tim | Terbuka |
+| Q-18 | Lisensi repo (misal MIT, Apache-2.0, atau tanpa lisensi)? | Tidak | Tim | Terbuka |
+
+## 3. Cara memperbarui
+- Keputusan baru → tambah baris D-xx (tanggal, sumber, alasan).
+- Keputusan yang diubah → jangan dihapus, tambahkan baris baru yang menyebut "menggantikan D-xx".
+- Pertanyaan terjawab → ubah status menjadi "Terjawab: …" dan, kalau menghasilkan keputusan, buat D-xx.

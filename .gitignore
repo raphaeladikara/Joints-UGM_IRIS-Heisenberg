@@ -1,0 +1,35 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+
+# Audio & rekaman (tidak di-commit: privasi + ukuran)
+recordings/
+*.wav
+*.mp3
+*.ulaw
+!content/**/audio-cache-manifest.json
+
+# Laporan evaluasi mentah (ringkasan boleh di-commit secara manual)
+eval/reports/raw/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
