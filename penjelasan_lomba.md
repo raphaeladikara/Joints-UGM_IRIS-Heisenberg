@@ -88,6 +88,7 @@ Tema umum Hackathon: **Education, Healthcare, Sustainability**. Satu tim pilih *
 7. Dilarang konten SARA, ujaran kebencian, diskriminasi, atau yang melanggar etika.
 8. Junjung sportivitas, dilarang curang.
 9. Pantau pengumuman resmi di **jointsxinspire.com** dan **Discord** JOINTS 2026.
+10. **Proposal maksimal 10 halaman A4, dihitung dari cover sampai references.** Cover, isi, gambar, tabel, dan daftar pustaka ikut dihitung. Generator proposal di `paper/script/build.py` otomatis gagal kalau hasilnya lebih dari 10 halaman.
 
 ## Checklist untuk 15–16 Oktober
 
