@@ -130,3 +130,4 @@ Panel tanda vital suara *live*, endpointing personal, backchannel, deteksi krama
 | 12 | [Keputusan & Pertanyaan Terbuka](12_KEPUTUSAN_DAN_PERTANYAAN.md) | Decision log + hal yang belum diketahui |
 | 13 | [Konvensi Repo](13_KONVENSI_REPO.md) | Struktur folder, branch, commit, secrets |
 | 14 | [Rencana Deliverable](14_DELIVERABLE.md) | Video, proposal, pitch deck, README, demo |
+| 15 | [Defense Bank](15_DEFENSE_BANK.md) | Pertanyaan sulit juri, lapisan perlindungan, jawaban 15 detik |

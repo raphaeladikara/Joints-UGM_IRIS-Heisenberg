@@ -16,9 +16,9 @@ Stage 0 dianggap selesai (**Gate G0**) kalau semua item bertanda ⭐ sudah dicen
 | Akun | Status saat ini | Yang harus dilakukan | ⭐ |
 |---|---|---|---|
 | Twilio | Ada (trial, raphael.adikara@gmail.com) | Cek **saldo trial tersisa**. Catat Account SID. Buat **API Key** (lebih aman dari auth token). Catat nomor trial yang diberikan | ⭐ |
-| ElevenLabs | Ada | Pastikan plan **Starter** aktif. Catat **tanggal reset kredit** & sisa kredit (Q-05). Buat API key | ⭐ |
+| ElevenLabs | Ada, sisa ±15.000 kredit | Catat **tanggal reset kredit** (Q-05). Buat API key. Terapkan alokasi & credit guard di [10](10_ANGGARAN_KUOTA.md) | ⭐ |
 | OpenAI | Ada | Buat API key project khusus TILIK. Set **batas pemakaian (usage limit)** di dashboard supaya tidak kebobolan biaya | ⭐ |
-| Meta (WhatsApp Cloud API) | **Belum diketahui** | Buat/memakai Meta Developer App → produk WhatsApp → nomor tes. Daftarkan nomor penerima (maksimal sesuai batas nomor tes). Siapa pemilik akun Meta → Q-09 | ⭐ |
+| Meta (WhatsApp Cloud API) | Pakai **akun Raphael** (Q-09 terjawab) | Buat Meta Developer App → produk WhatsApp → nomor tes. Daftarkan nomor penerima (nomor tim A & B) | ⭐ |
 | Supabase | Belum diketahui | Buat project (free tier, region terdekat yang tersedia) | ⭐ |
 | Vercel | Belum diketahui | Hubungkan ke repo (Hobby) | |
 | Cloudflare | Tidak perlu akun untuk Quick Tunnel | Install `cloudflared` di laptop server | ⭐ |
@@ -28,13 +28,20 @@ Stage 0 dianggap selesai (**Gate G0**) kalau semua item bertanda ⭐ sudah dicen
 - [ ] ⭐ Salin [`.env.example`](../../.env.example) menjadi `.env` lokal di laptop server
 
 ## C. Nomor telepon untuk demo (Twilio trial: maksimal 5 nomor terverifikasi)
-| Peran | Nomor milik | Status verifikasi |
+
+> 🔒 **Nomor HP asli tidak ditulis di repo ini (repo publik).** Nomor hanya disimpan di `.env` laptop server (`DEMO_ALLOWLIST`) dan di catatan privat tim.
+
+Per 15 Okt tim memakai **2 nomor dulu** (nomor tim A & B, sudah diberikan ke tim).
+
+| Peran | Nomor | Status verifikasi Twilio |
 |---|---|---|
-| Bu Sri (pasien) | ? → Q-06 | [ ] |
-| Mas Dika (anak, HP di meja juri) | ? | [ ] |
-| Bu Tini (Sahabat Tilik) | ? | [ ] |
-| Cadangan 1 | ? | [ ] |
-| Cadangan 2 | ? | [ ] |
+| Bu Sri (pasien) | Nomor A atau B, **pembagian peran belum ditentukan** → Q-06 | [ ] |
+| Mas Dika (anak, HP di meja juri) | Nomor A atau B → Q-06 | [ ] |
+| Bu Tini (Sahabat Tilik) | **Belum ada nomor ketiga** → Q-19 | [ ] |
+| Cadangan 1 | – | – |
+| Cadangan 2 | – | – |
+
+**Dampak 2 nomor:** konferensi darurat di demo hanya bisa melibatkan pasien + anak. Selama nomor ketiga belum ada, peran Sahabat Tilik di demo ditunjukkan lewat **WA alert** (bukan telepon).
 
 - [ ] ⭐ Verifikasi nomor di Twilio Console → Verified Caller IDs (via SMS)
 - [ ] Siapkan HP jadul untuk peran Bu Sri (properti demo, opsional untuk MVP, wajib untuk final) → Q-14
@@ -80,9 +87,9 @@ Setiap spike: jalankan, catat hasil di tabel, ambil keputusan.
 - **Catat:** stabil? latensi tambahan?
 - **Keputusan:** tunnel final (Cloudflare Quick Tunnel atau alternatif gratis lain).
 
-### S-08 ⭐ Lingkungan pengembangan laptop server
-- **Catat:** OS & versi, versi Python (Pipecat butuh Python modern; cek persyaratan versi di dokumentasi resmi), Node.js untuk web → Q-10
-- **Keputusan:** laptop mana yang menjadi server suara saat demo.
+### S-08 ⭐ Lingkungan pengembangan laptop server (**laptop Raphael**, Q-10)
+- **Catat:** OS & versi, versi Python (Pipecat butuh Python modern; cek persyaratan versi di dokumentasi resmi), Node.js untuk web. Spesifikasinya **belum diketahui** → isi saat spike.
+- **Keputusan:** manajer environment Python & paket web ([13](13_KONVENSI_REPO.md) §6).
 
 ### Tabel hasil spike
 | Spike | Tanggal | Hasil | Keputusan | Kredit/biaya terpakai |

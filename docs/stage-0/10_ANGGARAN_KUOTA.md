@@ -10,7 +10,7 @@ Prinsip dari tim: **pakai yang paling hemat.** Yang berbayar hanya ElevenLabs St
 
 | Layanan | Plan | Biaya | Batas penting | Risiko |
 |---|---|---|---|---|
-| ElevenLabs | Starter | ±$6/bulan (sumber sekunder: $5–6) | ±**30.000 kredit/bulan**, dipakai **bersama** untuk TTS & STT. **Tidak ada overage**: kalau habis, berhenti sampai reset | 🔴 Kredit habis sebelum demo final |
+| ElevenLabs | Starter | ±$6/bulan (sumber sekunder: $5–6) | ±30.000 kredit/bulan, dipakai **bersama** untuk TTS & STT. **Sisa per 15 Okt: ±15.000.** **Tidak ada overage**: kalau habis, berhenti sampai reset | 🔴 Kredit habis sebelum video/demo final |
 | OpenAI | Billing yang ada | Per token | Batas yang kita pasang sendiri di dashboard | 🟠 Biaya bocor kalau tidak dibatasi |
 | Twilio | Trial | Saldo trial (jumlah belum diketahui, Q-04) | Hanya ke **maksimal 5 nomor terverifikasi**. Ada pesan trial di awal panggilan. Panggilan internasional mungkin dibatasi (uji S-01) | 🔴 Tidak bisa ke +62 → fallback WebRTC |
 | WhatsApp Cloud API | Nomor tes | Gratis untuk uji (cek ketentuan) | Jumlah penerima nomor tes terbatas. Pesan inisiatif bisnis di luar jendela 24 jam butuh template | 🟡 |
@@ -18,21 +18,28 @@ Prinsip dari tim: **pakai yang paling hemat.** Yang berbayar hanya ElevenLabs St
 | Vercel | Hobby | 0 | Penggunaan non-komersial | 🟢 |
 | Cloudflare Quick Tunnel | Tanpa akun | 0 | URL berubah setiap dijalankan (sistem dirancang untuk itu) | 🟢 |
 
-## 2. Rencana alokasi kredit ElevenLabs (30.000)
+## 2. Rencana alokasi kredit ElevenLabs (sisa ±15.000 per 15 Okt)
+
+**Fakta (dari tim, 15 Okt):** sisa kredit ±**15.000**. **Prioritas tim: kredit harus cukup supaya demo di video benar-benar berjalan.**
+Tanggal reset kredit **belum diketahui** (Q-05). Sampai diketahui, anggap 15.000 ini adalah **seluruh jatah sampai final**.
 
 > Tarif kredit **per karakter TTS** dan **per menit STT** berbeda antar model dan **belum diverifikasi** (sumber sekunder menyebut sekitar 1 kredit/karakter dan ±330 kredit/menit Scribe). Ukur di spike S-02/S-03, lalu perbarui tabel ini.
 
-| Pos | Porsi | Kredit | Catatan |
-|---|---|---|---|
-| Spike S-02 + S-03 | 10% | 3.000 | Sampel kecil saja |
-| Cache frasa statis (sapaan, pertanyaan baku, edukasi, briefing) | 10% | 3.000 | Di-generate **sekali**, disimpan sebagai file audio |
-| Pengembangan Stage 1 (panggilan uji live) | 25% | 7.500 | Sebagian besar pengembangan dilakukan dalam **mode teks** |
-| Evaluasi audio E2 | 10% | 3.000 | 5–10 skenario |
-| Rekaman video | 10% | 3.000 | Rekam per babak, ulang seperlunya |
-| Stage 2 (fitur + uji lansia) | 20% | 6.000 | |
-| **Cadangan demo final + gladi** | 15% | 4.500 | **Tidak boleh dipakai sebelum 31 Okt** |
+| Pos | Kredit | Catatan |
+|---|---|---|
+| Spike S-02 + S-03 | 800 | Sampel minimal: 3 kalimat TTS per model kandidat, ±1 menit audio STT |
+| Cache frasa statis (sapaan, pertanyaan baku, edukasi, briefing) | 1.200 | Di-generate **sekali** setelah skrip final, disimpan sebagai file audio |
+| Pengembangan Stage 1 (panggilan uji live) | 3.000 | Dialog & safety dikembangkan dalam **mode teks**. Uji suara hanya untuk integrasi |
+| Evaluasi audio E2 | 700 | 3–5 skenario saja (evaluasi utama tetap mode teks) |
+| **Rekaman video demo (babak 1 + 2, termasuk retake)** | **4.000** | **Prioritas utama.** Gladi dulu dalam mode teks, lalu rekam suara. Maksimal ±3 take per babak |
+| Stage 2 (fitur + uji lansia) | 2.300 | Dipakai hanya kalau lolos final (23 Okt) |
+| **Cadangan demo final + gladi** | 3.000 | **Tidak boleh dipakai sebelum 31 Okt** |
+| **Total** | **15.000** | |
 
-**Pertanyaan kritis (Q-05):** kapan kredit di-reset? Kalau reset jatuh antara 18 Okt dan 1 Nov, alokasi Stage 2 bisa memakai kuota bulan berikutnya. Kalau tidak, tabel di atas adalah seluruh jatah sampai final.
+### Credit guard (wajib di Stage 1)
+- Sebelum memulai panggilan suara, server membaca sisa kredit (dashboard / endpoint subscription API ElevenLabs, dicek di dokumentasi saat implementasi).
+- Kalau sisa ≤ **batas cadangan** (awal: 7.000 = video + cadangan final), panggilan uji **non-demo ditolak**, dan pengembangan wajib pindah ke mode teks.
+- Batas ini diturunkan setelah video selesai direkam.
 
 ## 3. Strategi hemat (wajib diterapkan)
 

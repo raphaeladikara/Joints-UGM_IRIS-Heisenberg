@@ -44,6 +44,7 @@ Kalau baru bergabung, baca dengan urutan ini:
 | 12 | [Keputusan & Pertanyaan Terbuka](docs/stage-0/12_KEPUTUSAN_DAN_PERTANYAAN.md) |
 | 13 | [Konvensi Repo](docs/stage-0/13_KONVENSI_REPO.md) |
 | 14 | [Rencana Deliverable](docs/stage-0/14_DELIVERABLE.md) |
+| 15 | [Defense Bank: pertanyaan sulit juri & jawabannya](docs/stage-0/15_DEFENSE_BANK.md) |
 
 ### Riset
 | Dokumen | Isi |

@@ -138,6 +138,20 @@ Urutan:
 ### F-17 Nudge Kangen + family-first (SHOULD)
 - Kalau pasien menyebut kangen → WA ke anak "Bu Sri tadi bilang kangen. Telepon 5 menit hari ini?".
 
+### F-18 Endpoint sinyal eksternal + simulasi jam tangan (LATER, Stage 2 prioritas)
+Menjawab pertanyaan "bagaimana kalau krisis mendadak di luar jam telepon?" (lihat [15_DEFENSE_BANK.md](15_DEFENSE_BANK.md) §1).
+- Endpoint `POST /events` menerima sinyal dari sumber apa pun: `fall_detected`, `sos_pressed`, `irregular_rhythm`, `bp_reading`, `missed_checkin`.
+- Sinyal masuk ke **mesin eskalasi yang sama** dengan panggilan harian.
+- Contoh alur `fall_detected`: TILIK langsung menelepon pasien ("Bu, jam tangan Ibu mendeteksi Ibu jatuh. Ibu baik-baik saja?"). Kalau tidak diangkat atau tidak ada jawaban dalam N detik → 🔴 ke Sahabat Tilik + anak + Board IGD.
+- **Demo:** tombol "Simulasikan: jam tangan mendeteksi jatuh" di konsol demo. Tanpa perangkat keras, tanpa biaya.
+
+**AC**
+- [ ] Event simulasi → panggilan ke pasien ≤ 10 detik.
+- [ ] Tidak ada jawaban → 🔴 tereskalasi otomatis.
+
+### F-19 Protokol "tidak diangkat" untuk pasien berisiko tinggi (SHOULD)
+- Pasien dengan 🟡 kemarin, atau tensi krisis dalam 7 hari terakhir: kalau panggilan pagi tidak diangkat → ulang dalam 15 menit → masih tidak diangkat → **Sahabat Tilik diminta mengecek ke rumah** (WA/telepon), dan keluarga diberi tahu.
+
 ### Fitur LATER (Stage 2 / roadmap)
 Panel tanda vital suara live · endpointing personal & backchannel · deteksi krama/ngoko otomatis · mode DTMF · UI berbagi bertingkat + mode rahasia · Telepon Bareng akhir pekan · jam kronis (tren minggu) · mode sovereign · integrasi SATUSEHAT/PSC 119 · uji lansia sungguhan.
 

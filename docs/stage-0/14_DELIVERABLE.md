@@ -97,4 +97,6 @@ Mengacu pada 6 momen WOW di [`docs/research/Ideas_Breakdown_v4_FINAL.md`](../res
 - [ ] Video cadangan per babak di laptop presentasi (offline)
 
 ## 8. Bank jawaban QnA
-Lihat [`docs/research/Ideas_Breakdown_v3.md`](../research/Ideas_Breakdown_v3.md) §9, [`v4`](../research/Ideas_Breakdown_v4_FINAL.md) §11, dan [`audit etika`](../research/TILIK_Celah_Etika_dan_Defense.md) §8.4.
+Sumber utama: [15_DEFENSE_BANK.md](15_DEFENSE_BANK.md). Pendukung: [`v3`](../research/Ideas_Breakdown_v3.md) §9, [`v4`](../research/Ideas_Breakdown_v4_FINAL.md) §11, [`audit etika`](../research/TILIK_Celah_Etika_dan_Defense.md) §8.4.
+
+Pertimbangkan satu **slide cadangan "Lapisan Perlindungan"** (tabel L0–L5 dari Defense Bank §1.2). Slide ini tidak ditampilkan di pitch utama, tapi dibuka kalau juri bertanya soal krisis di luar jam telepon.

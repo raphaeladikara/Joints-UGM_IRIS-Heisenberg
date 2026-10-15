@@ -104,6 +104,31 @@ Panggilan pasien berjalan sebagai *bidirectional Media Stream*. Untuk menyambung
 > Pada Twilio trial, **semua peserta harus nomor terverifikasi** (maksimal 5 nomor). Lihat [10](10_ANGGARAN_KUOTA.md).
 > Pada mode fallback browser, konferensi PSTN tidak tersedia. Eskalasi dilakukan lewat WA alert + Board IGD, dan panggilan ke anak/tetangga **hanya kalau** Twilio bisa menelepon nomor Indonesia.
 
+### 2.5a Mesin eskalasi event-driven (D-33)
+Mesin eskalasi **tidak terikat ke panggilan telepon**. Semua sumber sinyal diubah menjadi `Event` dengan format yang sama:
+
+```
+Event { patient_id, source: call|inbound_call|sos_button|wearable|sensor|scheduler,
+        type: red_flag|fall_detected|sos_pressed|irregular_rhythm|bp_reading|missed_checkin,
+        payload, occurred_at }
+```
+
+```mermaid
+flowchart LR
+  A[Panggilan harian] --> E{Mesin eskalasi}
+  B[Telepon balik pasien] --> E
+  C[Tombol SOS GSM] -.Stage 3.-> E
+  D[Jam tangan: jatuh / ritme / tensi] -.Stage 2 simulasi, Stage 3 nyata.-> E
+  F[Scheduler: tidak diangkat] --> E
+  E -->|🟡| P[Daftar Tilik Puskesmas]
+  E -->|🔴| Q[Telepon pasien → Sahabat Tilik → anak → Board IGD]
+```
+
+- **MVP:** sumber = panggilan harian (+ scheduler tidak diangkat kalau sempat).
+- **Stage 2:** endpoint `POST /events` + simulasi jam tangan di konsol demo (F-18).
+- **Stage 3:** integrasi perangkat nyata (tombol SOS GSM, jam tangan lewat platform kesehatan ponsel, tensimeter Bluetooth).
+- Prinsip: menambah sumber sinyal baru **tidak mengubah** logika eskalasi.
+
 ### 2.5 Rute ke RS ber-CT
 - **MVP (hemat):** tabel statis jarak/waktu tempuh dari desa-desa demo ke RS jejaring (dihitung sekali secara manual dari peta). Tanpa API berbayar.
 - Daftar RS: RSUD Wonosari, RS Saptosari, RS Panti Rahayu (Gunungkidul), RS Akademik UGM, RSUP Dr. Sardjito (Sleman). **Ketersediaan CT 24 jam wajib diverifikasi** (pertanyaan terbuka).

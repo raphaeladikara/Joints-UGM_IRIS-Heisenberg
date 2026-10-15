@@ -57,7 +57,10 @@ Contoh: `feat(voice): sambungkan Twilio Media Streams ke pipeline Pipecat`
 
 ## 5. Bahasa
 - Dokumen: Bahasa Indonesia (D-08).
-- Bahasa untuk nama variabel/fungsi & komentar kode: **belum diputuskan** (Q-17).
+- Kode (D-32):
+  - Nama variabel, fungsi, kelas, file, tabel/kolom database: **bahasa Inggris** (`log_blood_pressure`, `call_sessions`).
+  - Komentar & docstring: **bahasa Indonesia**.
+  - Konten percakapan (skrip, template WA): Indonesia/Jawa, disimpan di `content/`, bukan di-hardcode di kode.
 
 ## 6. Tooling (diputuskan saat S-08)
 | Kebutuhan | Kandidat | Status |

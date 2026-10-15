@@ -100,7 +100,7 @@ Urutan prioritas, kalau waktu terpotong: **P-A** (wajib untuk demo inti) → **P
 |---|---|
 | 19–23 Okt (sebelum pengumuman) | Rapikan utang teknis MVP. Siapkan uji manusia (lembar persetujuan, skrip wawancara). Cari nakes reviewer. Fitur SHOULD: telepon balik, Nudge Kangen, analisis suara offline |
 | 23 Okt | Pengumuman finalis |
-| 24–30 Okt (jika lolos) | Panel tanda vital suara **live**, endpointing/turn-taking untuk lansia, deteksi krama/ngoko, UI berbagi bertingkat, eval ≥ 100 skenario, uji 5–10 lansia + kutipan nakes, latihan pitch ≥ 3×, siapkan properti (HP jadul) |
+| 24–30 Okt (jika lolos) | **Endpoint sinyal eksternal + simulasi jam tangan (F-18)**, protokol tidak diangkat (F-19), panel tanda vital suara **live**, endpointing/turn-taking untuk lansia, deteksi krama/ngoko, UI berbagi bertingkat, eval ≥ 100 skenario, uji 5–10 lansia + kutipan nakes, latihan pitch ≥ 3×, siapkan properti (HP jadul) |
 | 31 Okt | **G4: gladi bersih** di jaringan seluler, video cadangan per babak, cek kredit ElevenLabs cukup untuk demo |
 | 1 Nov | Grand Final |
 
@@ -111,6 +111,7 @@ Urutan prioritas, kalau waktu terpotong: **P-A** (wajib untuk demo inti) → **P
 2. Integrasi SATUSEHAT (FHIR) & PSC 119.
 3. Mode sovereign (model terbuka seperti Sahabat-AI + STT self-hosted).
 4. Jam kronis (tren suara mingguan: sinyal gagal jantung/kognitif), skrining kamera via HP keluarga.
+5. **Integrasi perangkat (agnostik perangkat):** tombol SOS GSM dengan deteksi jatuh (paket murah untuk lansia tanpa smartphone), jam tangan (deteksi jatuh, notifikasi ritme tidak teratur, tensi) lewat platform kesehatan ponsel keluarga, tensimeter Bluetooth di Posyandu/kader. Lihat [15_DEFENSE_BANK.md](15_DEFENSE_BANK.md) §1.
 5. Bahasa daerah lain (Sunda, Madura, …).
 
 ## 7. Definition of Done umum (setiap job)
