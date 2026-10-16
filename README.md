@@ -26,13 +26,8 @@ flutter build apk --release        # build/app/outputs/flutter-apk/app-release.a
 ```
 
 Fitur baru di aplikasi keluarga: ringkasan harian + skor sehat, streak obat & telepon, jadwal & stok obat, air & garam,
-<<<<<<< HEAD
 menu rendah garam (kirim resep ke Mbah), rapor 30 hari untuk dokter, model 3D nenek/kakek bergaya kartun (kebaya & jarik batik, peci & sarung), dan
-maskot Kiki. Endpoint fitur baru (`/care`, `/meds/*`, `/intake`, `/family-calls`, `/report`) baru ada di mode offline.
-=======
-menu rendah garam (kirim resep ke Mbah), rapor 30 hari untuk dokter, model 3D lansia realistis (MakeHuman CC0), dan
 maskot Kiki. Endpoint fitur ini (`/care`, `/meds/*`, `/intake`, `/family-calls`, `/report`, pesan suara, protokol tidak diangkat) ada di API dan di mode offline.
->>>>>>> a686ed1 (KRING: update docs, paper, rebrand proposal, eval)
 
 ## Status: Stage 1 (prototype aplikasi berjalan)
 
