@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/api.dart';
+import '../../core/body3d.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../contact/contact_home.dart';
@@ -120,84 +121,92 @@ class _RoleGateState extends State<RoleGate> {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
+            constraints: const BoxConstraints(maxWidth: 600),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
               children: [
                 Row(
                   children: [
                     Container(
-                      width: 52,
-                      height: 52,
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(color: TColors.brand, borderRadius: BorderRadius.circular(16)),
-                      child: const Icon(Icons.phone_in_talk_rounded, color: Colors.white, size: 28),
+                      child: const Icon(Icons.phone_in_talk_rounded, color: Colors.white, size: 26),
                     ),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('TILIK', style: TText.display),
-                          Text('Cegah · Deteksi · Arahkan', style: TText.small),
-                        ],
-                      ),
+                    const SizedBox(width: 12),
+                    const Expanded(child: Text('TILIK', style: TText.h1)),
+                    IconButton(
+                      onPressed: _settings,
+                      icon: const Icon(Icons.settings_rounded),
+                      tooltip: 'Alamat server',
+                      style: IconButton.styleFrom(backgroundColor: TColors.panel),
                     ),
-                    IconButton(onPressed: _settings, icon: const Icon(Icons.settings_rounded), tooltip: 'Alamat server'),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Jalur cepat stroke dimulai dari rumah Mbah, bukan dari pintu IGD.',
-                  style: TText.h3.copyWith(color: TColors.brandDeep),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'TILIK menelepon lansia hipertensi setiap pagi lewat telepon biasa, mengecek obat, tensi, dan gejala, '
-                  'lalu menggerakkan tetangga, anak, dan IGD saat ada tanda stroke.',
-                  style: TText.body.copyWith(color: TColors.muted),
-                ),
+                const SizedBox(height: 14),
+                _hero(),
                 const SizedBox(height: 12),
                 _serverStatus(),
-                const SectionTitle('Masuk sebagai'),
-                _RoleCard(
-                  icon: Icons.phone_android_rounded,
-                  color: TColors.clay,
-                  title: 'HP Mbah (Bu Sri)',
-                  subtitle: 'Simulator telepon biasa: TILIK menelepon, Mbah menjawab dengan suara.',
-                  onTap: () => _open(const MbahPhone(patientId: 'p-sri')),
+                const SizedBox(height: 24),
+                const Padding(
+                  padding: EdgeInsets.only(left: 4, bottom: 12),
+                  child: Text('Masuk sebagai', style: TText.h2),
                 ),
-                _RoleCard(
-                  icon: Icons.family_restroom_rounded,
-                  color: TColors.brand,
-                  title: 'Keluarga (Mas Dika)',
-                  subtitle: 'Rapor pagi, bahan obrolan, titip pesan, alert darurat.',
-                  onTap: () => _open(const ContactHome(contactId: 'c-dika')),
-                  onLongPress: () => _pickContact('child'),
+                LayoutBuilder(
+                  builder: (context, box) {
+                    final cols = box.maxWidth >= 340 ? 2 : 1;
+                    final w = (box.maxWidth - 12 * (cols - 1)) / cols;
+                    final tiles = [
+                      _RoleTile(
+                        icon: Icons.phone_android_rounded,
+                        color: TColors.peach,
+                        ink: TColors.peachInk,
+                        title: 'HP Mbah',
+                        who: 'Bu Sri',
+                        subtitle: 'TILIK menelepon, Mbah menjawab dengan suara.',
+                        onTap: () => _open(const MbahPhone(patientId: 'p-sri')),
+                      ),
+                      _RoleTile(
+                        icon: Icons.family_restroom_rounded,
+                        color: TColors.sky,
+                        ink: TColors.skyInk,
+                        title: 'Keluarga',
+                        who: 'Mas Dika',
+                        subtitle: 'Rapor pagi, jam tangan, tubuh 3D, titip pesan.',
+                        onTap: () => _open(const ContactHome(contactId: 'c-dika')),
+                        onLongPress: () => _pickContact('child'),
+                      ),
+                      _RoleTile(
+                        icon: Icons.volunteer_activism_rounded,
+                        color: TColors.lavender,
+                        ink: TColors.lavenderInk,
+                        title: 'Sahabat Tilik',
+                        who: 'Bu Tini',
+                        subtitle: 'Tetangga yang dihubungi pertama saat darurat.',
+                        onTap: () => _open(const ContactHome(contactId: 'c-tini')),
+                        onLongPress: () => _pickContact('sahabat_tilik'),
+                      ),
+                      _RoleTile(
+                        icon: Icons.local_hospital_rounded,
+                        color: TColors.sage,
+                        ink: TColors.sageInk,
+                        title: 'Puskesmas',
+                        who: 'Wonosari I',
+                        subtitle: 'Daftar Tilik Hari Ini dan simulasi jam tangan.',
+                        onTap: () => _open(const DaftarTilik()),
+                      ),
+                    ];
+                    return Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [for (final t in tiles) SizedBox(width: w, child: t)],
+                    );
+                  },
                 ),
-                _RoleCard(
-                  icon: Icons.volunteer_activism_rounded,
-                  color: const Color(0xFF6A5ACD),
-                  title: 'Sahabat Tilik (Bu Tini)',
-                  subtitle: 'Tetangga yang dihubungi pertama saat darurat.',
-                  onTap: () => _open(const ContactHome(contactId: 'c-tini')),
-                  onLongPress: () => _pickContact('sahabat_tilik'),
-                ),
-                _RoleCard(
-                  icon: Icons.local_hospital_outlined,
-                  color: TColors.green,
-                  title: 'Puskesmas',
-                  subtitle: 'Daftar Tilik Hari Ini, tombol "Tilik sekarang", simulasi jam tangan.',
-                  onTap: () => _open(const DaftarTilik()),
-                ),
-                _RoleCard(
-                  icon: Icons.monitor_heart_outlined,
-                  color: TColors.red,
-                  title: 'IGD RS',
-                  subtitle: 'Board pre-alert: jam onset, skrining, obat, ETA.',
-                  onTap: () => _open(const IgdBoard()),
-                ),
-                const SizedBox(height: 8),
-                Text('Tahan kartu Keluarga/Sahabat untuk memilih orang lain.', style: TText.small, textAlign: TextAlign.center),
+                const SizedBox(height: 12),
+                _igdTile(),
+                const SizedBox(height: 10),
+                Text('Tahan ubin Keluarga/Sahabat untuk memilih orang lain.', style: TText.small, textAlign: TextAlign.center),
                 const SizedBox(height: 20),
                 OutlinedButton.icon(onPressed: _reset, icon: const Icon(Icons.restart_alt_rounded), label: const Text('Ulang data demo')),
                 const SizedBox(height: 16),
@@ -216,20 +225,96 @@ class _RoleGateState extends State<RoleGate> {
     );
   }
 
+  /// Blok pembuka: janji produk di kiri, tubuh 3D yang berputar pelan di kanan.
+  Widget _hero() {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(color: TColors.brand, borderRadius: BorderRadius.circular(30), boxShadow: TShadow.soft),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -24,
+            top: 0,
+            bottom: 0,
+            width: 170,
+            child: const IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(colors: [Color(0x40FFFFFF), Color(0x00FFFFFF)], radius: 0.65),
+                ),
+                child: Body3D(spots: [], height: 240),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 22, 138, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Jalur cepat stroke dimulai dari rumah Mbah.', style: TText.h1.copyWith(color: Colors.white, fontSize: 25)),
+                const SizedBox(height: 10),
+                Text(
+                  'Telepon biasa tiap pagi: obat, tensi, gejala. Ada tanda bahaya, tetangga, anak, dan IGD langsung bergerak.',
+                  style: TText.body.copyWith(color: Colors.white.withValues(alpha: 0.92), fontSize: 15.5),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _igdTile() {
+    return Material(
+      color: TColors.night,
+      borderRadius: BorderRadius.circular(26),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _open(const IgdBoard()),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(color: TColors.red, borderRadius: BorderRadius.circular(16)),
+                child: const Icon(Icons.monitor_heart_rounded, color: Colors.white, size: 28),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('IGD rumah sakit', style: TText.h3.copyWith(color: Colors.white)),
+                    Text(
+                      'Board pre-alert: jam onset, skrining, obat, ETA.',
+                      style: TText.small.copyWith(color: Colors.white.withValues(alpha: 0.78)),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _serverStatus() {
     final ok = _health != null;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(color: ok ? TColors.greenTint : TColors.yellowTint, borderRadius: BorderRadius.circular(12)),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(color: ok ? TColors.greenTint : TColors.yellowTint, borderRadius: BorderRadius.circular(16)),
       child: Row(
         children: [
-          Icon(ok ? Icons.cloud_done_rounded : Icons.cloud_off_rounded, color: ok ? TColors.green : TColors.yellow, size: 20),
-          const SizedBox(width: 8),
+          Icon(ok ? Icons.cloud_done_rounded : Icons.cloud_off_rounded, color: ok ? TColors.green : TColors.yellow, size: 22),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              ok
-                  ? 'Server tersambung · ${Api.instance.base}${_health!['llm'] == true ? ' · LLM aktif' : ' · jalur aturan'}'
-                  : (_error ?? 'Memeriksa server…'),
+              ok ? 'Server tersambung${_health!['llm'] == true ? ' · LLM aktif' : ' · jalur aturan'}' : (_error ?? 'Memeriksa server…'),
               style: TText.small.copyWith(color: TColors.ink),
             ),
           ),
@@ -240,55 +325,58 @@ class _RoleGateState extends State<RoleGate> {
   }
 }
 
-class _RoleCard extends StatelessWidget {
-  const _RoleCard({
+class _RoleTile extends StatelessWidget {
+  const _RoleTile({
     required this.icon,
     required this.color,
+    required this.ink,
     required this.title,
+    required this.who,
     required this.subtitle,
     required this.onTap,
     this.onLongPress,
   });
   final IconData icon;
   final Color color;
+  final Color ink;
   final String title;
+  final String who;
   final String subtitle;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
-                  child: Icon(icon, color: color),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: TText.h3),
-                      const SizedBox(height: 2),
-                      Text(subtitle, style: TText.small),
-                    ],
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(26),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    child: Icon(icon, color: ink, size: 26),
                   ),
-                ),
-                const Icon(Icons.chevron_right_rounded, color: TColors.muted),
-              ],
-            ),
+                  const Spacer(),
+                  Icon(Icons.arrow_outward_rounded, color: ink),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(title, style: TText.h3),
+              Text(who, style: TText.small.copyWith(color: ink, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              Text(subtitle, style: TText.small.copyWith(color: TColors.ink.withValues(alpha: 0.82))),
+            ],
           ),
         ),
       ),

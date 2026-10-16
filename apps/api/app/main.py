@@ -103,9 +103,9 @@ def _public_patient(p: dict[str, Any]) -> dict[str, Any]:
 
 def _bp_history(pid: str, days: int = 7) -> list[dict[str, Any]]:
     since = (config.now() - timedelta(days=days)).isoformat()
-    rows = db.query("SELECT value, observed_at FROM observations WHERE patient_id = ? AND kind = 'blood_pressure' AND observed_at >= ? ORDER BY observed_at",
+    rows = db.query("SELECT value, observed_at, source FROM observations WHERE patient_id = ? AND kind = 'blood_pressure' AND observed_at >= ? ORDER BY observed_at",
                     (pid, since))
-    return [{**db.loads(r["value"], {}), "at": r["observed_at"]} for r in rows]
+    return [{**db.loads(r["value"], {}), "at": r["observed_at"], "source": r["source"]} for r in rows]
 
 
 def _adherence(pid: str, days: int = 7) -> dict[str, Any]:

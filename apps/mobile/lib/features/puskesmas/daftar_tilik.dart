@@ -4,6 +4,7 @@ import '../../core/api.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../contact/health_views.dart';
 import '../phone/mbah_phone.dart';
 import 'call_transcript.dart';
 
@@ -312,6 +313,19 @@ class _PatientDetailState extends State<PatientDetail> with Poller<PatientDetail
                         ),
                       ],
                     ),
+                    SectionTitle(
+                      'Jam tangan',
+                      trailing: Text(
+                        (p['vitals']?['last_sync'] as Json?) == null
+                            ? 'belum tersambung'
+                            : '${p['vitals']['last_sync']['source_label']} · ${ago(p['vitals']['last_sync']['synced_at'] as String?)}',
+                        style: TText.small,
+                      ),
+                    ),
+                    if (p['vitals']?['connected'] == true)
+                      WatchTiles(p['vitals'] as Json)
+                    else
+                      Text('Pasien belum menyambungkan jam tangan. Keluarga bisa menyambungkannya dari aplikasi keluarga.', style: TText.small),
                     const SectionTitle('Tensi 14 hari'),
                     Card(
                       child: Padding(padding: const EdgeInsets.all(16), child: BpChart(p['bp_history'] as List)),

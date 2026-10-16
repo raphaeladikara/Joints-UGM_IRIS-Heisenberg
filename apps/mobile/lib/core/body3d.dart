@@ -260,12 +260,25 @@ class _Mesh {
 
   factory _Mesh.human() {
     final b = _MeshBuilder();
-    // Kepala, leher, badan (tiga elipsoid bertumpuk supaya ada pinggang).
+    // Kepala, leher, lalu badan sebagai SATU permukaan loft (pinggul → pinggang → dada → bahu): elipsoid yang
+    // saling menembus membuat garis potong bergerigi karena urutan segitiga, loft tidak punya garis potong.
     b.ellipsoid((0, 1.615, 0.005), (0.092, 0.112, 0.102));
-    b.capsule((0, 1.44, -0.005), (0, 1.53, 0), 0.046);
-    b.ellipsoid((0, 1.30, 0), (0.185, 0.17, 0.108));
-    b.ellipsoid((0, 1.10, 0.005), (0.152, 0.15, 0.098));
-    b.ellipsoid((0, 0.93, 0), (0.168, 0.11, 0.104));
+    b.capsule((0, 1.43, -0.005), (0, 1.53, 0), 0.046);
+    b.loft(const [
+      (0.79, 0.0, 0.0, 0.0),
+      (0.81, 0.11, 0.075, 0.0),
+      (0.86, 0.160, 0.100, 0.0),
+      (0.92, 0.172, 0.106, -0.004),
+      (0.99, 0.160, 0.100, 0.0),
+      (1.06, 0.140, 0.092, 0.006),
+      (1.14, 0.150, 0.097, 0.008),
+      (1.23, 0.172, 0.106, 0.008),
+      (1.31, 0.184, 0.104, 0.004),
+      (1.37, 0.180, 0.094, -0.004),
+      (1.42, 0.120, 0.072, -0.006),
+      (1.455, 0.060, 0.050, -0.006),
+      (1.47, 0.0, 0.0, -0.006),
+    ]);
     for (final sx in [-1.0, 1.0]) {
       b.ellipsoid((0.175 * sx, 1.385, -0.005), (0.07, 0.062, 0.068)); // bahu
       b.capsule((0.205 * sx, 1.37, -0.01), (0.245 * sx, 1.12, -0.01), 0.047); // lengan atas
@@ -302,7 +315,7 @@ class _MeshBuilder {
     }
   }
 
-  void ellipsoid((double, double, double) c, (double, double, double) r, {int rows = 14, int cols = 22}) {
+  void ellipsoid((double, double, double) c, (double, double, double) r, {int rows = 16, int cols = 26}) {
     final (cx, cy, cz) = c;
     final (ax, ay, az) = r;
     _grid(rows, cols, (i, j) {
@@ -313,7 +326,7 @@ class _MeshBuilder {
   }
 
   /// Kapsul dari a ke b: dua belahan bola disambung silinder (baris khatulistiwa digandakan).
-  void capsule((double, double, double) a, (double, double, double) b, double radius, {int half = 7, int cols = 18}) {
+  void capsule((double, double, double) a, (double, double, double) b, double radius, {int half = 9, int cols = 26}) {
     final (ax, ay, az) = a;
     final (bx, by, bz) = b;
     var dx = ax - bx, dy = ay - by, dz = az - bz; // sumbu lokal "atas" = menuju a
@@ -338,6 +351,49 @@ class _MeshBuilder {
       final nz = dz * co + (ez * math.cos(ph) + fz * math.sin(ph)) * s;
       final (cx, cy, cz) = top ? a : b;
       return (cx + nx * radius, cy + ny * radius, cz + nz * radius, nx, ny, nz);
+    });
+  }
+
+  /// Permukaan putar berpenampang elips. [profile]: (y, rx, rz, geser-z) dari bawah ke atas; nilai di antaranya
+  /// dihaluskan Catmull-Rom. Normal dihitung dari tetangga grid lalu diarahkan keluar.
+  void loft(List<(double, double, double, double)> profile, {int perSeg = 6, int cols = 40}) {
+    double cr(double p0, double p1, double p2, double p3, double t) =>
+        0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t);
+    final rows = <(double, double, double, double)>[];
+    for (var i = 0; i < profile.length - 1; i++) {
+      final a = profile[math.max(0, i - 1)], b = profile[i], c = profile[i + 1], d = profile[math.min(profile.length - 1, i + 2)];
+      for (var s = 0; s < perSeg; s++) {
+        final t = s / perSeg;
+        rows.add((
+          b.$1 + (c.$1 - b.$1) * t,
+          math.max(0, cr(a.$2, b.$2, c.$2, d.$2, t)),
+          math.max(0, cr(a.$3, b.$3, c.$3, d.$3, t)),
+          cr(a.$4, b.$4, c.$4, d.$4, t),
+        ));
+      }
+    }
+    rows.add(profile.last);
+    // Urutan baris dari atas ke bawah supaya arah putar segitiga sama dengan elipsoid (θ dari kutub atas).
+    final top = rows.reversed.toList();
+    (double, double, double) pos(int r, int c) {
+      final (y, rx, rz, dz) = top[r.clamp(0, top.length - 1)];
+      final ph = 2 * math.pi * c / cols;
+      return (rx * math.cos(ph), y, dz + rz * math.sin(ph));
+    }
+
+    _grid(top.length - 1, cols, (r, c) {
+      final (x, y, z) = pos(r, c);
+      final (x1, y1, z1) = pos(r, c + 1);
+      final (x0, y0, z0) = pos(r, c - 1);
+      final (xu, yu, zu) = pos(r - 1, c);
+      final (xd, yd, zd) = pos(r + 1, c);
+      final tx = x1 - x0, ty = y1 - y0, tz = z1 - z0; // keliling
+      final vx = xd - xu, vy = yd - yu, vz = zd - zu; // ke bawah
+      var nx = ty * vz - tz * vy, ny = tz * vx - tx * vz, nz = tx * vy - ty * vx;
+      final (_, _, _, dz) = top[r];
+      if (nx * x + nz * (z - dz) < 0 || (nx == 0 && nz == 0)) (nx, ny, nz) = (-nx, -ny, -nz);
+      if (nx.abs() + ny.abs() + nz.abs() < 1e-9) (nx, ny, nz) = (0.0, r < top.length / 2 ? 1.0 : -1.0, 0.0);
+      return (x, y, z, nx, ny, nz);
     });
   }
 

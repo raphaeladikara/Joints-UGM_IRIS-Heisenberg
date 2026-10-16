@@ -98,17 +98,27 @@ class MiniBars extends StatelessWidget {
           child: CustomPaint(size: Size.infinite, painter: _BarsPainter(vals, ink, goal?.toDouble())),
         ),
         const SizedBox(height: 6),
-        Row(
-          children: [
-            for (final (i, d) in daily.indexed)
-              Expanded(
-                child: Text(
-                  i == daily.length - 1 ? 'Ini' : shortDay('${d['date']}T12:00:00+07:00').substring(0, 2),
-                  textAlign: TextAlign.center,
-                  style: TText.label.copyWith(fontSize: 12, color: i == daily.length - 1 ? TColors.ink : TColors.muted),
+        // Nama hari 3 huruf hanya bila muat; di ubin sempit cukup penanda ujung (Sen/Sel tidak boleh jadi "Se/Se").
+        LayoutBuilder(
+          builder: (context, box) => box.maxWidth / math.max(1, daily.length) >= 30
+              ? Row(
+                  children: [
+                    for (final (i, d) in daily.indexed)
+                      Expanded(
+                        child: Text(
+                          i == daily.length - 1 ? 'Ini' : shortDay('${d['date']}T12:00:00+07:00'),
+                          textAlign: TextAlign.center,
+                          style: TText.label.copyWith(fontSize: 12, color: i == daily.length - 1 ? TColors.ink : TColors.muted),
+                        ),
+                      ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(child: Text('${daily.length} hari lalu', style: TText.label.copyWith(fontSize: 12))),
+                    Text('Hari ini', style: TText.label.copyWith(fontSize: 12, color: TColors.ink)),
+                  ],
                 ),
-              ),
-          ],
         ),
       ],
     );

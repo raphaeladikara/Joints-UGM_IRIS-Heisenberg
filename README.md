@@ -113,6 +113,21 @@ flutter build apk --release --split-per-abi --dart-define=TILIK_API=http://<IP-l
 Alamat server juga bisa diganti dari ikon ⚙ di layar awal. Emulator Android memakai `http://10.0.2.2:8080`.
 Tombol **Ulang data demo** mengembalikan semua data fiktif ke kondisi awal.
 
+### Jam tangan & aplikasi kesehatan
+Aplikasi keluarga bisa menyinkronkan data jam tangan Mbah (langkah, tidur, detak jantung, oksigen darah, tensi) ke
+`POST /v1/patients/{id}/vitals`. Angka di luar batas (SpO2 < 90%, detak istirahat ≥ 120, tensi krisis) membuka 🟡 di
+Daftar Tilik sekali per hari; ambangnya ada di `content/red_flags.json` → `wearable` (draf, perlu review nakes).
+
+| Platform | Sumber | Catatan |
+|---|---|---|
+| Android | **Health Connect** | Samsung Health, Wear OS, Fitbit, Mi Fitness, Huawei Health menyalin data ke sini. Butuh Android 8+ dan aplikasi Health Connect. |
+| iPhone | **Apple Health** | Folder `apps/mobile/ios` sudah berisi izin HealthKit; build di Mac (Xcode → Signing & Capabilities → HealthKit). |
+| Web / laptop | Simulasi jam tangan | Tombol "Simulasi jam tangan": hari biasa, oksigen turun, tensi tinggi. |
+
+Data jam tangan juga menghidupkan tab **Tubuh**: model 3D (digambar langsung oleh Flutter, tanpa file model) dengan
+titik otak, jantung, paru, lengan (tensi), perut (obat), dan kaki (langkah) yang berwarna sesuai status.
+Setelah memperbarui server, tekan **Ulang data demo** supaya data jam tangan contoh Bu Sri ikut terisi.
+
 ### Batasan prototype (jujur)
 - Telepon Mbah disimulasikan di aplikasi; belum PSTN. Suara memakai TTS/STT perangkat, belum ElevenLabs.
 - WhatsApp dan konferensi telepon keluarga disimulasikan sebagai notifikasi di aplikasi.
