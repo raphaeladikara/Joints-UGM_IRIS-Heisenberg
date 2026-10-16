@@ -5,6 +5,9 @@ library;
 import 'dart:math';
 
 import 'clock.dart';
+import 'escalation.dart' show puskesmasName;
+import 'nlu.dart' as nlu;
+import 'protocol.dart' show retryMinutes;
 import 'store.dart';
 
 const _hospitals = [
@@ -74,6 +77,18 @@ const _patients = [
       null, {'amlodipin': 25, 'warfarin': 25}, 1.0, 7, 3, 0.1),
 ];
 
+/// Suasana hati harian (dari cerita pagi): peluang kesepian & murung per pasien. Painem paling sering kesepian (anak di Batam).
+const _moodProfile = {'p-sri': (0.05, 0.05), 'p-harjo': (0.15, 0.15), 'p-painem': (0.45, 0.15), 'p-wiryo': (0.05, 0.05),
+  'p-lastri': (0.15, 0.2), 'p-darmo': (0.25, 0.1)};
+const _happyLines = ['Tadi ikut pengajian di masjid, senang ketemu teman.', 'Cucu datang menginap, rumah jadi ramai.', 'Panen cabai lumayan banyak.',
+  'Ikut senam lansia di balai desa.'];
+const _plainLines = ['Biasa saja, di rumah.', 'Menyapu halaman lalu istirahat.', 'Nonton TV sambil melipat baju.'];
+const _lonelyLines = ['Sepi, anak-anak jauh semua.', 'Kangen sama anak, sudah lama tidak pulang.', 'Sendirian di rumah, tidak ada teman ngobrol.'];
+const _sadLines = ['Semalam susah tidur, kepikiran.', 'Capek, badan pegal semua.'];
+
+/// Jadwal (hari dari sekarang): kontrol Prolanis di Puskesmas & posyandu lansia di dusun. Darmo sengaja: stok habis sebelum kontrol.
+const _visits = {'p-sri': (3, 1), 'p-harjo': (9, 5), 'p-painem': (12, 2), 'p-wiryo': (16, 8), 'p-lastri': (6, 0), 'p-darmo': (27, 11)};
+
 const _sriStories = [
   'Tomat di kebun belakang sudah merah, sebentar lagi panen.',
   'Tadi ikut senam lansia di balai desa.',
@@ -98,6 +113,7 @@ const historyDays = 29;
 void runSeed() {
   final db = Store.instance..wipe();
   final rng = Random(7);
+  final moodRng = Random(11); // terpisah supaya data lain tetap sama
   final now = wibNow();
   final today = startOfDay(now);
   db.seededOn = dateIso(now);
@@ -139,20 +155,30 @@ void runSeed() {
       final missed = rng.nextDouble() < p.missRate;
       final bp = _bp(rng, p.baseBp, trend: d);
       final story = p.id == 'p-sri' && d <= 6 ? _sriStories[d - 1] : '';
-      _call(p, atHm(day, p.time), 'completed', 'green', missed ? 'belum' : 'sudah', bp, story, reason: missed ? 'forgot' : null, report: d <= 6);
+      final sid = _call(p, atHm(day, p.time), 'completed', 'green', missed ? 'belum' : 'sudah', bp, story, reason: missed ? 'forgot' : null, report: d <= 6);
+      _mood(p.id, sid, atHm(day, p.time), story.isNotEmpty ? story : _moodLine(moodRng, p.id));
     }
 
     final t = atHm(today, p.time);
     switch (p.today) {
       case 'green':
-        _call(p, t, 'completed', 'green', 'sudah', _bp(rng, p.baseBp), 'Cucu menginap akhir pekan ini.');
+        final sid = _call(p, t, 'completed', 'green', 'sudah', _bp(rng, p.baseBp), 'Cucu menginap akhir pekan ini.');
+        _mood(p.id, sid, t, 'Cucu menginap akhir pekan ini.');
       case 'med_out':
         final sid = _call(p, t, 'completed', 'yellow', 'belum', _bp(rng, p.baseBp), '', reason: 'out_of_stock');
         _alert(p.id, sid, t, [{'path': 'rule', 'code': 'MED_OUT', 'label': 'Obat habis', 'quote': 'Obatipun sampun telas, Mbak.'}]);
       case 'no_answer':
-        final sid = _call(p, t, 'no_answer', null, null, null, '');
-        _alert(p.id, sid, t, [{'path': 'rule', 'code': 'NO_ANSWER_2X', 'label': '2× tidak diangkat', 'quote': '2 panggilan berturut-turut tidak diangkat'}],
-            source: 'scheduler');
+        // F-19: tidak diangkat → telepon ulang 15 menit → tetap tidak diangkat → Sahabat Kring diminta menengok.
+        final first = _call(p, t, 'no_answer', null, null, null, '');
+        final t2 = t.add(const Duration(minutes: retryMinutes));
+        final second = _call(p, t2, 'no_answer', null, null, null, '', trigger: 'retry');
+        db.insert('call_retries', {'id': newId(), 'patient_id': p.id, 'origin_session_id': first, 'due_at': iso(t2), 'status': 'missed', 'session_id': second,
+          'created_at': iso(t.add(const Duration(minutes: 1)))});
+        final aid = _alert(p.id, second, t2, [
+          {'path': 'rule', 'code': 'NO_ANSWER_RETRY', 'label': 'Tidak diangkat, telepon ulang 15 menit juga tidak diangkat',
+           'quote': 'tidak diangkat pukul ${fmtHm(iso(t))} dan ${fmtHm(iso(t2))}'},
+        ], source: 'scheduler');
+        _homeCheck(p, aid, [t, t2]);
       case 'bp_crisis':
         final sid = _call(p, t, 'completed', 'yellow', 'sudah', (184, 104), '');
         _alert(p.id, sid, t, [
@@ -188,6 +214,22 @@ void runSeed() {
   }
 
   _watch.forEach((pid, w) => _watchData(rng, pid, today, now, w.$1, w.$2, w.$3, w.$4, w.$5, w.$6));
+
+  // Jadwal kontrol Prolanis & posyandu lansia (+ satu kontrol bulan lalu yang sudah selesai).
+  for (final p in _patients) {
+    final (prolanis, posyandu) = _visits[p.id]!;
+    final dusun = p.village.split(',').first;
+    for (final (kind, title, place, offset, hm, status) in [
+      ('prolanis', 'Kontrol Prolanis', puskesmasName, -25, '08:00', 'done'),
+      ('prolanis', 'Kontrol Prolanis', puskesmasName, prolanis, '08:00', 'scheduled'),
+      ('posyandu', 'Posyandu Lansia', 'Balai dusun $dusun', posyandu, '09:00', 'scheduled'),
+    ]) {
+      db.insert('appointments', {'id': newId(), 'patient_id': p.id, 'kind': kind, 'title': title, 'place': place,
+        'date': dateIso(today.add(Duration(days: offset))), 'time': hm,
+        'note': kind == 'prolanis' ? 'Bawa kartu BPJS & buku kontrol' : 'Timbang, tensi, senam', 'status': status,
+        'created_at': iso(today.subtract(const Duration(days: 30)))});
+    }
+  }
 
   db.insert('memories', {'id': newId(), 'patient_id': 'p-sri', 'fact': 'Tomat di kebun belakang sudah merah, sebentar lagi panen', 'category': 'hobby',
     'source_session_id': null, 'created_at': iso(today.subtract(const Duration(days: 1))), 'last_used_at': null});
@@ -227,7 +269,38 @@ void _watchData(Random rng, String pid, DateTime today, DateTime now, String sou
   return (base.$1 + drift + rng.nextInt(17) - 8, base.$2 + drift ~/ 2 + rng.nextInt(11) - 5);
 }
 
-String _call(_P p, DateTime at, String status, String? level, String? adherence, (int, int)? bp, String story, {String? reason, bool report = true}) {
+String _moodLine(Random rng, String pid) {
+  final (lonely, sad) = _moodProfile[pid]!;
+  final x = rng.nextDouble();
+  final pool = x < lonely ? _lonelyLines : (x < lonely + sad ? _sadLines : (rng.nextDouble() < 0.5 ? _happyLines : _plainLines));
+  return pool[rng.nextInt(pool.length)];
+}
+
+void _mood(String pid, String sid, DateTime at, String line) => _obs(pid, sid, 'mood', nlu.mood(line), line, 'nlu', at.add(const Duration(minutes: 3)));
+
+void _homeCheck(_P p, String alertId, List<DateTime> missed) {
+  final db = Store.instance;
+  final sahabat = p.contacts.firstWhere((c) => c.$2 == 'sahabat_tilik');
+  final child = p.contacts.firstWhere((c) => c.$2 == 'child');
+  final hid = newId();
+  final at = iso(missed.last.add(const Duration(minutes: 1)));
+  db.insert('home_checks', {'id': hid, 'patient_id': p.id, 'contact_id': sahabat.$1, 'alert_id': alertId, 'status': 'requested', 'note': '',
+    'missed_at': [for (final m in missed) iso(m)], 'created_at': at, 'responded_at': null});
+  final j1 = fmtHm(iso(missed.first)), j2 = fmtHm(iso(missed.last));
+  for (final (cid, kind, title, body) in [
+    (sahabat.$1, 'home_check', '🏠 Mohon tengok ${p.display}',
+     '${sahabat.$3}, ini Kring dari $puskesmasName. ${p.display} dua kali tidak mengangkat telepon pagi (pukul $j1 dan $j2). '
+         'Mohon tengok ke rumah beliau, lalu kabari lewat tombol di aplikasi.'),
+    (child.$1, 'home_check_sent', '🏠 ${sahabat.$3} diminta mengecek ${p.display}',
+     'KRING sudah menelepon pukul $j1 dan $j2, belum diangkat. ${sahabat.$3} (${sahabat.$4}) diminta menengok ke rumah dan akan mengabari di sini.'),
+  ]) {
+    db.insert('notifications', {'id': newId(), 'contact_id': cid, 'patient_id': p.id, 'alert_id': alertId, 'session_id': null, 'kind': kind,
+      'channel': 'whatsapp_sim', 'title': title, 'body': body, 'payload': {'home_check_id': hid}, 'status': 'sent', 'created_at': at, 'read_at': null});
+  }
+}
+
+String _call(_P p, DateTime at, String status, String? level, String? adherence, (int, int)? bp, String story,
+    {String? reason, bool report = true, String trigger = 'daily'}) {
   final db = Store.instance;
   final sid = newId();
   final points = story.isEmpty ? <String>[] : [story.replaceAll(RegExp(r'\.$'), '')];
@@ -237,7 +310,7 @@ String _call(_P p, DateTime at, String status, String? level, String? adherence,
     summary = '${bits.join('. ')}.';
   }
   db.insert('call_sessions', {
-    'id': sid, 'patient_id': p.id, 'direction': 'outbound', 'trigger': 'daily', 'transport': 'app_sim', 'status': status, 'state': 'ENDED',
+    'id': sid, 'patient_id': p.id, 'direction': 'outbound', 'trigger': trigger, 'transport': 'app_sim', 'status': status, 'state': 'ENDED',
     'ctx': <String, dynamic>{}, 'final_level': level, 'outcome': status, 'started_at': iso(at), 'answered_at': status == 'completed' ? iso(at) : null,
     'ended_at': iso(at.add(const Duration(minutes: 4))), 'summary': summary, 'family_talking_points': points,
   });
@@ -263,11 +336,13 @@ String _call(_P p, DateTime at, String status, String? level, String? adherence,
   return sid;
 }
 
-void _alert(String pid, String sid, DateTime at, List<Map<String, dynamic>> reasons, {String source = 'call'}) {
+String _alert(String pid, String sid, DateTime at, List<Map<String, dynamic>> reasons, {String source = 'call'}) {
   final ts = iso(at.add(const Duration(minutes: 4)));
+  final aid = newId();
   Store.instance.insert('alerts', {
-    'id': newId(), 'patient_id': pid, 'session_id': sid, 'level': 'yellow', 'source': source, 'reasons': reasons, 'screening': <String, dynamic>{},
+    'id': aid, 'patient_id': pid, 'session_id': sid, 'level': 'yellow', 'source': source, 'reasons': reasons, 'screening': <String, dynamic>{},
     'last_known_well': null, 'lkw_note': null, 'golden_period_deadline': null, 'target_hospital_id': null, 'eta_minutes': null, 'status': 'open',
     'acknowledged_by': null, 'acknowledged_at': null, 'created_at': ts, 'updated_at': ts,
   });
+  return aid;
 }

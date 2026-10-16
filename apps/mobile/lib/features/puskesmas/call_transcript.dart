@@ -83,7 +83,7 @@ class _CallTranscriptState extends State<CallTranscript> with Poller<CallTranscr
                             SizedBox(
                               width: 64,
                               child: Text(
-                                t['speaker'] == 'tilik' ? 'KRING' : 'Pasien',
+                                t['speaker'] == 'tilik' ? 'KRING' : (t['speaker'] == 'family' ? 'Keluarga' : 'Pasien'),
                                 style: TText.label.copyWith(color: t['speaker'] == 'tilik' ? TColors.brand : TColors.clay),
                               ),
                             ),

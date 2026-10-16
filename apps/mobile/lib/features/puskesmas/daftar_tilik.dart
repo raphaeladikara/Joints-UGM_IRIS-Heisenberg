@@ -169,6 +169,7 @@ class _DaftarTilikState extends State<DaftarTilik> with Poller<DaftarTilik> {
                             Text('Obat ${adh['taken']}/${adh['total']} hari', style: TText.small),
                           ],
                         ),
+                        ..._extras(r),
                       ],
                     ),
                   ),
@@ -180,6 +181,46 @@ class _DaftarTilikState extends State<DaftarTilik> with Poller<DaftarTilik> {
       ),
     );
   }
+}
+
+/// Baris tambahan: protokol tidak diangkat (F-19), jadwal kontrol + ambil obat, tanda kesepian.
+List<Widget> _extras(Json r) {
+  final st = r['protocol'] as Json?;
+  final visit = r['next_visit'] as Json?;
+  final pickup = r['pickup'] as Json?;
+  final mood = r['mood'] as Json?;
+  Widget line(IconData icon, String text, {Color color = TColors.muted}) => Padding(
+    padding: const EdgeInsets.only(top: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 4),
+        Expanded(child: Text(text, style: TText.small.copyWith(color: color == TColors.muted ? null : color, fontWeight: color == TColors.muted ? null : FontWeight.w700))),
+      ],
+    ),
+  );
+  final hc = st?['home_check'] as Json?;
+  return [
+    if (st != null)
+      switch (st['stage']) {
+        'retry_scheduled' || 'retrying' => line(Icons.phone_callback_rounded, 'Telepon ulang pukul ${hm((st['retry'] as Json?)?['due_at'] as String?)}',
+            color: TColors.yellow),
+        'home_check' => line(Icons.house_rounded, '${hc?['contact_name']} diminta menengok ke rumah (menunggu kabar)', color: TColors.yellow),
+        'checked_ok' => line(Icons.verified_rounded, '${hc?['contact_name']}: sudah dicek, baik', color: TColors.green),
+        'not_home' => line(Icons.no_meeting_room_rounded, '${hc?['contact_name']}: tidak ada di rumah', color: TColors.red),
+        'help' => line(Icons.emergency_rounded, '${hc?['contact_name']}: butuh bantuan', color: TColors.red),
+        _ => const SizedBox.shrink(),
+      },
+    if (pickup != null && (pickup['status'] == 'now' || pickup['status'] == 'before_visit'))
+      line(Icons.local_pharmacy_rounded, pickup['message'] as String, color: pickup['status'] == 'now' ? TColors.red : TColors.yellow)
+    else if (visit != null)
+      line(Icons.event_rounded,
+          '${visit['title']} ${visit['days_until'] == 0 ? 'hari ini' : visit['days_until'] == 1 ? 'besok' : '${visit['days_until']} hari lagi'}'),
+    if (mood != null && mood['level'] != 'ok')
+      line(Icons.favorite_rounded, '${mood['lonely_days_7']}× menyebut kangen/sepi minggu ini${mood['level'] == 'nudge' ? ' · ajak ke posyandu / kunjungan kader' : ''}',
+          color: mood['level'] == 'nudge' ? TColors.lavenderInk : TColors.muted),
+  ];
 }
 
 /// Detail pasien untuk nakes: tren tensi, kepatuhan, memori, riwayat panggilan, "Kring sekarang", simulasi sinyal.

@@ -9,6 +9,7 @@ import '../../core/format.dart';
 import '../../core/mascot.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import 'kring_plus.dart';
 
 String _fmtInt(num n) {
   final s = n.round().toString();
@@ -569,6 +570,10 @@ class _MedsViewState extends State<MedsView> {
           const SizedBox(height: 8),
           for (final (i, d) in doses.indexed) _DoseRow(dose: d, last: i == doses.length - 1),
           const SizedBox(height: 18),
+          const Text('Kapan ambil obat', style: TText.h2),
+          const SizedBox(height: 8),
+          ScheduleCard(feed: widget.feed, onChanged: widget.onChanged),
+          const SizedBox(height: 18),
           const Text('Stok obat', style: TText.h2),
           const SizedBox(height: 8),
           for (final m in meds) _StockCard(med: m, onRefill: () => _refill(m['name'] as String)),
@@ -865,6 +870,7 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
       '• Telepon pagi terjawab ${calls['completed']}/${calls['total']}, tidak diangkat ${calls['no_answer']}.',
       if (v['steps_avg'] != null) '• Langkah rata-rata ${_fmtInt(v['steps_avg'] as num)}/hari; tidur ${((v['sleep_avg_min'] ?? 0) as num) ~/ 60} jam.',
       if (i['salt_avg'] != null) '• Garam rata-rata ${(i['salt_avg'] as num).toStringAsFixed(1)} sdt/hari; ${i['salt_over_days']} hari melewati batas.',
+      if (r['mood'] != null) '• Suasana hati: ${(r['mood'] as Json)['lonely_days']} hari menyebut kangen/sepi dari ${(r['mood'] as Json)['days']} hari.',
       '• Tanda yang perlu tindak lanjut: ${alerts.isEmpty ? 'tidak ada' : alerts.map((a) => (a['labels'] as List).join(', ')).toSet().join('; ')}.',
       '(Dibuat oleh aplikasi, data demo. Bukan diagnosis.)',
     ].join('\n');
@@ -937,6 +943,32 @@ class _MonthlyReportPageState extends State<MonthlyReportPage> {
                     ],
                   ),
                 ),
+                if (r['mood'] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: MoodCard(mood: r['mood'] as Json, name: widget.patientName),
+                  ),
+                if ((r['appointments'] as List?)?.isNotEmpty ?? false)
+                  _panel(
+                    'Kontrol & posyandu',
+                    Column(
+                      children: [
+                        for (final a in (r['appointments'] as List).cast<Json>())
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Row(
+                              children: [
+                                Icon(a['status'] == 'done' ? Icons.check_circle_rounded : (a['status'] == 'missed' ? Icons.cancel_rounded : Icons.event_rounded),
+                                    color: a['status'] == 'done' ? TColors.green : (a['status'] == 'missed' ? TColors.red : TColors.muted)),
+                                const SizedBox(width: 8),
+                                Expanded(child: Text('${a['title']}', style: TText.body)),
+                                Text(dayLabel('${a['date']}T12:00:00+07:00'), style: TText.small),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 _panel(
                   'Catatan tindak lanjut',
                   Column(

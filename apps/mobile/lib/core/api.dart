@@ -146,6 +146,37 @@ class Api {
   Future<Json> logFamilyCall(String patientId, String contactId) => post('/v1/patients/$patientId/family-calls', {'contact_id': contactId});
   Future<Json> report(String patientId, {int days = 30}) => get('/v1/patients/$patientId/report?days=$days');
 
+  // F-03 pesan suara asli anak.
+  Future<Json> sendVoiceMessage(String patientId, String contactId, Uint8List audio, String mime, int seconds) =>
+      post('/v1/patients/$patientId/family-messages',
+          {'contact_id': contactId, 'audio_b64': base64Encode(audio), 'audio_mime': mime, 'duration_s': seconds});
+
+  /// Byte rekaman pesan suara (server: byte audio; offline: JSON base64).
+  Future<(Uint8List, String)> messageAudio(String messageId) async {
+    final path = '/v1/family-messages/$messageId/audio';
+    if (isOffline) {
+      final j = (await _send('GET', path)) as Json;
+      return (base64Decode(j['data_b64'] as String), j['mime'] as String);
+    }
+    try {
+      final res = await http.get(Uri.parse('$_base$path')).timeout(const Duration(seconds: 15));
+      if (res.statusCode >= 400) throw ApiException('Rekaman tidak ditemukan');
+      return (res.bodyBytes, res.headers['content-type'] ?? 'audio/mp4');
+    } on TimeoutException {
+      throw ApiException('Server tidak menjawab ($_base).');
+    }
+  }
+
+  // F-19 protokol tidak diangkat.
+  Future<Json> retryNow(String retryId) => post('/v1/retries/$retryId/now');
+  Future<Json> homeCheck(String id, String result, {String note = ''}) => post('/v1/home-checks/$id', {'result': result, 'note': note});
+
+  // Jadwal kontrol Prolanis & posyandu lansia.
+  Future<Json> addAppointment(String patientId, String kind, String date, String time, {String place = ''}) =>
+      post('/v1/patients/$patientId/appointments', {'kind': kind, 'date': date, 'time': time, 'place': place});
+  Future<Json> setAppointmentStatus(String id, String status, {bool pickedUpMeds = false}) =>
+      post('/v1/appointments/$id/status', {'status': status, 'picked_up_meds': pickedUpMeds});
+
   Future<Json> postVitals(String patientId, String source, String device, List<Json> samples) =>
       post('/v1/patients/$patientId/vitals', {'source': source, 'device': device, 'samples': samples});
 }

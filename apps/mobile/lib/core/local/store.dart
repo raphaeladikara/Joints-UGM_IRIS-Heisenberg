@@ -15,7 +15,7 @@ const tableNames = [
   'patients', 'contacts', 'call_sessions', 'call_turns', 'observations', 'hospitals', 'travel_times', 'alerts', 'memories',
   'family_messages', 'notifications', 'events', 'device_syncs', 'doctor_consults',
   // Fitur tambahan aplikasi keluarga.
-  'med_stock', 'intake', 'family_calls',
+  'med_stock', 'intake', 'family_calls', 'message_audio', 'call_retries', 'home_checks', 'appointments',
 ];
 
 class Store {

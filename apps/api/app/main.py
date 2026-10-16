@@ -9,15 +9,19 @@ from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException
+import base64
+import binascii
+
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
-from . import config, db, dialog, escalation, safety, seed, vitals
+from . import care, config, db, dialog, escalation, protocol, safety, seed, vitals
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    if not db.one("SELECT id FROM patients LIMIT 1"):
+    # DB lama (sebelum fitur keluarga & jadwal kontrol) belum punya datanya: isi ulang data demo.
+    if not db.one("SELECT id FROM patients LIMIT 1") or not db.one("SELECT id FROM appointments LIMIT 1"):
         seed.run()
     yield
 
@@ -49,7 +53,11 @@ class EventIn(Strict):
 
 class FamilyMessageIn(Strict):
     contact_id: str
-    text: str = Field(min_length=1, max_length=300)
+    text: str = Field(default="", max_length=300)
+    # F-03 pesan suara asli: rekaman (AAC/M4A, WebM/Opus, WAV) dikirim base64, maks. ±60 detik.
+    audio_b64: str | None = Field(default=None, max_length=900_000)
+    audio_mime: str = Field(default="audio/mp4", pattern=r"^audio/[a-z0-9.+-]+$")
+    duration_s: int = Field(default=0, ge=0, le=90)
 
 
 class NotificationAction(Strict):
@@ -83,6 +91,44 @@ class ConsultIn(Strict):
 class ConsultUpdate(Strict):
     status: Literal["in_call", "ended", "declined"]
     note: str = Field(default="", max_length=500)
+
+
+class DoseIn(Strict):
+    name: str = Field(min_length=1, max_length=60)
+    time: str = Field(pattern=r"^\d{2}:\d{2}$")
+    status: Literal["taken", "missed"] = "taken"
+
+
+class RefillIn(Strict):
+    name: str | None = Field(default=None, max_length=60)
+
+
+class IntakeIn(Strict):
+    kind: Literal["water", "salt"]
+    delta: float = Field(default=1, ge=-16, le=16)
+
+
+class HomeCheckIn(Strict):
+    result: Literal["ok", "not_home", "help"]
+    note: str = Field(default="", max_length=300)
+
+
+class AppointmentIn(Strict):
+    kind: Literal["prolanis", "posyandu"]
+    date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    time: str = Field(default="08:00", pattern=r"^\d{2}:\d{2}$")
+    place: str = Field(default="", max_length=80)
+    note: str = Field(default="", max_length=200)
+
+
+class AppointmentStatusIn(Strict):
+    status: Literal["done", "missed"]
+    picked_up_meds: bool = False
+
+
+class FamilyCallIn(Strict):
+    contact_id: str | None = None
+    minutes: int = Field(default=5, ge=0, le=600)
 
 
 # ---------- util ----------
@@ -191,12 +237,14 @@ def patient_detail(pid: str) -> dict[str, Any]:
         "vitals": vitals.summary(pid),
         "sessions": sessions,
         "alerts": [_alert_view(a) for a in db.query("SELECT * FROM alerts WHERE patient_id = ? ORDER BY created_at DESC LIMIT 5", (pid,))],
+        "care": care.care(pid),
     }
 
 
 @app.get("/v1/puskesmas/today")
 def daftar_tilik() -> dict[str, Any]:
     """F-13 Daftar Kring Hari Ini: 🔴/🟡 di paling atas."""
+    protocol.run_due()
     start = _today_start()
     rows = []
     for p in db.query("SELECT * FROM patients WHERE active = 1"):
@@ -218,11 +266,16 @@ def daftar_tilik() -> dict[str, Any]:
         else:
             status = "scheduled"
         reasons = [r["label"] for a in alerts for r in db.loads(a["reasons"], [])]
+        c = care.care(p["id"])
         rows.append({
             "patient": _public_patient(p), "status": status,
             "call": {k: call[k] for k in ("id", "status", "final_level", "outcome", "started_at", "ended_at", "summary")} if call else None,
             "last_bp": bp[-1] if bp else None, "adherence_7d": {"taken": adh["taken"], "total": adh["total"]},
             "follow_up": reasons, "open_alerts": [a["id"] for a in alerts],
+            "protocol": protocol.state(p["id"]),
+            "mood": {k: c["mood"][k] for k in ("level", "lonely_days_7", "summary")},
+            "next_visit": c["schedule"]["upcoming"][0] if c["schedule"]["upcoming"] else None,
+            "pickup": c["schedule"]["pickup"],
         })
     order = {"red": 0, "yellow": 1, "no_answer": 2, "in_progress": 3, "scheduled": 4, "green": 5}
     rows.sort(key=lambda r: (order.get(r["status"], 9), r["patient"]["display_name"]))
@@ -247,6 +300,7 @@ def start_call(body: StartCall) -> dict[str, Any]:
 @app.get("/v1/patients/{pid}/incoming")
 def incoming(pid: str) -> dict[str, Any]:
     """Dipoll oleh simulator HP Mbah: apakah ada panggilan KRING yang sedang berdering?"""
+    protocol.run_due(pid)
     s = db.one("SELECT id, trigger, started_at FROM call_sessions WHERE patient_id = ? AND status = 'ringing' ORDER BY started_at DESC LIMIT 1", (pid,))
     return {"ringing": s is not None, "session": s}
 
@@ -303,6 +357,7 @@ def call_detail(sid: str) -> dict[str, Any]:
 
 @app.get("/v1/calls")
 def calls_live() -> list[dict[str, Any]]:
+    protocol.run_due()
     return db.query("""SELECT c.id, c.patient_id, p.display_name, c.status, c.state, c.trigger, c.started_at FROM call_sessions c
                        JOIN patients p ON p.id = c.patient_id WHERE c.status IN ('ringing','in_progress') ORDER BY c.started_at DESC""")
 
@@ -412,6 +467,7 @@ def contact_feed(cid: str) -> dict[str, Any]:
     if not c:
         raise HTTPException(404, "Kontak tidak ditemukan")
     p = _patient_or_404(c["patient_id"])
+    protocol.run_due(p["id"])
     notes = [_notification_view(n) for n in db.query("SELECT * FROM notifications WHERE contact_id = ? ORDER BY created_at DESC LIMIT 40", (cid,))]
     report = next((n for n in notes if n["kind"] == "daily_report"), None)
     red = db.one("SELECT * FROM alerts WHERE patient_id = ? AND level = 'red' AND status != 'closed' ORDER BY created_at DESC LIMIT 1", (p["id"],))
@@ -429,11 +485,14 @@ def contact_feed(cid: str) -> dict[str, Any]:
         "red_alert": _alert_view(red) if red else None,
         "incoming_call": ringing,
         "notifications": notes,
-        "pending_messages": db.query("SELECT id, text, status, created_at FROM family_messages WHERE from_contact_id = ? ORDER BY created_at DESC LIMIT 5",
+        "pending_messages": db.query("""SELECT m.id, m.kind, m.text, m.status, m.created_at, a.duration_s FROM family_messages m
+                                        LEFT JOIN message_audio a ON a.message_id = m.id WHERE m.from_contact_id = ? ORDER BY m.created_at DESC LIMIT 5""",
                                      (cid,)),
+        "no_answer": protocol.state(p["id"]),
         "doctor": {**config.DOCTOR, "suggest": _health_concerns(p["id"])},
         "doctor_consult": _consult_view(dc) if (dc := db.one(
             "SELECT * FROM doctor_consults WHERE contact_id = ? AND status IN ('ringing', 'in_call') ORDER BY created_at DESC LIMIT 1", (cid,))) else None,
+        "care": care.care(p["id"]),
     }
 
 
@@ -568,8 +627,111 @@ def family_message(pid: str, body: FamilyMessageIn) -> dict[str, Any]:
     c = db.one("SELECT * FROM contacts WHERE id = ? AND patient_id = ?", (body.contact_id, pid))
     if not c:
         raise HTTPException(400, "Kontak bukan keluarga pasien ini")
+    audio: bytes | None = None
+    if body.audio_b64:
+        try:
+            audio = base64.b64decode(body.audio_b64, validate=True)
+        except (binascii.Error, ValueError):
+            raise HTTPException(422, "Rekaman tidak valid")
+    if not audio and not body.text.strip():
+        raise HTTPException(422, "Pesan kosong")
     mid = db.new_id()
-    db.execute("INSERT INTO family_messages (id, patient_id, from_contact_id, kind, text, status, created_at) VALUES (?,?,?, 'text', ?, 'pending', ?)",
-               (mid, pid, body.contact_id, body.text.strip(), config.now().isoformat()))
-    return {"id": mid, "status": "pending"}
+    with db.tx() as conn:
+        conn.execute("INSERT INTO family_messages (id, patient_id, from_contact_id, kind, text, status, created_at) VALUES (?,?,?,?,?, 'pending', ?)",
+                     (mid, pid, body.contact_id, "audio" if audio else "text", body.text.strip(), config.now().isoformat()))
+        if audio:
+            conn.execute("INSERT INTO message_audio (message_id, mime, data_b64, duration_s) VALUES (?,?,?,?)",
+                         (mid, body.audio_mime, body.audio_b64, body.duration_s))
+    return {"id": mid, "status": "pending", "kind": "audio" if audio else "text"}
 
+
+@app.get("/v1/family-messages/{mid}/audio")
+def family_message_audio(mid: str) -> Response:
+    a = db.one("SELECT mime, data_b64 FROM message_audio WHERE message_id = ?", (mid,))
+    if not a:
+        raise HTTPException(404, "Rekaman tidak ditemukan")
+    return Response(base64.b64decode(a["data_b64"]), media_type=a["mime"])
+
+
+# ---------- F-19 protokol tidak diangkat ----------
+
+@app.post("/v1/retries/{rid}/now")
+def retry_now(rid: str) -> dict[str, Any]:
+    """Demo: jalankan telepon ulang sekarang tanpa menunggu 15 menit."""
+    st = protocol.fire_now(rid)
+    if st is None:
+        raise HTTPException(404, "Jadwal telepon ulang tidak ditemukan")
+    return st
+
+
+@app.post("/v1/home-checks/{hid}")
+def home_check(hid: str, body: HomeCheckIn) -> dict[str, Any]:
+    """Sahabat Kring melapor hasil menengok rumah."""
+    st = protocol.respond(hid, body.result, body.note.strip())
+    if st is None:
+        raise HTTPException(404, "Permintaan cek rumah tidak ditemukan")
+    return st
+
+
+# ---------- jadwal kontrol Prolanis & posyandu ----------
+
+@app.post("/v1/patients/{pid}/appointments")
+def add_appointment(pid: str, body: AppointmentIn) -> dict[str, Any]:
+    _patient_or_404(pid)
+    care.add_appointment(pid, body.kind, body.date, body.time, body.place.strip(), body.note.strip())
+    return care.care(pid)
+
+
+@app.post("/v1/appointments/{aid}/status")
+def appointment_status(aid: str, body: AppointmentStatusIn) -> dict[str, Any]:
+    pid = care.mark_appointment(aid, body.status, body.picked_up_meds)
+    if pid is None:
+        raise HTTPException(404, "Jadwal tidak ditemukan")
+    return care.care(pid)
+
+
+
+# ---------- fitur keluarga: obat, asupan, streak, rapor ----------
+
+@app.get("/v1/patients/{pid}/care")
+def get_care(pid: str) -> dict[str, Any]:
+    _patient_or_404(pid)
+    return care.care(pid)
+
+
+@app.post("/v1/patients/{pid}/meds/dose")
+def log_dose(pid: str, body: DoseIn) -> dict[str, Any]:
+    """Keluarga mencentang dosis (mis. obat malam). Dosis 'taken' mengurangi stok obat itu."""
+    _patient_or_404(pid)
+    care.log_dose(pid, body.name, body.time, body.status)
+    return care.care(pid)
+
+
+@app.post("/v1/patients/{pid}/meds/refill")
+def refill_meds(pid: str, body: RefillIn) -> dict[str, Any]:
+    """Obat sudah diambil/ditebus: stok bertambah satu kemasan, alert yang hanya 'obat habis' ditutup."""
+    _patient_or_404(pid)
+    care.refill(pid, body.name)
+    return care.care(pid)
+
+
+@app.post("/v1/patients/{pid}/intake")
+def log_intake(pid: str, body: IntakeIn) -> dict[str, Any]:
+    """Air (gelas) & garam (sdt) hari ini; batas garam 1 sdt."""
+    _patient_or_404(pid)
+    care.log_intake(pid, body.kind, body.delta)
+    return care.care(pid)
+
+
+@app.post("/v1/patients/{pid}/family-calls")
+def log_family_call(pid: str, body: FamilyCallIn) -> dict[str, Any]:
+    _patient_or_404(pid)
+    care.log_family_call(pid, body.contact_id, body.minutes)
+    return care.care(pid)
+
+
+@app.get("/v1/patients/{pid}/report")
+def patient_report(pid: str, days: int = 30) -> dict[str, Any]:
+    p = _patient_or_404(pid)
+    days = max(7, min(days, 30))
+    return care.report(p, _public_patient(p), _bp_history(pid, days), days)

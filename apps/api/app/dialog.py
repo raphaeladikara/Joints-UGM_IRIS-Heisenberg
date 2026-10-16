@@ -14,7 +14,7 @@ from datetime import timedelta
 from dataclasses import dataclass, field
 from typing import Any
 
-from . import config, content, db, escalation, llm, nlu, safety
+from . import care, config, content, db, escalation, llm, nlu, protocol, safety
 
 SCREEN_SENTENCE = "Langit biru di atas desa"
 
@@ -44,12 +44,14 @@ class TurnResult:
     outcome: str | None = None
     alert_id: str | None = None
     hints: list[str] = field(default_factory=list)
+    # Urutan putar di telepon bila ada pesan suara keluarga: [{"say": teks} | {"play": message_id, ...}]. Kosong = ucapkan tilik_text.
+    segments: list[dict[str, Any]] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "session_id": self.session_id, "tilik_text": self.tilik_text, "state": self.state,
             "state_label": STATE_LABELS.get(self.state, self.state), "level": self.level, "ended": self.ended,
-            "outcome": self.outcome, "alert_id": self.alert_id, "hints": self.hints,
+            "outcome": self.outcome, "alert_id": self.alert_id, "hints": self.hints, "segments": self.segments,
         }
 
 
@@ -161,17 +163,23 @@ def no_answer(sid: str) -> TurnResult:
         alert_id = escalation.open_alert(s["patient_id"], sid, "red", "event:wearable", reasons)
         db.execute("UPDATE call_sessions SET final_level = 'red' WHERE id = ?", (sid,))
         return TurnResult(sid, "", "ENDED", "red", ended=True, outcome=outcome, alert_id=alert_id, hints=["escalation_started"])
-    prev = db.query(
-        "SELECT status FROM call_sessions WHERE patient_id = ? AND id != ? AND status != 'ringing' ORDER BY started_at DESC LIMIT 1",
-        (s["patient_id"], sid),
-    )
+    # F-19: telepon ulang 15 menit → masih tidak diangkat → Sahabat Kring mengecek rumah.
+    retry_alert, hints = protocol.on_no_answer(s, ctx)
     level = "green"
-    if prev and prev[0]["status"] == "no_answer":
-        reasons = [{"path": "rule", "code": "NO_ANSWER_2X", "label": content.label("NO_ANSWER_2X"), "quote": "2 panggilan berturut-turut tidak diangkat"}]
-        alert_id = escalation.open_alert(s["patient_id"], sid, "yellow", "scheduler", reasons)
-        level = "yellow"
+    if retry_alert:
+        alert_id, level = retry_alert, "yellow"
         db.execute("UPDATE call_sessions SET final_level = 'yellow' WHERE id = ?", (sid,))
-    return TurnResult(sid, "", "ENDED", level, ended=True, outcome=outcome, alert_id=alert_id)
+    else:
+        prev = db.query(
+            "SELECT status FROM call_sessions WHERE patient_id = ? AND id != ? AND status != 'ringing' ORDER BY started_at DESC LIMIT 1",
+            (s["patient_id"], sid),
+        )
+        if prev and prev[0]["status"] == "no_answer":
+            reasons = [{"path": "rule", "code": "NO_ANSWER_2X", "label": content.label("NO_ANSWER_2X"), "quote": "2 panggilan berturut-turut tidak diangkat"}]
+            alert_id = escalation.open_alert(s["patient_id"], sid, "yellow", "scheduler", reasons)
+            level = "yellow"
+            db.execute("UPDATE call_sessions SET final_level = 'yellow' WHERE id = ?", (sid,))
+    return TurnResult(sid, "", "ENDED", level, ended=True, outcome=outcome, alert_id=alert_id, hints=hints)
 
 
 def hangup(sid: str) -> TurnResult:
@@ -294,13 +302,33 @@ def _after_identity(s, ctx, patient, say) -> TurnResult:
            WHERE m.patient_id = ? AND m.status = 'pending' ORDER BY m.created_at""",
         (patient["id"],),
     )
+    segments: list[dict[str, Any]] = []
+    played: list[str] = []
     for m in msgs[:2]:
-        parts.append(say("family_message_text", pengirim=m["sender"], pesan=m["text"]))
+        if m["kind"] == "audio":
+            # F-03: suara asli anak diputar apa adanya, diapit kalimat pengantar & penutup KRING.
+            audio = db.one("SELECT duration_s FROM message_audio WHERE message_id = ?", (m["id"],))
+            intro, outro = say("family_message_audio", pengirim=m["sender"]), say("family_message_audio_end", pengirim=m["sender"])
+            parts += [intro, outro]
+            segments += [{"say": intro}, {"play": m["id"], "sender": m["sender"], "duration_s": audio["duration_s"] if audio else 0}, {"say": outro}]
+            played.append(f"🔊 Pesan suara {m['sender']} diputar ({audio['duration_s'] if audio else 0} detik)")
+            if "family_voice" not in hints:
+                hints.append("family_voice")
+        else:
+            line = say("family_message_text", pengirim=m["sender"], pesan=m["text"])
+            parts.append(line)
+            segments.append({"say": line})
     if msgs:
         ctx["delivered_messages"] = [m["id"] for m in msgs[:2]]
         hints.append("family_message")
-    parts.append(say("ask_medication"))
-    return _reply(s["id"], "MEDICATION", ctx, " ".join(parts), hints)
+    ask = say("ask_medication")
+    parts.append(ask)
+    result = _reply(s["id"], "MEDICATION", ctx, " ".join(parts), hints)
+    for line in played:
+        _turn(s["id"], "family", "MEDICATION", line)
+    if "family_voice" in hints:
+        result.segments = segments + [{"say": ask}]
+    return result
 
 
 def _next_after_med(s, ctx, patient, say, prefix: str) -> TurnResult:
@@ -328,7 +356,17 @@ def _medication(s, ctx, patient, say, text) -> TurnResult:
         return _reply(s["id"], "MED_REASON", ctx, say("ask_med_reason"))
     ctx["med"] = {"status": status}
     _observe(patient["id"], s["id"], "adherence", {"status": status}, text)
+    _take_dose(patient["id"], status)
     return _next_after_med(s, ctx, patient, say, say("med_ack_yes") if status == "sudah" else "")
+
+
+def _take_dose(pid: str, status: str) -> None:
+    """Obat pagi yang diminum mengurangi stok (fitur Jadwal & stok obat)."""
+    if status != "sudah":
+        return
+    for m in db.query("SELECT id, times FROM med_stock WHERE patient_id = ?", (pid,)):
+        if any(t < "12:00" for t in db.loads(m["times"], [])):
+            db.execute("UPDATE med_stock SET pills_left = MAX(0, pills_left - per_dose) WHERE id = ?", (m["id"],))
 
 
 def _med_reason(s, ctx, patient, say, text) -> TurnResult:
@@ -342,6 +380,7 @@ def _apply_med_reason(s, ctx, patient, say, text, reason: str) -> TurnResult:
            "side_effect": "med_reason_side_effect"}.get(reason, "med_reason_other")
     if reason == "out_of_stock":
         _record_findings(ctx, [safety.Finding("MED_OUT", "yellow", "follow_up", text)])
+        db.execute("UPDATE med_stock SET pills_left = 0 WHERE patient_id = ?", (patient["id"],))
     elif reason == "side_effect":
         _record_findings(ctx, [safety.Finding("MED_SIDE_EFFECT", "yellow", "follow_up", text)])
     missed = _missed_days(patient["id"])
@@ -433,11 +472,15 @@ def _symptoms(s, ctx, patient, say, text) -> TurnResult:
 
 def _story(s, ctx, patient, say, text) -> TurnResult:
     ctx["story"] = text
+    ctx["mood"] = nlu.mood(text)
     if nlu.mentions_missing_family(text):
         ctx["kangen"] = True
+    # Tanggapan ikut suasana hati: jangan bilang "senang mendengarnya" kepada Mbah yang sedang kangen.
+    ack = "story_ack_lonely" if ctx["mood"]["lonely"] else "story_ack_sad" if ctx["mood"]["mood"] == "sedih" else "story_ack"
+    reminders = " ".join(say(k, **v) for k, v in care.reminders(patient["id"]))
     key = "closing_yellow" if ctx["level"] == "yellow" else "closing"
     closing = say(key, edukasi=content.education(ctx.get("edu_index", 0)))
-    return _finish(s, ctx, f"{say('story_ack')} {closing}", outcome="completed")
+    return _finish(s, ctx, " ".join(x for x in (say(ack), reminders, closing) if x), outcome="completed")
 
 
 # ---------- darurat ----------
@@ -519,6 +562,8 @@ def _finish(s, ctx, text: str, *, outcome: str, hints: list[str] | None = None) 
 
     alert_id = ctx.get("alert_id")
     if outcome == "completed":
+        if ctx.get("mood"):
+            _observe(pid, sid, "mood", ctx["mood"], ctx.get("story", ""), source="nlu")
         if level == "yellow":
             alert_id = escalation.open_alert(pid, sid, "yellow", "call", [r for r in ctx["findings"] if r["level"] == "yellow"])
         _daily_report(patient, sid, ctx, summary, points)
@@ -576,10 +621,34 @@ def _daily_report(patient: dict[str, Any], sid: str, ctx: dict[str, Any], summar
         shared_points = points if scope.get("stories", True) else []
         if shared_points:
             lines.append("💬 Bahan obrolan: " + "; ".join(shared_points))
+        sched = care.care(patient["id"])["schedule"]
+        soon = next((a for a in sched["upcoming"] if a["days_until"] <= 1), None)
+        if soon:
+            lines.append(f"📅 {'Hari ini' if soon['days_until'] == 0 else 'Besok'} {soon['title']} pukul {soon['time'].replace(':', '.')} di {soon['place']}")
+        if sched["pickup"] and sched["pickup"]["status"] in ("now", "before_visit") and sched["pickup"]["days_left"] <= 7:
+            lines.append("💊 " + sched["pickup"]["message"])
         escalation.notify(c, patient["id"], "daily_report", "whatsapp_sim", f"Rapor pagi {patient['display_name']}", "\n".join(lines),
                           payload={"level": ctx["level"], "talking_points": shared_points, "bp": ctx.get("bp") if scope.get("bp", True) else None,
                                    "medication": med.get("status") if scope.get("medication", True) else None},
                           session_id=sid)
-        if ctx.get("kangen"):
-            escalation.notify(c, patient["id"], "nudge", "whatsapp_sim", "💛 Nudge Kangen",
-                              f"{patient['display_name']} tadi bilang kangen. Telepon 5 menit hari ini?", session_id=sid)
+        _nudge(c, patient, sid, ctx)
+
+
+def _nudge(c: dict[str, Any], patient: dict[str, Any], sid: str, ctx: dict[str, Any]) -> None:
+    """Nudge Kangen, diperkuat ringkasan suasana hati: kangen hari ini, atau kesepian berulang minggu ini (maks. 1×/hari)."""
+    m = care.mood(patient["id"])
+    name = patient["display_name"]
+    if not ctx.get("kangen") and m["level"] != "nudge":
+        return
+    start = config.now().replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    if db.one("SELECT id FROM notifications WHERE contact_id = ? AND kind = 'nudge' AND created_at >= ?", (c["id"], start)):
+        return
+    first = f"{name} tadi bilang kangen." if ctx.get("kangen") else f"{name} beberapa hari ini terdengar kesepian."
+    detail = []
+    if m["lonely_days_7"] >= 2:
+        detail.append(f"Seminggu ini {m['lonely_days_7']}× menyebut kangen/sepi")
+    if m["days_since_family_call"] is not None and m["days_since_family_call"] >= 2:
+        detail.append(f"telepon keluarga terakhir {m['days_since_family_call']} hari lalu")
+    body = first + (" " + ", ".join(detail) + "." if detail else "") + " Telepon 5 menit hari ini?"
+    escalation.notify(c, patient["id"], "nudge", "whatsapp_sim", "💛 Nudge Kangen", body,
+                      payload={"mood": {k: m[k] for k in ("level", "lonely_days_7", "days_since_family_call", "summary")}}, session_id=sid)

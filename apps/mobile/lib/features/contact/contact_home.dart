@@ -12,6 +12,7 @@ import 'doctor.dart';
 import 'emergency.dart';
 import 'care_views.dart';
 import 'health_views.dart';
+import 'kring_plus.dart';
 import 'recipes.dart';
 
 /// Aplikasi keluarga (anak) dan Sahabat Kring. Di produksi kanal utamanya WhatsApp; di prototype,
@@ -300,6 +301,10 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           ],
           _patientHero(f),
           const SizedBox(height: 14),
+          if (f['no_answer'] != null && f['no_answer']['stage'] != 'answered') ...[
+            NoAnswerCard(feed: f, contactId: widget.contactId, onChanged: refreshNow),
+            const SizedBox(height: 14),
+          ],
           if (f['care'] != null) ...[
             SummaryCard(f),
             const SizedBox(height: 14),
@@ -333,6 +338,15 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
               ],
             ),
           ),
+          if (f['care']?['mood'] != null) ...[
+            const SizedBox(height: 14),
+            MoodCard(mood: f['care']['mood'] as Json, name: name, onCall: _callPatient),
+          ],
+          if (f['care']?['schedule'] != null) ...[
+            const SizedBox(height: 22),
+            _heading('Jadwal kontrol & ambil obat'),
+            ScheduleCard(feed: f, onChanged: refreshNow),
+          ],
           if (f['care'] != null) ...[
             const SizedBox(height: 22),
             _heading('Air & garam'),
@@ -416,13 +430,23 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
         children: [
+          if (f['no_answer'] != null && f['no_answer']['stage'] != 'answered') ...[
+            NoAnswerCard(feed: f, contactId: widget.contactId, onChanged: refreshNow),
+            const SizedBox(height: 14),
+          ],
           _patientHero(f, callButton: false),
+          if (f['care']?['schedule'] != null) ...[
+            const SizedBox(height: 22),
+            _heading('Jadwal posyandu & kontrol'),
+            ScheduleCard(feed: f, onChanged: refreshNow),
+          ],
           const SizedBox(height: 22),
           _heading('Peran Anda'),
           HealthPanel(
             child: Text(
               'Anda adalah Sahabat Kring untuk $name: orang pertama yang ditelepon KRING saat ada tanda bahaya, '
-              'karena paling dekat secara fisik. Anda tidak menerima rapor harian, hanya panggilan darurat.',
+              'karena paling dekat secara fisik. Kalau telepon pagi dan telepon ulang 15 menit kemudian tidak diangkat, '
+              'Anda diminta menengok ke rumah. Anda tidak menerima rapor harian.',
               style: TText.body,
             ),
           ),
@@ -574,8 +598,11 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
             ],
           ),
           const SizedBox(height: 4),
-          Text('KRING membacakannya di telepon pagi berikutnya, diawali "${f['contact']['name']} titip pesan…".',
+          Text('KRING membacakannya di telepon pagi berikutnya, diawali "${f['contact']['name']} titip pesan…". '
+              'Pesan suara diputar apa adanya, dengan suara Anda sendiri.',
               style: TText.small.copyWith(color: TColors.butterInk)),
+          const SizedBox(height: 10),
+          VoiceRecorder(patientId: f['patient']['id'] as String, contactId: widget.contactId, onSent: refreshNow),
           const SizedBox(height: 10),
           TextField(
             controller: _msg,
@@ -590,7 +617,10 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
               padding: const EdgeInsets.only(top: 10),
               child: Row(
                 children: [
-                  Expanded(child: Text('“${m['text']}”', maxLines: 2, overflow: TextOverflow.ellipsis, style: TText.small.copyWith(color: TColors.ink))),
+                  Expanded(
+                    child: Text(m['kind'] == 'audio' ? '🎙️ Pesan suara ${m['duration_s'] ?? ''} detik' : '“${m['text']}”',
+                        maxLines: 2, overflow: TextOverflow.ellipsis, style: TText.small.copyWith(color: TColors.ink)),
+                  ),
                   const SizedBox(width: 8),
                   LevelChip(m['status'] == 'delivered' ? 'green' : 'scheduled', text: m['status'] == 'delivered' ? 'Tersampaikan' : 'Menunggu'),
                 ],

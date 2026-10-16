@@ -34,6 +34,9 @@ WIB = timezone(timedelta(hours=7), "WIB")
 
 GOLDEN_PERIOD = timedelta(hours=4, minutes=30)
 
+# F-19: panggilan pagi tidak diangkat → telepon ulang setelah sekian menit, lalu Sahabat Kring diminta mengecek rumah.
+RETRY_MINUTES = int(os.getenv("TILIK_RETRY_MINUTES", "15"))
+
 
 def now() -> datetime:
     return datetime.now(WIB)

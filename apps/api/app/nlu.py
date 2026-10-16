@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Any
 
 from . import config
 
@@ -197,6 +198,23 @@ def asks_dosage(text: str) -> bool:
 def mentions_missing_family(text: str) -> bool:
     t = normalize(text)
     return bool(re.search(r"(kangen|rindu|sepi|kesepian|sendirian terus)", t))
+
+
+# Leksikon suasana hati (Indonesia + Jawa). Sengaja sederhana dan bisa diaudit; bukan diagnosis depresi.
+_LONELY = r"\b(kangen|rindu|sepi|kesepian|sendirian|ora ana kanca|ora ono kanca|tidak ada teman|nggak ada teman|ditinggal|jarang (ditelepon|ditelpon|pulang)|ngelangut|nelangsa)\b"
+_SAD = r"\b(sedih|susah tidur|susah|sedhih|capek|capai|lelah|kesel|bingung|takut|khawatir|kuatir|was-was|nangis|menangis|males|ora iso turu|tidak bisa tidur|kepikiran|ngenes|loro ati|sakit hati)\b"
+_HAPPY = r"\b(senang|seneng|bahagia|gembira|bungah|syukur|alhamdulillah|panen|lega|ketawa|tertawa|asyik|asik|senam|pengajian|arisan|jalan-jalan|dolan|menginap|nginep|wisuda|bertelur|seger)\b"
+
+
+def mood(text: str) -> dict[str, Any]:
+    """Suasana hati dari cerita harian: senang / biasa / sedih + tanda kesepian, beserta kata pemicunya."""
+    t = normalize(text)
+    lonely = [m.group(0) for m in re.finditer(_LONELY, t)]
+    sad = [m.group(0) for m in re.finditer(_SAD, t)]
+    happy = [m.group(0) for m in re.finditer(_HAPPY, t)]
+    score = len(happy) - len(sad) - (1 if lonely else 0)
+    label = "senang" if score > 0 else ("sedih" if score < 0 else "biasa")
+    return {"mood": label, "lonely": bool(lonely), "cues": list(dict.fromkeys(lonely + sad + happy))[:4]}
 
 
 def not_measured(text: str) -> bool:

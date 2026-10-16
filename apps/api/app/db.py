@@ -178,13 +178,77 @@ CREATE TABLE IF NOT EXISTS doctor_consults (
   answered_at TEXT,
   ended_at TEXT
 );
+CREATE TABLE IF NOT EXISTS med_stock (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  name TEXT NOT NULL,
+  schedule TEXT NOT NULL DEFAULT '',
+  times TEXT NOT NULL DEFAULT '[]',
+  per_dose INTEGER NOT NULL DEFAULT 1,
+  pills_left INTEGER NOT NULL DEFAULT 0,
+  refill_size INTEGER NOT NULL DEFAULT 30,
+  last_refill TEXT
+);
+CREATE TABLE IF NOT EXISTS intake (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  date TEXT NOT NULL,
+  water INTEGER NOT NULL DEFAULT 0,
+  salt REAL NOT NULL DEFAULT 0,
+  UNIQUE (patient_id, date)
+);
+CREATE TABLE IF NOT EXISTS family_calls (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  contact_id TEXT,
+  at TEXT NOT NULL,
+  minutes INTEGER NOT NULL DEFAULT 5
+);
+CREATE TABLE IF NOT EXISTS message_audio (
+  message_id TEXT PRIMARY KEY REFERENCES family_messages(id),
+  mime TEXT NOT NULL,
+  data_b64 TEXT NOT NULL,
+  duration_s INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS call_retries (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  origin_session_id TEXT NOT NULL,
+  due_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  session_id TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS home_checks (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  contact_id TEXT NOT NULL REFERENCES contacts(id),
+  alert_id TEXT,
+  status TEXT NOT NULL DEFAULT 'requested',
+  note TEXT NOT NULL DEFAULT '',
+  missed_at TEXT NOT NULL DEFAULT '[]',
+  created_at TEXT NOT NULL,
+  responded_at TEXT
+);
+CREATE TABLE IF NOT EXISTS appointments (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  kind TEXT NOT NULL,
+  title TEXT NOT NULL,
+  place TEXT NOT NULL DEFAULT '',
+  date TEXT NOT NULL,
+  time TEXT NOT NULL DEFAULT '08:00',
+  note TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'scheduled',
+  created_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_obs_patient ON observations(patient_id, observed_at);
 CREATE INDEX IF NOT EXISTS idx_calls_patient ON call_sessions(patient_id, started_at);
 CREATE INDEX IF NOT EXISTS idx_notif_contact ON notifications(contact_id, created_at);
 """
 
 TABLES = [
-    "doctor_consults", "device_syncs", "notifications", "events", "family_messages", "memories", "alerts", "travel_times", "hospitals",
+    "appointments", "home_checks", "call_retries", "message_audio", "family_calls", "intake", "med_stock", "doctor_consults", "device_syncs", "notifications", "events", "family_messages", "memories", "alerts", "travel_times", "hospitals",
     "observations", "call_turns", "call_sessions", "contacts", "patients",
 ]
 

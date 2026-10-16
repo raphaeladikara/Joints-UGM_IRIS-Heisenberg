@@ -1,12 +1,15 @@
 /// Backend offline KRING: endpoint yang sama dengan `apps/api/app/main.py`, berjalan di dalam aplikasi.
 /// Dipakai bila server tidak diatur (APK demo bisa dipasang di HP mana pun, tanpa internet).
 ///
-/// Endpoint tambahan (fitur keluarga): /care, /meds/dose, /meds/refill, /intake, /family-calls, /report.
+/// Endpoint tambahan (fitur keluarga): /care, /meds/dose, /meds/refill, /intake, /family-calls, /report,
+/// pesan suara (/family-messages/{id}/audio), protokol tidak diangkat (/retries, /home-checks), jadwal (/appointments).
 library;
 
+import 'care_extra.dart' as cx;
 import 'clock.dart';
 import 'dialog.dart' as dialog;
 import 'escalation.dart' as esc;
+import 'protocol.dart' as protocol;
 import 'safety.dart' as safety;
 import 'seed.dart';
 import 'store.dart';
@@ -33,7 +36,7 @@ class LocalBackend {
     await Content.load();
     final ok = await _db.load();
     // Data demo selalu "hari ini": kalau tersimpan dari hari lain, isi ulang.
-    if (!ok || _db.seededOn != dateIso(wibNow()) || _db.rows('patients').isEmpty) {
+    if (!ok || _db.seededOn != dateIso(wibNow()) || _db.rows('patients').isEmpty || _db.rows('appointments').isEmpty) {
       runSeed();
       await _db.save();
     }
@@ -72,12 +75,15 @@ class LocalBackend {
       case ['patients', final pid] when get:
         return _patientDetail(pid);
       case ['puskesmas', 'today'] when get:
+        protocol.runDue();
         return _daftarTilik();
       case ['calls'] when !get:
         return _startCall(b);
       case ['calls'] when get:
+        protocol.runDue();
         return _liveCalls();
       case ['patients', final pid, 'incoming'] when get:
+        protocol.runDue(pid);
         final s = _db.sorted(_db.where('call_sessions', (c) => c['patient_id'] == pid && c['status'] == 'ringing'), 'started_at', desc: true).firstOrNull;
         return {'ringing': s != null, 'session': s == null ? null : {'id': s['id'], 'trigger': s['trigger'], 'started_at': s['started_at']}};
       case ['calls', final sid, 'answer']:
@@ -156,10 +162,41 @@ class LocalBackend {
         _patientOr404(pid);
         final c = _db.one('contacts', (c) => c['id'] == b['contact_id'] && c['patient_id'] == pid);
         if (c == null) throw LocalHttpError(400, 'Kontak bukan keluarga pasien ini');
+        final audio = '${b['audio_b64'] ?? ''}';
+        final text = '${b['text'] ?? ''}'.trim();
+        if (audio.isEmpty && text.isEmpty) throw LocalHttpError(422, 'Pesan kosong');
         final mid = newId();
-        _db.insert('family_messages', {'id': mid, 'patient_id': pid, 'from_contact_id': c['id'], 'kind': 'text', 'text': '${b['text']}'.trim(),
+        final kind = audio.isEmpty ? 'text' : 'audio';
+        _db.insert('family_messages', {'id': mid, 'patient_id': pid, 'from_contact_id': c['id'], 'kind': kind, 'text': text,
           'status': 'pending', 'delivered_session_id': null, 'created_at': nowIso()});
-        return {'id': mid, 'status': 'pending'};
+        if (audio.isNotEmpty) {
+          _db.insert('message_audio', {'id': mid, 'message_id': mid, 'mime': b['audio_mime'] ?? 'audio/mp4', 'data_b64': audio,
+            'duration_s': (b['duration_s'] as num?)?.toInt() ?? 0});
+          _pruneAudio(pid);
+        }
+        return {'id': mid, 'status': 'pending', 'kind': kind};
+      case ['family-messages', final mid, 'audio'] when get:
+        // Offline: rekaman dikembalikan sebagai JSON base64 (server sungguhan mengirim byte audio).
+        final a = _db.byId('message_audio', mid) ?? (throw LocalHttpError(404, 'Rekaman tidak ditemukan'));
+        return {'mime': a['mime'], 'data_b64': a['data_b64']};
+      // ---------- F-19 protokol tidak diangkat ----------
+      case ['retries', final rid, 'now']:
+        return protocol.fireNow(rid) ?? (throw LocalHttpError(404, 'Jadwal telepon ulang tidak ditemukan'));
+      case ['home-checks', final hid]:
+        final result = '${b['result']}';
+        if (!const {'ok', 'not_home', 'help'}.contains(result)) throw LocalHttpError(422, 'Hasil cek tidak dikenal');
+        return protocol.respond(hid, result, '${b['note'] ?? ''}'.trim()) ?? (throw LocalHttpError(404, 'Permintaan cek rumah tidak ditemukan'));
+      // ---------- jadwal kontrol Prolanis & posyandu ----------
+      case ['patients', final pid, 'appointments']:
+        _patientOr404(pid);
+        final kind = '${b['kind']}';
+        final date = '${b['date'] ?? ''}';
+        if (!cx.apptTitles.containsKey(kind) || !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date)) throw LocalHttpError(422, 'Jadwal tidak valid');
+        cx.addAppointment(pid, kind, date, '${b['time'] ?? '08:00'}', '${b['place'] ?? ''}'.trim(), '${b['note'] ?? ''}'.trim());
+        return care(pid);
+      case ['appointments', final aid, 'status']:
+        final pid = cx.markAppointment(aid, '${b['status']}', b['picked_up_meds'] == true) ?? (throw LocalHttpError(404, 'Jadwal tidak ditemukan'));
+        return care(pid);
       // ---------- fitur keluarga ----------
       case ['patients', final pid, 'care'] when get:
         _patientOr404(pid);
@@ -174,14 +211,7 @@ class LocalBackend {
         return care(pid);
       case ['patients', final pid, 'meds', 'refill']:
         _patientOr404(pid);
-        for (final st in _db.where('med_stock', (m) => m['patient_id'] == pid && (b['name'] == null || m['name'] == b['name']))) {
-          st['pills_left'] = (st['pills_left'] as int) + (st['refill_size'] as int);
-          st['last_refill'] = nowIso();
-        }
-        // Obat sudah diambil: tindak lanjut "obat habis" hari ini selesai.
-        for (final a in _db.where('alerts', (a) => a['patient_id'] == pid && a['status'] != 'closed')) {
-          if ((a['reasons'] as List).every((r) => r['code'] == 'MED_OUT')) a.addAll({'status': 'closed', 'updated_at': nowIso()});
-        }
+        cx.refill(pid, b['name'] as String?);
         return care(pid);
       case ['patients', final pid, 'intake']:
         _patientOr404(pid);
@@ -210,6 +240,15 @@ class LocalBackend {
   }
 
   // ---------- util ----------
+
+  /// Penyimpanan offline terbatas: simpan rekaman 6 pesan suara terbaru per pasien saja.
+  void _pruneAudio(String pid) {
+    final ids = _db.sorted(_db.where('family_messages', (m) => m['patient_id'] == pid && m['kind'] == 'audio'), 'created_at', desc: true)
+        .skip(6)
+        .map((m) => m['id'])
+        .toSet();
+    _db.delete('message_audio', (a) => ids.contains(a['message_id']));
+  }
 
   int _age(int birthYear) => wibNow().year - birthYear;
   String _todayStart() => iso(startOfDay(wibNow()));
@@ -294,6 +333,8 @@ class LocalBackend {
           desc: true);
       final bp = _bpHistory(pid, 30);
       final adh = _adherence(pid);
+      final c = care(pid);
+      final sched = c['schedule'] as J, m = c['mood'] as J;
       String status;
       if (alerts.any((a) => a['level'] == 'red')) {
         status = 'red';
@@ -313,6 +354,10 @@ class LocalBackend {
         'call': call == null ? null : {for (final k in ['id', 'status', 'final_level', 'outcome', 'started_at', 'ended_at', 'summary']) k: call[k]},
         'last_bp': bp.lastOrNull, 'adherence_7d': {'taken': adh['taken'], 'total': adh['total']},
         'follow_up': [for (final a in alerts) for (final r in (a['reasons'] as List)) r['label']], 'open_alerts': [for (final a in alerts) a['id']],
+        'protocol': protocol.state(pid),
+        'mood': {for (final k in ['level', 'lonely_days_7', 'summary']) k: m[k]},
+        'next_visit': (sched['upcoming'] as List).firstOrNull,
+        'pickup': sched['pickup'],
       });
     }
     const order = {'red': 0, 'yellow': 1, 'no_answer': 2, 'in_progress': 3, 'scheduled': 4, 'green': 5};
@@ -393,6 +438,7 @@ class LocalBackend {
     final c = _db.byId('contacts', cid) ?? (throw LocalHttpError(404, 'Kontak tidak ditemukan'));
     final pid = c['patient_id'] as String;
     final p = _patientOr404(pid);
+    protocol.runDue(pid);
     final notes = _db.sorted(_db.where('notifications', (n) => n['contact_id'] == cid), 'created_at', desc: true).take(40).toList();
     final red = _db.sorted(_db.where('alerts', (a) => a['patient_id'] == pid && a['level'] == 'red' && a['status'] != 'closed'), 'created_at', desc: true).firstOrNull;
     final today = _todayCall(pid);
@@ -411,8 +457,10 @@ class LocalBackend {
       'notifications': notes,
       'pending_messages': [
         for (final m in _db.sorted(_db.where('family_messages', (m) => m['from_contact_id'] == cid), 'created_at', desc: true).take(5))
-          {'id': m['id'], 'text': m['text'], 'status': m['status'], 'created_at': m['created_at']},
+          {'id': m['id'], 'kind': m['kind'], 'text': m['text'], 'status': m['status'], 'created_at': m['created_at'],
+           'duration_s': _db.byId('message_audio', m['id'] as String)?['duration_s']},
       ],
+      'no_answer': protocol.state(pid),
       'doctor': {...esc.doctor, 'suggest': _healthConcerns(pid)},
       'doctor_consult': dc == null ? null : _consultView(dc),
       'care': care(pid),
@@ -573,6 +621,8 @@ class LocalBackend {
         'last7': [for (final r in last7) {'date': r['date'], 'water': r['water'], 'salt': r['salt']}],
       },
       'streaks': _streaks(pid),
+      'schedule': cx.schedule(pid, meds),
+      'mood': cx.mood(pid),
     };
   }
 
@@ -681,6 +731,13 @@ class LocalBackend {
       },
       'family_calls': {'count': calls.length, 'minutes': calls.fold<int>(0, (a, c) => a + (c['minutes'] as int))},
       'streaks': _streaks(pid),
+      'mood': cx.mood(pid, days),
+      'appointments': [
+        for (final a in _db.sorted(
+            _db.where('appointments', (a) => a['patient_id'] == pid && (a['date'] as String).compareTo(dates.first) >= 0 && (a['date'] as String).compareTo(dates.last) <= 0),
+            'date'))
+          {for (final k in ['kind', 'title', 'date', 'status']) k: a[k]},
+      ],
     };
   }
 }

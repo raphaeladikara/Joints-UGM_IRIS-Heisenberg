@@ -4,9 +4,12 @@
 /// Darurat dari state mana pun: STROKE_SCREEN (speech → arms → lkw) → ESCALATING.
 library;
 
+import 'backend.dart';
+import 'care_extra.dart' as cx;
 import 'clock.dart';
 import 'escalation.dart' as esc;
 import 'nlu.dart' as nlu;
+import 'protocol.dart' as protocol;
 import 'safety.dart' as safety;
 import 'store.dart';
 
@@ -32,9 +35,12 @@ class TurnResult {
   final String? outcome, alertId;
   final List<String> hints;
 
+  /// Urutan putar di telepon bila ada pesan suara keluarga: [{say: teks} | {play: id pesan, ...}]. Kosong = ucapkan tilikText.
+  List<Map<String, dynamic>> segments = [];
+
   Map<String, dynamic> asMap() => {
     'session_id': sessionId, 'tilik_text': tilikText, 'state': state, 'state_label': stateLabels[state] ?? state, 'level': level,
-    'ended': ended, 'outcome': outcome, 'alert_id': alertId, 'hints': hints,
+    'ended': ended, 'outcome': outcome, 'alert_id': alertId, 'hints': hints, 'segments': segments,
   };
 }
 
@@ -145,18 +151,26 @@ TurnResult noAnswer(String sid) {
     s['final_level'] = 'red';
     return TurnResult(sid, '', 'ENDED', 'red', ended: true, outcome: 'no_answer', alertId: alertId, hints: ['escalation_started']);
   }
-  final prev = _db.sorted(_db.where('call_sessions', (c) => c['patient_id'] == pid && c['id'] != sid && c['status'] != 'ringing'), 'started_at', desc: true);
+  // F-19: telepon ulang 15 menit → masih tidak diangkat → Sahabat Kring mengecek rumah.
+  final (retryAlert, hints) = protocol.onNoAnswer(s, ctx);
   var level = 'green';
   String? alertId;
-  if (prev.isNotEmpty && prev.first['status'] == 'no_answer') {
-    final reasons = [
-      {'path': 'rule', 'code': 'NO_ANSWER_2X', 'label': Content.label('NO_ANSWER_2X'), 'quote': '2 panggilan berturut-turut tidak diangkat'},
-    ];
-    alertId = esc.openAlert(pid, sid, 'yellow', 'scheduler', reasons);
+  if (retryAlert != null) {
+    alertId = retryAlert;
     level = 'yellow';
     s['final_level'] = 'yellow';
+  } else {
+    final prev = _db.sorted(_db.where('call_sessions', (c) => c['patient_id'] == pid && c['id'] != sid && c['status'] != 'ringing'), 'started_at', desc: true);
+    if (prev.isNotEmpty && prev.first['status'] == 'no_answer') {
+      final reasons = [
+        {'path': 'rule', 'code': 'NO_ANSWER_2X', 'label': Content.label('NO_ANSWER_2X'), 'quote': '2 panggilan berturut-turut tidak diangkat'},
+      ];
+      alertId = esc.openAlert(pid, sid, 'yellow', 'scheduler', reasons);
+      level = 'yellow';
+      s['final_level'] = 'yellow';
+    }
   }
-  return TurnResult(sid, '', 'ENDED', level, ended: true, outcome: 'no_answer', alertId: alertId);
+  return TurnResult(sid, '', 'ENDED', level, ended: true, outcome: 'no_answer', alertId: alertId, hints: hints);
 }
 
 TurnResult hangup(String sid) {
@@ -286,17 +300,37 @@ TurnResult _greeting(Row s, Map<String, dynamic> ctx, Row patient, Speaker say, 
 TurnResult _afterIdentity(Row s, Map<String, dynamic> ctx, Row patient, Speaker say) {
   final parts = <String>[];
   final hints = <String>[];
+  final segments = <Map<String, dynamic>>[];
+  final played = <String>[];
   final msgs = _db.sorted(_db.where('family_messages', (m) => m['patient_id'] == patient['id'] && m['status'] == 'pending'), 'created_at');
   for (final m in msgs.take(2)) {
     final sender = _db.byId('contacts', m['from_contact_id'] as String)?['name'] ?? 'Keluarga';
-    parts.add(say.call('family_message_text', {'pengirim': sender, 'pesan': m['text']}));
+    if (m['kind'] == 'audio') {
+      // F-03: suara asli anak diputar apa adanya, diapit kalimat pengantar & penutup KRING.
+      final dur = (_db.byId('message_audio', m['id'] as String)?['duration_s'] as int?) ?? 0;
+      final intro = say.call('family_message_audio', {'pengirim': sender}), outro = say.call('family_message_audio_end', {'pengirim': sender});
+      parts.addAll([intro, outro]);
+      segments.addAll([{'say': intro}, {'play': m['id'], 'sender': sender, 'duration_s': dur}, {'say': outro}]);
+      played.add('🔊 Pesan suara $sender diputar ($dur detik)');
+      if (!hints.contains('family_voice')) hints.add('family_voice');
+    } else {
+      final line = say.call('family_message_text', {'pengirim': sender, 'pesan': m['text']});
+      parts.add(line);
+      segments.add({'say': line});
+    }
   }
   if (msgs.isNotEmpty) {
     ctx['delivered_messages'] = [for (final m in msgs.take(2)) m['id']];
     hints.add('family_message');
   }
-  parts.add(say.call('ask_medication'));
-  return _reply(s['id'] as String, 'MEDICATION', ctx, parts.join(' '), hints: hints);
+  final ask = say.call('ask_medication');
+  parts.add(ask);
+  final result = _reply(s['id'] as String, 'MEDICATION', ctx, parts.join(' '), hints: hints);
+  for (final line in played) {
+    _turn(s['id'] as String, 'family', 'MEDICATION', line);
+  }
+  if (hints.contains('family_voice')) result.segments = [...segments, {'say': ask}];
+  return result;
 }
 
 TurnResult _nextAfterMed(Row s, Map<String, dynamic> ctx, Row patient, Speaker say, String prefix) {
@@ -445,10 +479,15 @@ TurnResult _symptoms(Row s, Map<String, dynamic> ctx, Row patient, Speaker say, 
 
 TurnResult _story(Row s, Map<String, dynamic> ctx, Row patient, Speaker say, String text) {
   ctx['story'] = text;
+  final m = nlu.mood(text);
+  ctx['mood'] = m;
   if (nlu.mentionsMissingFamily(text)) ctx['kangen'] = true;
+  // Tanggapan ikut suasana hati: jangan bilang "senang mendengarnya" kepada Mbah yang sedang kangen.
+  final ack = m['lonely'] == true ? 'story_ack_lonely' : (m['mood'] == 'sedih' ? 'story_ack_sad' : 'story_ack');
+  final reminders = [for (final (k, v) in cx.reminders(patient['id'] as String)) say.call(k, v)].join(' ');
   final key = ctx['level'] == 'yellow' ? 'closing_yellow' : 'closing';
   final closing = say.call(key, {'edukasi': Content.education((ctx['edu_index'] as int?) ?? 0)});
-  return _finish(s, ctx, '${say.call('story_ack')} $closing', outcome: 'completed');
+  return _finish(s, ctx, [say.call(ack), reminders, closing].where((x) => x.isNotEmpty).join(' '), outcome: 'completed');
 }
 
 // ---------- darurat ----------
@@ -534,6 +573,7 @@ TurnResult _finish(Row s, Map<String, dynamic> ctx, String text, {required Strin
   }
   var alertId = ctx['alert_id'] as String?;
   if (outcome == 'completed') {
+    if (ctx['mood'] != null) observe(pid, sid, 'mood', (ctx['mood'] as Map).cast<String, dynamic>(), (ctx['story'] as String?) ?? '', source: 'nlu');
     if (level == 'yellow') {
       alertId = esc.openAlert(pid, sid, 'yellow', 'call',
           [for (final r in (ctx['findings'] as List).cast<Map<String, dynamic>>()) if (r['level'] == 'yellow') r]);
@@ -592,12 +632,38 @@ void _dailyReport(Row patient, String sid, Map<String, dynamic> ctx, String summ
     }
     final shared = scope['stories'] != false ? points : <String>[];
     if (shared.isNotEmpty) lines.add('💬 Bahan obrolan: ${shared.join('; ')}');
+    final sched = LocalBackend.instance.care(patient['id'] as String)['schedule'] as Map<String, dynamic>;
+    final soon = (sched['upcoming'] as List).cast<Map<String, dynamic>>().where((a) => (a['days_until'] as int) <= 1).firstOrNull;
+    if (soon != null) {
+      lines.add('📅 ${soon['days_until'] == 0 ? 'Hari ini' : 'Besok'} ${soon['title']} pukul ${(soon['time'] as String).replaceAll(':', '.')} di ${soon['place']}');
+    }
+    final pickup = sched['pickup'] as Map<String, dynamic>?;
+    if (pickup != null && (pickup['status'] == 'now' || pickup['status'] == 'before_visit') && (pickup['days_left'] as int) <= 7) {
+      lines.add('💊 ${pickup['message']}');
+    }
     esc.notify(c, patient['id'] as String, 'daily_report', 'whatsapp_sim', 'Rapor pagi $name', lines.join('\n'),
         payload: {'level': ctx['level'], 'talking_points': shared, 'bp': scope['bp'] != false ? bp : null,
           'medication': scope['medication'] != false ? med['status'] : null},
         sessionId: sid);
-    if (ctx['kangen'] == true) {
-      esc.notify(c, patient['id'] as String, 'nudge', 'whatsapp_sim', '💛 Nudge Kangen', '$name tadi bilang kangen. Telepon 5 menit hari ini?', sessionId: sid);
-    }
+    _nudge(c, patient, sid, ctx);
   }
+}
+
+/// Nudge Kangen, diperkuat ringkasan suasana hati: kangen hari ini, atau kesepian berulang minggu ini (maks. 1×/hari).
+void _nudge(Row c, Row patient, String sid, Map<String, dynamic> ctx) {
+  final m = cx.mood(patient['id'] as String);
+  final name = patient['display_name'];
+  if (ctx['kangen'] != true && m['level'] != 'nudge') return;
+  final start = iso(startOfDay(wibNow()));
+  if (_db.one('notifications', (n) => n['contact_id'] == c['id'] && n['kind'] == 'nudge' && (n['created_at'] as String).compareTo(start) >= 0) != null) {
+    return;
+  }
+  final first = ctx['kangen'] == true ? '$name tadi bilang kangen.' : '$name beberapa hari ini terdengar kesepian.';
+  final detail = <String>[
+    if ((m['lonely_days_7'] as int) >= 2) 'Seminggu ini ${m['lonely_days_7']}× menyebut kangen/sepi',
+    if (m['days_since_family_call'] != null && (m['days_since_family_call'] as int) >= 2) 'telepon keluarga terakhir ${m['days_since_family_call']} hari lalu',
+  ];
+  final body = '$first${detail.isEmpty ? '' : ' ${detail.join(', ')}.'} Telepon 5 menit hari ini?';
+  esc.notify(c, patient['id'] as String, 'nudge', 'whatsapp_sim', '💛 Nudge Kangen', body,
+      payload: {'mood': {for (final k in ['level', 'lonely_days_7', 'days_since_family_call', 'summary']) k: m[k]}}, sessionId: sid);
 }

@@ -44,6 +44,9 @@ dependencies:
   web: ^1.1.1
   webview_flutter: ^4.14.1
   webview_flutter_android: ^4.14.1
+  record: ^7.1.2
+  audioplayers: ^6.8.1
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:

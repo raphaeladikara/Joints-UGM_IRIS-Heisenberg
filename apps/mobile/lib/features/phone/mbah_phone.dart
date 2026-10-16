@@ -6,6 +6,7 @@ import '../../core/api.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../core/voice.dart';
+import '../../core/voice_note.dart';
 import '../../core/widgets.dart';
 
 enum _Phase { idle, ringing, inCall, ended }
@@ -20,9 +21,10 @@ class MbahPhone extends StatefulWidget {
 }
 
 class _Line {
-  _Line(this.fromTilik, this.text);
+  _Line(this.fromTilik, this.text, {this.voiceFrom});
   final bool fromTilik;
   final String text;
+  final String? voiceFrom; // pesan suara keluarga yang diputar
 }
 
 class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTickerProviderStateMixin {
@@ -50,6 +52,8 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
   String _partial = '';
   bool _helpComing = false;
   bool _familyMsg = false;
+  String? _playingFrom;
+  List<String> _endHints = const [];
   DateTime? _answeredAt;
   Timer? _clock;
 
@@ -67,6 +71,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
     _pulse.dispose();
     _voice.stop();
     _voice.stopListening();
+    VoiceNote.instance.stopPlaying();
     super.dispose();
   }
 
@@ -121,7 +126,8 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
         _phase = _Phase.ended;
         _outcome = 'no_answer';
         _level = r['level'] as String? ?? 'green';
-        _helpComing = (r['hints'] as List?)?.contains('escalation_started') ?? false;
+        _endHints = ((r['hints'] as List?) ?? const []).cast<String>();
+        _helpComing = _endHints.contains('escalation_started');
       });
     } catch (e) {
       if (mounted) showError(context, e);
@@ -141,7 +147,33 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
       if (r['ended'] == true) _outcome = r['outcome'] as String?;
     });
     _scrollDown();
-    if (text.isNotEmpty) {
+    final segments = ((r['segments'] as List?) ?? const []).cast<Map>();
+    if (segments.isNotEmpty) {
+      // Ada pesan suara keluarga: ucapkan pengantar, putar suara asli, lalu lanjutkan pertanyaan.
+      final token = ++_speakToken;
+      setState(() => _speaking = true);
+      for (final seg in segments) {
+        if (token != _speakToken || !mounted) return;
+        if (seg['say'] != null) {
+          await _voice.speak(seg['say'] as String);
+        } else if (seg['play'] != null) {
+          final from = '${seg['sender'] ?? 'Keluarga'}';
+          setState(() {
+            _playingFrom = from;
+            _lines.add(_Line(false, 'Pesan suara · ${seg['duration_s'] ?? 0} detik', voiceFrom: from));
+          });
+          _scrollDown();
+          try {
+            final (bytes, mime) = await _api.messageAudio(seg['play'] as String);
+            if (token != _speakToken || !mounted) return;
+            await VoiceNote.instance.play(bytes, mimeType: mime, seconds: (seg['duration_s'] as num?)?.toInt() ?? 30);
+          } catch (_) {}
+          if (mounted) setState(() => _playingFrom = null);
+        }
+      }
+      if (token != _speakToken || !mounted) return;
+      setState(() => _speaking = false);
+    } else if (text.isNotEmpty) {
       final token = ++_speakToken;
       setState(() => _speaking = true);
       await _voice.speak(text);
@@ -161,7 +193,9 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
     if (sid == null || text.trim().isEmpty || _sending) return;
     _speakToken++;
     await _voice.stop();
+    await VoiceNote.instance.stopPlaying();
     setState(() {
+      _playingFrom = null;
       _speaking = false;
       _sending = true;
       _lines.add(_Line(false, text.trim()));
@@ -221,6 +255,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
       _outcome = null;
       _level = 'green';
       _helpComing = false;
+      _endHints = const [];
     });
   }
 
@@ -347,7 +382,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
       child: Column(
         children: [
           const Spacer(),
-          Text(fall ? 'Panggilan cek jatuh' : 'Panggilan masuk', style: TText.body.copyWith(color: Colors.white60)),
+          Text(fall ? 'Panggilan cek jatuh' : (_trigger == 'retry' ? 'Panggilan ulang (15 menit kemudian)' : 'Panggilan masuk'), style: TText.body.copyWith(color: Colors.white60)),
           const SizedBox(height: 18),
           ScaleTransition(
             scale: Tween(begin: 0.92, end: 1.08).animate(CurvedAnimation(parent: _pulse, curve: Curves.easeInOut)),
@@ -441,7 +476,23 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
               ],
             ),
           ),
-        if (_familyMsg && !_helpComing)
+        if (_playingFrom != null && !_helpComing)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: TColors.clay, borderRadius: BorderRadius.circular(12)),
+            child: Row(
+              children: [
+                const Icon(Icons.graphic_eq_rounded, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Memutar pesan suara $_playingFrom (suara asli)…',
+                      style: TText.small.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                ),
+              ],
+            ),
+          )
+        else if (_familyMsg && !_helpComing)
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.all(10),
@@ -549,6 +600,30 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
   }
 
   Widget _bubble(_Line l) {
+    if (l.voiceFrom != null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(color: const Color(0xFF3A2A1E), borderRadius: BorderRadius.circular(16)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.play_circle_fill_rounded, color: Color(0xFFFFB27A), size: 30),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l.voiceFrom!, style: TText.label.copyWith(color: Colors.white70, fontSize: 10.5)),
+                  Text(l.text, style: TText.body.copyWith(color: Colors.white)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Align(
       alignment: l.fromTilik ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
@@ -590,7 +665,9 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
         'Panggilan tidak diangkat',
         _helpComing
             ? 'Jam tangan mendeteksi jatuh dan tidak ada jawaban: KRING langsung mengeskalasi ke Sahabat Kring, keluarga, dan IGD.'
-            : 'Tercatat. Dua kali berturut-turut → masuk daftar tindak lanjut Puskesmas.',
+            : _endHints.contains('home_check_requested')
+                ? 'Telepon ulang juga tidak diangkat. Sahabat Kring diminta menengok ke rumah, dan keluarga sudah diberi tahu.'
+                : 'KRING akan menelepon ulang 15 menit lagi. Kalau tetap tidak diangkat, Sahabat Kring diminta menengok ke rumah.',
       ),
       'wrong_person' => ('Bukan Mbah yang mengangkat', 'KRING tidak menyebut data medis apa pun dan akan menelepon lagi nanti.'),
       'hung_up' => ('Panggilan diakhiri', 'Data yang sudah terkumpul tetap tersimpan.'),

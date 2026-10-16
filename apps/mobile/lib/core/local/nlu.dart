@@ -170,6 +170,28 @@ bool asksDosage(String text) => _has(
 
 bool mentionsMissingFamily(String text) => _has(r'(kangen|rindu|sepi|kesepian|sendirian terus)', normalize(text));
 
+// Leksikon suasana hati (port `nlu.mood`). Sederhana dan bisa diaudit; bukan diagnosis depresi.
+final _lonely = RegExp(r'\b(kangen|rindu|sepi|kesepian|sendirian|ora ana kanca|ora ono kanca|tidak ada teman|nggak ada teman|ditinggal|'
+    r'jarang (ditelepon|ditelpon|pulang)|ngelangut|nelangsa)\b');
+final _sad = RegExp(r'\b(sedih|susah tidur|susah|sedhih|capek|capai|lelah|kesel|bingung|takut|khawatir|kuatir|was-was|nangis|menangis|males|'
+    r'ora iso turu|tidak bisa tidur|kepikiran|ngenes|loro ati|sakit hati)\b');
+final _happy = RegExp(r'\b(senang|seneng|bahagia|gembira|bungah|syukur|alhamdulillah|panen|lega|ketawa|tertawa|asyik|asik|senam|pengajian|'
+    r'arisan|jalan-jalan|dolan|menginap|nginep|wisuda|bertelur|seger)\b');
+
+/// Suasana hati dari cerita harian: senang / biasa / sedih + tanda kesepian, beserta kata pemicunya.
+Map<String, dynamic> mood(String text) {
+  final t = normalize(text);
+  final lonely = [for (final m in _lonely.allMatches(t)) m[0]!];
+  final sad = [for (final m in _sad.allMatches(t)) m[0]!];
+  final happy = [for (final m in _happy.allMatches(t)) m[0]!];
+  final score = happy.length - sad.length - (lonely.isNotEmpty ? 1 : 0);
+  return {
+    'mood': score > 0 ? 'senang' : (score < 0 ? 'sedih' : 'biasa'),
+    'lonely': lonely.isNotEmpty,
+    'cues': {...lonely, ...sad, ...happy}.take(4).toList(),
+  };
+}
+
 bool notMeasured(String text) {
   final t = normalize(text);
   return _has(r'(belum|dereng|durung|tidak|nggak|mboten|ora|ndak|lupa)\w* (ukur|ngukur|mengukur|nensi|tensi|punya|gadah|duwe)', t) ||
