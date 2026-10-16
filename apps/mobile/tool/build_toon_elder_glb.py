@@ -221,12 +221,12 @@ def tex_kawung(w=1024, h=512, cell=78) -> Image.Image:
 
 
 def tex_plaid(w=1024, h=512) -> Image.Image:
-    """Sarung kotak-kotak: marun + hijau tua + garis krem."""
+    """Sarung kotak-kotak: terakota + hijau tua + garis krem."""
     x = np.arange(w)[None, :, None]
     y = np.arange(h)[:, None, None]
-    base = np.array(hexrgb("#74202F"), float)
-    green = np.array(hexrgb("#2D5A45"), float)
-    cream = np.array(hexrgb("#E9D9B4"), float)
+    base = np.array(hexrgb("#A04A2A"), float)
+    green = np.array(hexrgb("#154D39"), float)
+    cream = np.array(hexrgb("#F7F3EA"), float)
     img = np.broadcast_to(base, (h, w, 3)).copy()
     for coord, period in ((x, 128), (y, 128)):
         band = ((coord % period) < 44).astype(float)
@@ -237,11 +237,11 @@ def tex_plaid(w=1024, h=512) -> Image.Image:
 
 
 def tex_parang(w=1024, h=512, period=64) -> Image.Image:
-    """Kemeja batik parang biru tua + plaket kancing di depan."""
+    """Kemeja batik parang hijau tua + plaket kancing di depan."""
     yy, xx = np.mgrid[0:h, 0:w].astype(float)
     s = (xx + yy) / period
     f = (s + 0.13 * np.sin(2 * np.pi * (xx - yy) / (period * 0.9))) % 1.0
-    navy, light, gold = np.array(hexrgb("#1F3A66")), np.array(hexrgb("#9CC0EE")), np.array(hexrgb("#E2C27A"))
+    navy, light, gold = np.array(hexrgb("#154D39")), np.array(hexrgb("#9CC5B0")), np.array(hexrgb("#E9A27E"))
     img = np.broadcast_to(navy, (h, w, 3)).astype(float).copy()
     stripe = (np.abs(f - 0.5) < 0.07)[..., None]
     img = np.where(stripe, light, img)
@@ -254,8 +254,8 @@ def tex_parang(w=1024, h=512, period=64) -> Image.Image:
 
 
 def tex_brokat(w=1024, h=512, bef=True) -> Image.Image:
-    """Kebaya kutubaru: brokat biru + bef krem di depan (u = 0,5)."""
-    base, flower, cream, trim = hexrgb("#6E9BE2"), hexrgb("#A6C4F2"), hexrgb("#F7EEDD"), hexrgb("#3F6FBF")
+    """Kebaya kutubaru: brokat hijau daun muda + bef krem di depan (u = 0,5)."""
+    base, flower, cream, trim = hexrgb("#6FA88A"), hexrgb("#A9CDB9"), hexrgb("#F7F3EA"), hexrgb("#1F6B4F")
     im = Image.new("RGB", (w, h), base)
     dr = ImageDraw.Draw(im)
     for gy in range(0, h + 40, 40):
@@ -496,8 +496,8 @@ MATS = {  # nama: (warna sRGB, kekasaran, logam)
     "blush": ("#E98C7A", 0.7, 0), "brow": ("#D9D5CE", 0.85, 0), "mouth": ("#7A3226", 0.6, 0), "frame": ("#7B4A2C", 0.35, 0),
     "hair": ("#FFFFFF", 0.82, 0), "hair_plain": ("#ECE9E3", 0.82, 0), "gold": ("#E2B14A", 0.32, 0.75),
     "kebaya": ("#FFFFFF", 0.78, 0), "kebaya_sleeve": ("#FFFFFF", 0.78, 0), "jarik": ("#FFFFFF", 0.85, 0),
-    "sandal": ("#6A4632", 0.7, 0), "peci": ("#1D1D24", 0.95, 0), "shirt": ("#FFFFFF", 0.8, 0),
-    "shirt_plain": ("#1F3A66", 0.8, 0), "button": ("#F2E6CC", 0.4, 0), "sarung": ("#FFFFFF", 0.85, 0),
+    "sandal": ("#6A4632", 0.7, 0), "peci": ("#1E2A24", 0.95, 0), "shirt": ("#FFFFFF", 0.8, 0),
+    "shirt_plain": ("#154D39", 0.8, 0), "button": ("#F2E6CC", 0.4, 0), "sarung": ("#FFFFFF", 0.85, 0),
 }
 
 # Titik organ: (x, y) target di depan tubuh; +x = kiri pasien (model menghadap +z). Diproyeksikan ke permukaan terdepan.

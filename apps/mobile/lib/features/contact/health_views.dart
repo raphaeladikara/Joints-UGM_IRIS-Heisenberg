@@ -55,7 +55,7 @@ class BpCard extends StatelessWidget {
             runSpacing: 6,
             children: [
               _Legend(TColors.brand, 'Normal < 140'),
-              _Legend(Color(0xFFE0A100), 'Tinggi 140–179'),
+              _Legend(Color(0xFFD99A12), 'Tinggi 140–179'),
               _Legend(TColors.red, 'Sangat tinggi ≥ 180'),
             ],
           ),
@@ -180,7 +180,7 @@ class DailyRings extends StatelessWidget {
                 value: _fmtInt(steps),
                 goalText: '/ ${_fmtInt(goals['steps'] as num)}',
                 progress: steps / (goals['steps'] as num),
-                color: const Color(0xFFD9622B),
+                color: const Color(0xFFC0623B),
                 icon: Icons.directions_walk_rounded,
               ),
               Ring(
@@ -188,7 +188,7 @@ class DailyRings extends StatelessWidget {
                 value: _sleepText(sleep),
                 goalText: '/ 7 j',
                 progress: sleep / (goals['sleep_min'] as num),
-                color: const Color(0xFF6A58C7),
+                color: const Color(0xFF4C5750),
                 icon: Icons.bedtime_rounded,
               ),
               Ring(
@@ -498,7 +498,7 @@ class _BodyViewState extends State<BodyView> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32),
-            gradient: const RadialGradient(center: Alignment(0, -0.2), radius: 0.9, colors: [Color(0xFFFFFFFF), Color(0xFFE6EDF7)]),
+            gradient: const RadialGradient(center: Alignment(0, -0.2), radius: 0.9, colors: [Color(0xFFFFFFFF), Color(0xFFEFE8DA)]),
             boxShadow: TShadow.soft,
           ),
           child: Human3D(spots: [for (final s in spots) s.$1], sex: (widget.feed['patient']['sex'] as String?) ?? 'F', selected: _sel, onSelect: (id) => setState(() => _sel = id), height: modelH),

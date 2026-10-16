@@ -495,7 +495,7 @@ class MoodCard extends StatelessWidget {
     final level = mood['level'] as String;
     final last = mood['last_lonely'] as Json?;
     final (bg, tili) = switch (level) {
-      'nudge' => (const Color(0xFFFFE9EF), TiliMood.worried),
+      'nudge' => (const Color(0xFFF7E4DA), TiliMood.worried),
       'watch' => (TColors.butter, TiliMood.calm),
       _ => (TColors.lavender, TiliMood.happy),
     };
@@ -549,9 +549,9 @@ class MoodCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: switch (d['mood']) {
-                                'senang' => const Color(0xFF34C77B),
-                                'biasa' => const Color(0xFF8FB8F0),
-                                'sedih' => const Color(0xFFFF9466),
+                                'senang' => const Color(0xFF3E9B6A),
+                                'biasa' => const Color(0xFF9CC5B0),
+                                'sedih' => const Color(0xFFE9A27E),
                                 _ => Colors.white.withValues(alpha: 0.7),
                               },
                             ),

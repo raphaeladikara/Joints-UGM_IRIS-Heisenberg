@@ -58,7 +58,7 @@ class _PipoPainter extends CustomPainter {
   _PipoPainter(this.t) : super(repaint: t);
   final ValueNotifier<double> t;
 
-  // Urutan lukis: bawah ke atas (kertas, biru langit, aprikot), sama dengan urutan lapisan CSS yang dibalik.
+  // Urutan lukis: bawah ke atas (kertas, hijau sedang, terakota muda), sama dengan urutan lapisan CSS yang dibalik.
   static final _blobs = [
     _Blob(TColors.paper, 53.11, 12.71, 66.65, _phase(3), _phase(4)),
     _Blob(TColors.skyBlue, 25.17, 75.99, 44.6, _phase(1), _phase(2)),
@@ -73,7 +73,7 @@ class _PipoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFFAF8EE));
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFF7F3EA));
     final ph = t.value * 0.86;
     const amt = 0.72;
     for (final b in _blobs) {

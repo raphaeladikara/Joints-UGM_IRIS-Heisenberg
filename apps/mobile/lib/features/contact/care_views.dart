@@ -40,7 +40,7 @@ class StreakBar extends StatelessWidget {
     final s = care['streaks'] as Json;
     return Row(
       children: [
-        Flexible(child: _pill('🔥', '${s['medication_days']}', 'hari obat rutin', const Color(0xFFFFE8D9))),
+        Flexible(child: _pill('🔥', '${s['medication_days']}', 'hari obat rutin', const Color(0xFFF7E4DA))),
         const SizedBox(width: 8),
         Flexible(child: _pill('💙', '${s['family_calls_week']}', 'telepon/minggu', TColors.brandTint)),
         const SizedBox(width: 8),
@@ -126,7 +126,7 @@ class SummaryCard extends StatelessWidget {
                 curve: Curves.easeOutExpo,
                 builder: (_, k, _) => CustomPaint(
                   size: Size.square(ring),
-                  painter: _GapRingPainter(k, const Color(0xFF2EE6B6)),
+                  painter: _GapRingPainter(k, const Color(0xFFE9A27E)),
                   child: SizedBox.square(
                     dimension: ring,
                     child: Column(
@@ -145,9 +145,9 @@ class SummaryCard extends StatelessWidget {
           SizedBox(height: context.compact ? 10 : 16),
           Row(
             children: [
-              _bar('Obat', '$taken / ${doses.length}', doses.isEmpty ? 0 : taken / doses.length, const Color(0xFF2EE6B6)),
+              _bar('Obat', '$taken / ${doses.length}', doses.isEmpty ? 0 : taken / doses.length, const Color(0xFFE9A27E)),
               _bar('Air', '$water / $waterGoal gelas', water / waterGoal, TColors.skyBright),
-              _bar('Garam', '${_sdt(salt)} / ${_sdt(saltMax)} sdt', salt / saltMax, salt > saltMax ? const Color(0xFFFF7A59) : const Color(0xFFFFC53D)),
+              _bar('Garam', '${_sdt(salt)} / ${_sdt(saltMax)} sdt', salt / saltMax, salt > saltMax ? const Color(0xFFE9A27E) : const Color(0xFFD99A12)),
             ],
           ),
         ],
@@ -345,10 +345,10 @@ class _Glass extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(6), bottom: Radius.circular(12)),
                 gradient: filled
-                    ? const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFBFE0FF), Color(0xFF4FA3F7)], stops: [0.18, 0.2])
+                    ? const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFC4E2D2), Color(0xFF4F9A78)], stops: [0.18, 0.2])
                     : null,
-                color: filled ? null : const Color(0xFFE9F3FF),
-                border: Border.all(color: filled ? const Color(0xFF3D8EE6) : const Color(0xFFC7DDF5), width: 2),
+                color: filled ? null : const Color(0xFFEEF6F1),
+                border: Border.all(color: filled ? const Color(0xFF1F6B4F) : const Color(0xFFC9DECF), width: 2),
               ),
             ),
             if (isNext) const Icon(Icons.add_rounded, color: TColors.brandDeep, size: 22),
@@ -357,7 +357,7 @@ class _Glass extends StatelessWidget {
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  decoration: const BoxDecoration(color: Color(0xFF2EE6B6), shape: BoxShape.circle),
+                  decoration: const BoxDecoration(color: Color(0xFFE9A27E), shape: BoxShape.circle),
                   child: const Icon(Icons.check_rounded, size: 16, color: TColors.night),
                 ),
               ),
@@ -391,7 +391,7 @@ class _SaltMeter extends StatelessWidget {
                   height: 14,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(99),
-                    gradient: LinearGradient(colors: const [Color(0xFFB9EBCF), Color(0xFFFFE19A), Color(0xFFFFB4A6)], stops: [0, max / total, 1]),
+                    gradient: LinearGradient(colors: const [Color(0xFFB7DCC5), Color(0xFFFFE19A), Color(0xFFFFB4A6)], stops: [0, max / total, 1]),
                   ),
                 ),
               ),
@@ -524,7 +524,7 @@ class _MedsViewState extends State<MedsView> {
             padding: EdgeInsets.fromLTRB(16, 16, 16, context.compact ? 16 : 22),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
-              gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF26354C), TColors.night]),
+              gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF1F4537), TColors.night]),
               boxShadow: TShadow.lift,
             ),
             child: Column(
@@ -552,7 +552,7 @@ class _MedsViewState extends State<MedsView> {
                   const SizedBox(height: 12),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
-                      backgroundColor: due ? const Color(0xFF2EE6B6) : Colors.white.withValues(alpha: 0.14),
+                      backgroundColor: due ? const Color(0xFFE9A27E) : Colors.white.withValues(alpha: 0.14),
                       foregroundColor: due ? TColors.night : Colors.white,
                       shape: const StadiumBorder(),
                       minimumSize: const Size(220, 52),
@@ -562,7 +562,7 @@ class _MedsViewState extends State<MedsView> {
                     label: Text(next['status'] == 'out' ? 'Obat habis' : 'Tandai sudah diminum'),
                   ),
                 ] else
-                  Text('🔥 $streak hari berturut-turut minum obat', style: TText.h3.copyWith(color: const Color(0xFF2EE6B6))),
+                  Text('🔥 $streak hari berturut-turut minum obat', style: TText.h3.copyWith(color: const Color(0xFFE9A27E))),
               ],
             ),
           ),
@@ -624,7 +624,7 @@ class _DoseRingPainter extends CustomPainter {
       ..shader = SweepGradient(
         startAngle: -math.pi / 2,
         endAngle: math.pi * 1.5,
-        colors: const [Color(0xFF5BB4FF), Color(0xFF2EE6B6)],
+        colors: const [Color(0xFF9CC5B0), Color(0xFFE9A27E)],
         transform: const GradientRotation(-math.pi / 2),
       ).createShader(Rect.fromCircle(center: c, radius: r))
       ..style = PaintingStyle.stroke
@@ -635,9 +635,9 @@ class _DoseRingPainter extends CustomPainter {
       final a = -math.pi / 2 + f * math.pi * 2;
       final p = c + Offset(math.cos(a), math.sin(a)) * r;
       final color = switch (status) {
-        'taken' => const Color(0xFF2EE6B6),
-        'missed' || 'out' => const Color(0xFFFF7A59),
-        'late' => const Color(0xFFFFC53D),
+        'taken' => const Color(0xFFE9A27E),
+        'missed' || 'out' => const Color(0xFFE9A27E),
+        'late' => const Color(0xFFD99A12),
         _ => Colors.white,
       };
       canvas.drawCircle(p, 11, Paint()..color = TColors.night);
@@ -798,7 +798,7 @@ class AdherenceCalendar extends StatelessWidget {
                       height: cell,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: switch (d['status']) { 'sudah' => const Color(0xFF34C77B), 'belum' => const Color(0xFFFF9466), _ => TColors.sunk },
+                        color: switch (d['status']) { 'sudah' => const Color(0xFF3E9B6A), 'belum' => const Color(0xFFE9A27E), _ => TColors.sunk },
                         borderRadius: BorderRadius.circular(9),
                         border: i == days.length - 1 ? Border.all(color: TColors.ink, width: 2) : null,
                       ),
@@ -814,9 +814,9 @@ class AdherenceCalendar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _key(const Color(0xFF34C77B), 'Diminum'),
+            _key(const Color(0xFF3E9B6A), 'Diminum'),
             const SizedBox(width: 14),
-            _key(const Color(0xFFFF9466), 'Terlewat'),
+            _key(const Color(0xFFE9A27E), 'Terlewat'),
             const SizedBox(width: 14),
             _key(TColors.sunk, 'Tidak ada data'),
           ],

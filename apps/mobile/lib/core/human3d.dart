@@ -62,10 +62,10 @@ class _Human3DState extends State<Human3D> {
   });
 
   static String _color(String level) => switch (level) {
-    'red' => '#C4261D',
-    'yellow' => '#E0A100',
-    'green' => '#1F9D57',
-    _ => '#8C97AA',
+    'red' => '#C0272D',
+    'yellow' => '#D99A12',
+    'green' => '#237A4B',
+    _ => '#8F9A92',
   };
 
   String _hotspots() {
@@ -88,7 +88,7 @@ class _Human3DState extends State<Human3D> {
   .hs .ring { position: absolute; inset: -9px; border-radius: 50%; border: 2px solid var(--c); opacity: .0; animation: pulse 2.2s ease-out infinite; }
   .hs.sel { transform: scale(1.25); }
   .hs.sel .ring { opacity: .9; }
-  .hs .lbl { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); white-space: nowrap; background: #0E1A2B; color: #fff;
+  .hs .lbl { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); white-space: nowrap; background: #0F2E24; color: #fff;
              font: 700 12px system-ui, sans-serif; padding: 4px 9px; border-radius: 99px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .hs.sel .lbl { opacity: 1; }
   .hs[data-visible="false"] { opacity: .25; }
@@ -98,7 +98,7 @@ class _Human3DState extends State<Human3D> {
 
   String _js() => '''
   (function(){
-    const colors = {red:'#C4261D', yellow:'#E0A100', green:'#1F9D57', none:'#8C97AA'};
+    const colors = {red:'#C0272D', yellow:'#D99A12', green:'#237A4B', none:'#8F9A92'};
     const mv = document.getElementById('$_viewerId') || document.querySelector('model-viewer');
     function send(id){ try { KringJs.postMessage(id); } catch(e) {} }
     function focus(id){
@@ -174,7 +174,7 @@ class _Human3DState extends State<Human3D> {
 /// Warna titik status untuk UI Flutter di sekitar model (chip, panel).
 Color levelColor(String level) => switch (level) {
   'red' => TColors.red,
-  'yellow' => const Color(0xFFE0A100),
+  'yellow' => const Color(0xFFD99A12),
   'green' => TColors.green,
   _ => TColors.muted,
 };

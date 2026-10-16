@@ -141,12 +141,7 @@ class _RoleGateState extends State<RoleGate> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(color: TColors.brand, borderRadius: BorderRadius.circular(16)),
-                      child: const Icon(Icons.ring_volume_rounded, color: Colors.white, size: 26),
-                    ),
+                    Image.asset('assets/kring_icon_512.png', width: 48, height: 48, semanticLabel: 'Logo KRING'),
                     const SizedBox(width: 12),
                     const Expanded(child: Text('KRING', style: TText.h1)),
                     IconButton(

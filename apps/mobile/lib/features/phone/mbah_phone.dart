@@ -293,9 +293,9 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1424),
+      backgroundColor: const Color(0xFF0B231B),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B1424),
+        backgroundColor: const Color(0xFF0B231B),
         foregroundColor: Colors.white,
         title: Text('HP ${_patient?['display_name'] ?? 'Mbah'}', style: TText.h2.copyWith(color: Colors.white)),
         actions: [
@@ -331,7 +331,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
           const Spacer(),
           Text(
             '${now.hour.toString().padLeft(2, '0')}.${now.minute.toString().padLeft(2, '0')}',
-            style: const TextStyle(fontFamily: 'Jakarta', fontSize: 72, color: Colors.white, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontFamily: 'Nunito', fontSize: 72, color: Colors.white, fontWeight: FontWeight.w500),
           ),
           Text(dayLabel(DateTime.now().toIso8601String()), style: TText.body.copyWith(color: Colors.white70)),
           const SizedBox(height: 28),
@@ -525,9 +525,9 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: ActionChip(
-                      backgroundColor: const Color(0xFF1C2A40),
-                      disabledColor: const Color(0xFF1C2A40),
-                      side: const BorderSide(color: Color(0xFF2E4060)),
+                      backgroundColor: const Color(0xFF173B2F),
+                      disabledColor: const Color(0xFF173B2F),
+                      side: const BorderSide(color: Color(0xFF2A4A3E)),
                       label: Text(s, style: TText.small.copyWith(color: Colors.white)),
                       onPressed: _sending ? null : () => _send(s),
                     ),
@@ -554,7 +554,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
               ),
               const SizedBox(width: 8),
               Material(
-                color: _listening ? TColors.clay : const Color(0xFF1C2A40),
+                color: _listening ? TColors.clay : const Color(0xFF173B2F),
                 shape: const CircleBorder(),
                 child: InkWell(
                   customBorder: const CircleBorder(),
@@ -610,7 +610,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.play_circle_fill_rounded, color: Color(0xFFFFB27A), size: 30),
+              const Icon(Icons.play_circle_fill_rounded, color: Color(0xFFE9A27E), size: 30),
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -631,7 +631,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: l.fromTilik ? const Color(0xFF1A2638) : TColors.brand,
+          color: l.fromTilik ? const Color(0xFF173B2F) : TColors.brand,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),

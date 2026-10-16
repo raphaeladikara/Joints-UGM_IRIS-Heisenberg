@@ -339,7 +339,7 @@ class BpGauge extends StatelessWidget {
   static (String, Color) zone(int? s) {
     if (s == null) return ('Belum ada data', TColors.grey);
     if (s >= 180) return ('Sangat tinggi', TColors.red);
-    if (s >= 140) return ('Tinggi', const Color(0xFFC98A00));
+    if (s >= 140) return ('Tinggi', const Color(0xFFD99A12));
     return ('Normal', TColors.brand);
   }
 
@@ -404,7 +404,7 @@ class _GaugePainter extends CustomPainter {
     final rect = Rect.fromCircle(center: c, radius: radius);
     double ang(double v) => math.pi + (v.clamp(lo, hi) - lo) / (hi - lo) * math.pi;
     const gap = 0.045;
-    final zones = [(lo, 140.0, TColors.brand), (140.0, 180.0, const Color(0xFFE0A100)), (180.0, hi, TColors.red)];
+    final zones = [(lo, 140.0, TColors.brand), (140.0, 180.0, const Color(0xFFD99A12)), (180.0, hi, TColors.red)];
     for (final (a, b, col) in zones) {
       final start = ang(a) + (a == lo ? 0 : gap / 2);
       final end = ang(b) - (b == hi ? 0 : gap / 2);
@@ -423,7 +423,7 @@ class _GaugePainter extends CustomPainter {
     if (value == null) return;
     final a = ang(value!);
     final p = c + Offset(math.cos(a), math.sin(a)) * radius;
-    canvas.drawCircle(p + const Offset(0, 2), stroke * 0.78, Paint()..color = const Color(0x33141A24));
+    canvas.drawCircle(p + const Offset(0, 2), stroke * 0.78, Paint()..color = const Color(0x33142A20));
     canvas.drawCircle(p, stroke * 0.78, Paint()..color = Colors.white);
     canvas.drawCircle(
       p,
@@ -507,7 +507,7 @@ class PillNav extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontFamily: 'Jakarta',
+                                    fontFamily: 'Nunito',
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
                                     color: i == index ? TColors.ink : Colors.white.withValues(alpha: 0.86),

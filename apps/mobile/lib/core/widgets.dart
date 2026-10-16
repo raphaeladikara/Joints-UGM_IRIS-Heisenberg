@@ -62,7 +62,7 @@ class LevelChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             text ?? s.label,
-            style: TextStyle(fontFamily: 'Jakarta', fontWeight: FontWeight.w800, fontSize: big ? 15 : 12.5, color: s.fg),
+            style: TextStyle(fontFamily: 'Nunito', fontWeight: FontWeight.w800, fontSize: big ? 15 : 12.5, color: s.fg),
           ),
         ],
       ),
@@ -227,7 +227,7 @@ class _BpPainter extends CustomPainter {
         final tp = TextPainter(
           text: TextSpan(
             text: '$last',
-            style: TextStyle(fontFamily: 'Jakarta', fontSize: 11, fontWeight: FontWeight.w800, color: color),
+            style: TextStyle(fontFamily: 'Nunito', fontSize: 11, fontWeight: FontWeight.w800, color: color),
           ),
           textDirection: TextDirection.ltr,
         )..layout();

@@ -3,5 +3,5 @@ Model 3D lansia (elder_female.glb, elder_male.glb)
 Dibuat seluruhnya oleh tool/build_toon_elder_glb.py dari bentuk dasar (elipsoid, tabung, torus, bubutan) dan
 tekstur prosedural (batik kawung, batik parang, kotak-kotak sarung, brokat kebaya). Tidak memakai aset pihak ketiga;
 bagian dari proyek KRING dan bebas dipakai ulang. Gaya kartun senada maskot Kiki.
-Nenek: kebaya kutubaru + jarik kawung + sanggul uban. Kakek: peci + kemeja batik parang + sarung.
+Nenek: kebaya kutubaru hijau + jarik kawung + sanggul uban. Kakek: peci + kemeja batik parang hijau + sarung terakota.
 Model adalah ilustrasi, bukan pasien sungguhan.

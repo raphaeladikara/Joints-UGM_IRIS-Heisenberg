@@ -68,15 +68,18 @@ flutter:
   assets:
     - assets/content/
     - assets/models/
+    - assets/kring_icon_512.png
   # Font dibundel supaya tampil tanpa internet (OFL, lihat assets/fonts/OFL-*.txt).
   fonts:
-    - family: Jakarta
+    - family: Nunito
       fonts:
-        - asset: assets/fonts/PlusJakartaSans-500.ttf
+        - asset: assets/fonts/Nunito-500.ttf
           weight: 500
-        - asset: assets/fonts/PlusJakartaSans-600.ttf
+        - asset: assets/fonts/Nunito-600.ttf
           weight: 600
-        - asset: assets/fonts/PlusJakartaSans-700.ttf
+        - asset: assets/fonts/Nunito-700.ttf
           weight: 700
-        - asset: assets/fonts/PlusJakartaSans-800.ttf
+        - asset: assets/fonts/Nunito-800.ttf
           weight: 800
+        - asset: assets/fonts/Nunito-900.ttf
+          weight: 900

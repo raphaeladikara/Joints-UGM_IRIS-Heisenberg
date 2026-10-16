@@ -9,7 +9,7 @@ import 'theme.dart';
 
 /// Tubuh 3D interaktif tanpa aset: mesh lansia pria (peci, kemeja batik, tongkat) atau wanita (sanggul, kebaya,
 /// kain jarik) dari elipsoid, kapsul, dan loft; diproyeksikan perspektif, diurutkan kedalamannya, dan diwarnai
-/// warna bahan × cahaya Lambert + cahaya tepi biru. Geser untuk memutar; ketuk titik untuk detail.
+/// warna bahan × cahaya Lambert + cahaya tepi hijau. Geser untuk memutar; ketuk titik untuk detail.
 /// Jalan sama di Android dan web, tanpa WebView atau file .glb.
 class BodySpot {
   const BodySpot({required this.id, required this.label, required this.anchor, required this.level, required this.icon, this.value});
@@ -130,7 +130,7 @@ class _ProjectedSpot {
 
 Color spotColor(String level) => switch (level) {
   'red' => TColors.red,
-  'yellow' => const Color(0xFFC98A00),
+  'yellow' => const Color(0xFFD99A12),
   'green' => TColors.green,
   _ => TColors.grey,
 };
@@ -173,12 +173,12 @@ class _BodyPainter extends CustomPainter {
       final ny2 = ny0 * cp - nz1 * sp, nz2 = ny0 * sp + nz1 * cp;
       final lambert = math.max(0.0, nx1 * lx + ny2 * ly + nz2 * lz);
       final fill = math.max(0.0, -nx1 * 0.6 + nz2 * 0.4) * 0.25; // cahaya isi dari kanan
-      final rim = math.pow(1 - nz2.abs().clamp(0.0, 1.0), 3).toDouble() * 0.55; // tepi biru lembut
+      final rim = math.pow(1 - nz2.abs().clamp(0.0, 1.0), 3).toDouble() * 0.55; // tepi hijau lembut
       final base = 0.52 + lambert * 0.50 + fill;
-      // Warna bahan × cahaya, ditambah cahaya tepi biru langit supaya siluet tetap terbaca di latar putih.
-      final r = (255 * mesh.cr[i] * base + 110 * rim).clamp(0, 255).toInt();
-      final g = (255 * mesh.cg[i] * base + 150 * rim).clamp(0, 255).toInt();
-      final b = (255 * mesh.cb[i] * base + 230 * rim).clamp(0, 255).toInt();
+      // Warna bahan × cahaya, ditambah cahaya tepi hijau muda supaya siluet tetap terbaca di latar putih.
+      final r = (255 * mesh.cr[i] * base + 150 * rim).clamp(0, 255).toInt();
+      final g = (255 * mesh.cg[i] * base + 200 * rim).clamp(0, 255).toInt();
+      final b = (255 * mesh.cb[i] * base + 170 * rim).clamp(0, 255).toInt();
       colors[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
     }
 
@@ -187,7 +187,7 @@ class _BodyPainter extends CustomPainter {
     canvas.drawOval(
       Rect.fromCenter(center: Offset(ox, floorY + 4), width: size.height * 0.36, height: size.height * 0.05),
       Paint()
-        ..color = const Color(0x22243048)
+        ..color = const Color(0x22243A30)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
     );
 
@@ -259,15 +259,15 @@ class _BodyPainter extends CustomPainter {
 typedef _Rgb = (double, double, double);
 typedef _Paint = _Rgb Function(double x, double y, double z);
 
-/// Palet bahan. Kulit sawo matang, rambut uban, kain dari palet aplikasi (biru langit, navy).
+/// Palet bahan. Kulit sawo matang, rambut uban, kain dari palet aplikasi (hijau daun, terakota).
 abstract final class _Mat {
   static const _Rgb skin = (0.80, 0.62, 0.49);
   static const _Rgb grey = (0.86, 0.86, 0.88);
   static const _Rgb peci = (0.13, 0.14, 0.18);
-  static const _Rgb batik = (0.40, 0.60, 0.90);
-  static const _Rgb trousers = (0.22, 0.27, 0.38);
-  static const _Rgb kebaya = (0.72, 0.84, 0.98); // kebaya biru muda, jelas beda dari kulit
-  static const _Rgb jarik = (0.20, 0.29, 0.52);
+  static const _Rgb batik = (0.12, 0.42, 0.31);
+  static const _Rgb trousers = (0.45, 0.22, 0.16);
+  static const _Rgb kebaya = (0.62, 0.79, 0.69); // kebaya hijau muda, jelas beda dari kulit
+  static const _Rgb jarik = (0.42, 0.26, 0.15);
   static const _Rgb sandal = (0.36, 0.27, 0.22);
   static const _Rgb wood = (0.56, 0.39, 0.25);
 }

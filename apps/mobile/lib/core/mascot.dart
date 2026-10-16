@@ -15,7 +15,7 @@ TiliMood moodForLevel(String? level) => switch (level) {
   _ => TiliMood.calm,
 };
 
-/// "Kiki", burung kutilang biru maskot KRING. Digambar dengan CustomPainter (tanpa aset), bergoyang pelan,
+/// "Kiki", burung kutilang hijau daun maskot KRING. Digambar dengan CustomPainter (tanpa aset), bergoyang pelan,
 /// berkedip, dan ekspresinya mengikuti [mood]. Diam bila pengguna mematikan animasi.
 class Tili extends StatefulWidget {
   const Tili({super.key, this.mood = TiliMood.happy, this.size = 120, this.waving = false});
@@ -63,11 +63,11 @@ class _TiliPainter extends CustomPainter {
   final TiliMood mood;
   final bool waving;
 
-  static const _blue = Color(0xFF2F86F6);
-  static const _blueDeep = Color(0xFF1858C8);
-  static const _belly = Color(0xFFFFF4DA);
-  static const _beak = Color(0xFFFF9F43);
-  static const _cheek = Color(0xFFFF8FA3);
+  static const _leaf = Color(0xFF2E7D5B);
+  static const _leafDeep = Color(0xFF154D39);
+  static const _belly = Color(0xFFFBF5E6);
+  static const _beak = Color(0xFFE9A27E);
+  static const _cheek = Color(0xFFEFA08A);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -81,7 +81,7 @@ class _TiliPainter extends CustomPainter {
 
     // Bayangan
     canvas.drawOval(Rect.fromCenter(center: Offset(50, 95 - bob), width: 52 - bob * 2, height: 7),
-        Paint()..color = const Color(0x220E2A5A)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2));
+        Paint()..color = const Color(0x22153A2C)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2));
 
     // Kaki
     final leg = Paint()
@@ -97,14 +97,14 @@ class _TiliPainter extends CustomPainter {
       ..quadraticBezierTo(97, 58, 96, 44)
       ..quadraticBezierTo(88, 54, 76, 54)
       ..close();
-    canvas.drawPath(tail, Paint()..color = _blueDeep);
+    canvas.drawPath(tail, Paint()..color = _leafDeep);
 
     // Badan
     final body = Rect.fromCenter(center: const Offset(50, 55), width: 66, height: 64);
     canvas.drawOval(
       body,
       Paint()
-        ..shader = const RadialGradient(center: Alignment(-0.35, -0.5), radius: 0.95, colors: [Color(0xFF6FB4FF), _blue, _blueDeep], stops: [0, 0.55, 1])
+        ..shader = const RadialGradient(center: Alignment(-0.35, -0.5), radius: 0.95, colors: [Color(0xFF6FB08E), _leaf, _leafDeep], stops: [0, 0.55, 1])
             .createShader(body),
     );
     // Perut
@@ -116,7 +116,7 @@ class _TiliPainter extends CustomPainter {
       ..quadraticBezierTo(42, 10, 52, 8)
       ..quadraticBezierTo(48, 16, 55, 24)
       ..close();
-    canvas.drawPath(crest, Paint()..color = _blueDeep);
+    canvas.drawPath(crest, Paint()..color = _leafDeep);
 
     // Sayap (melambai bila waving)
     final wave = waving ? math.sin(time * 7) * 18 : math.sin(time * 2.2) * 3;
@@ -145,7 +145,7 @@ class _TiliPainter extends CustomPainter {
       ..lineTo(54, 52 + beakOpen * 0.3)
       ..lineTo(50, 56 + beakOpen)
       ..close();
-    canvas.drawPath(beakBottom, Paint()..color = const Color(0xFFE5822A));
+    canvas.drawPath(beakBottom, Paint()..color = const Color(0xFFC0623B));
 
     // Tanda di atas kepala
     if (mood == TiliMood.alert) {
@@ -154,7 +154,7 @@ class _TiliPainter extends CustomPainter {
       canvas.drawCircle(const Offset(76, 25), 3.2, p);
     } else if (mood == TiliMood.sleepy) {
       final tp = TextPainter(
-        text: const TextSpan(text: 'z z', style: TextStyle(fontFamily: 'Jakarta', fontWeight: FontWeight.w800, fontSize: 12, color: _blueDeep)),
+        text: const TextSpan(text: 'z z', style: TextStyle(fontFamily: 'Nunito', fontWeight: FontWeight.w800, fontSize: 12, color: _leafDeep)),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset(68, 8 + math.sin(time * 2) * 2));
@@ -173,7 +173,7 @@ class _TiliPainter extends CustomPainter {
       ..quadraticBezierTo(side * 14, -4, side * 10, 12)
       ..quadraticBezierTo(side * 2, 8, 0, -10)
       ..close();
-    canvas.drawPath(w, Paint()..color = _blueDeep);
+    canvas.drawPath(w, Paint()..color = _leafDeep);
     canvas.restore();
   }
 
@@ -222,7 +222,7 @@ class _TiliPainter extends CustomPainter {
       ..quadraticBezierTo(c.dx, c.dy, c.dx - r, c.dy)
       ..quadraticBezierTo(c.dx, c.dy, c.dx, c.dy - r)
       ..close();
-    canvas.drawPath(p, Paint()..color = const Color(0xFFFFC53D));
+    canvas.drawPath(p, Paint()..color = const Color(0xFFD99A12));
   }
 
   @override

@@ -22,12 +22,12 @@ class Human3DBridge {
     }
     final s = jsonDecode(stateJson) as Map<String, dynamic>;
     final spots = (s['spots'] as Map).cast<String, String>();
-    const colors = {'red': '#C4261D', 'yellow': '#E0A100', 'green': '#1F9D57'};
+    const colors = {'red': '#C0272D', 'yellow': '#D99A12', 'green': '#237A4B'};
     final nodes = mv.querySelectorAll('.hs');
     for (var i = 0; i < nodes.length; i++) {
       final el = nodes.item(i) as web.HTMLElement;
       final id = el.dataset['id'];
-      el.style.setProperty('--c', colors[spots[id]] ?? '#8C97AA');
+      el.style.setProperty('--c', colors[spots[id]] ?? '#8F9A92');
       el.classList.toggle('sel', id == s['selected']);
       if (_wired.add('$viewerId/$id')) {
         el.addEventListener('click', ((web.Event e) {
