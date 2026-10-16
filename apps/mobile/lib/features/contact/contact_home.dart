@@ -4,8 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/api.dart';
 import '../../core/format.dart';
 import '../../core/health_widgets.dart';
+import '../../core/pipo.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import 'doctor.dart';
 import 'emergency.dart';
 import 'health_views.dart';
 
@@ -210,9 +212,12 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
     final name = p['display_name'] as String;
     final status = _status(f);
     final s = LevelStyle.of(status);
-    return Container(
+    return DecoratedBox(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), boxShadow: TShadow.soft),
+      child: PipoBackground(
+        borderRadius: BorderRadius.circular(30),
+        child: Padding(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: TColors.brand, borderRadius: BorderRadius.circular(30), boxShadow: TShadow.soft),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -222,16 +227,16 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
                 width: 64,
                 height: 64,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), shape: BoxShape.circle),
-                child: Text(name.split(' ').last[0], style: TText.h1.copyWith(color: Colors.white)),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), shape: BoxShape.circle),
+                child: Icon(p['sex'] == 'M' ? Icons.elderly_rounded : Icons.elderly_woman_rounded, size: 36, color: TColors.brandDeep),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: TText.h1.copyWith(color: Colors.white)),
-                    Text('${p['age']} tahun · ${p['village']}', style: TText.small.copyWith(color: Colors.white.withValues(alpha: 0.85))),
+                    Text(name, style: TText.h1),
+                    Text('${p['age']} tahun · ${p['village']}', style: TText.small.copyWith(color: TColors.ink.withValues(alpha: 0.7))),
                   ],
                 ),
               ),
@@ -268,6 +273,8 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           ],
         ],
       ),
+        ),
+      ),
     );
   }
 
@@ -285,6 +292,8 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
         children: [
           _patientHero(f),
+          const SizedBox(height: 14),
+          DoctorCard(feed: f, contactId: widget.contactId, onChanged: refreshNow),
           const SizedBox(height: 14),
           // Bahan obrolan: alasan anak menelepon, letaknya di atas angka-angka.
           Container(

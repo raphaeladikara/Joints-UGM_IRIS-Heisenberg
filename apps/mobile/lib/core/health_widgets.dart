@@ -497,7 +497,7 @@ class PillNav extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontFamily: 'Nunito',
+                                    fontFamily: 'Jakarta',
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w800,
                                     color: i == index ? TColors.ink : Colors.white.withValues(alpha: 0.86),

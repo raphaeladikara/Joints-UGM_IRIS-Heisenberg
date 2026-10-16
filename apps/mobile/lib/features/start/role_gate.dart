@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/api.dart';
 import '../../core/body3d.dart';
+import '../../core/pipo.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../contact/contact_home.dart';
@@ -206,7 +207,21 @@ class _RoleGateState extends State<RoleGate> {
                 const SizedBox(height: 12),
                 _igdTile(),
                 const SizedBox(height: 10),
-                Text('Tahan ubin Keluarga/Sahabat untuk memilih orang lain.', style: TText.small, textAlign: TextAlign.center),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () => _pickContact('child'),
+                      icon: const Icon(Icons.swap_horiz_rounded),
+                      label: const Text('Pilih keluarga lain'),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _pickContact('sahabat_tilik'),
+                      icon: const Icon(Icons.swap_horiz_rounded),
+                      label: const Text('Pilih Sahabat lain'),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 OutlinedButton.icon(onPressed: _reset, icon: const Icon(Icons.restart_alt_rounded), label: const Text('Ulang data demo')),
                 const SizedBox(height: 16),
@@ -227,40 +242,35 @@ class _RoleGateState extends State<RoleGate> {
 
   /// Blok pembuka: janji produk di kiri, tubuh 3D yang berputar pelan di kanan.
   Widget _hero() {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(color: TColors.brand, borderRadius: BorderRadius.circular(30), boxShadow: TShadow.soft),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -24,
-            top: 0,
-            bottom: 0,
-            width: 170,
-            child: const IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(colors: [Color(0x40FFFFFF), Color(0x00FFFFFF)], radius: 0.65),
-                ),
-                child: Body3D(spots: [], height: 240),
+    return DecoratedBox(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), boxShadow: TShadow.soft),
+      child: PipoBackground(
+        borderRadius: BorderRadius.circular(30),
+        child: Stack(
+          children: [
+            const Positioned(
+              right: -18,
+              top: 0,
+              bottom: 0,
+              width: 170,
+              child: IgnorePointer(child: Body3D(spots: [], sex: 'F', height: 250)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 138, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Jalur cepat stroke dimulai dari rumah Mbah.', style: TText.h1.copyWith(fontSize: 25)),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Telepon biasa tiap pagi: obat, tensi, gejala. Ada tanda bahaya, tetangga, anak, dan IGD langsung bergerak.',
+                    style: TText.body.copyWith(fontSize: 15.5, color: TColors.ink.withValues(alpha: 0.78)),
+                  ),
+                ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 22, 138, 22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Jalur cepat stroke dimulai dari rumah Mbah.', style: TText.h1.copyWith(color: Colors.white, fontSize: 25)),
-                const SizedBox(height: 10),
-                Text(
-                  'Telepon biasa tiap pagi: obat, tensi, gejala. Ada tanda bahaya, tetangga, anak, dan IGD langsung bergerak.',
-                  style: TText.body.copyWith(color: Colors.white.withValues(alpha: 0.92), fontSize: 15.5),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

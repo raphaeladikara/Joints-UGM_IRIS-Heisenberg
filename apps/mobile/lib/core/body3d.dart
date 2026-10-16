@@ -7,8 +7,9 @@ import 'package:flutter/scheduler.dart';
 
 import 'theme.dart';
 
-/// Tubuh 3D interaktif tanpa aset: mesh dibangun dari elipsoid dan kapsul, diproyeksikan perspektif, diurutkan
-/// kedalamannya, dan diwarnai dengan cahaya Lambert + cahaya tepi. Geser untuk memutar; ketuk titik untuk detail.
+/// Tubuh 3D interaktif tanpa aset: mesh lansia pria (peci, kemeja batik, tongkat) atau wanita (sanggul, kebaya,
+/// kain jarik) dari elipsoid, kapsul, dan loft; diproyeksikan perspektif, diurutkan kedalamannya, dan diwarnai
+/// warna bahan × cahaya Lambert + cahaya tepi biru. Geser untuk memutar; ketuk titik untuk detail.
 /// Jalan sama di Android dan web, tanpa WebView atau file .glb.
 class BodySpot {
   const BodySpot({required this.id, required this.label, required this.anchor, required this.level, required this.icon, this.value});
@@ -25,8 +26,11 @@ class BodySpot {
 }
 
 class Body3D extends StatefulWidget {
-  const Body3D({super.key, required this.spots, this.selected, this.onSelect, this.height = 380});
+  const Body3D({super.key, required this.spots, this.sex = 'F', this.selected, this.onSelect, this.height = 380});
   final List<BodySpot> spots;
+
+  /// 'M' lansia pria, selain itu lansia wanita (kolom `sex` pasien).
+  final String sex;
   final String? selected;
   final ValueChanged<String>? onSelect;
   final double height;
@@ -36,7 +40,7 @@ class Body3D extends StatefulWidget {
 }
 
 class _Body3DState extends State<Body3D> with SingleTickerProviderStateMixin {
-  static final _mesh = _Mesh.human();
+  static final _meshes = <bool, _Mesh>{};
   late final Ticker _ticker;
   double _yaw = -0.45;
   double _vel = 0; // rad/detik setelah jari dilepas
@@ -109,7 +113,7 @@ class _Body3DState extends State<Body3D> with SingleTickerProviderStateMixin {
           onTapUp: (d) => _tapAt(d.localPosition),
           child: CustomPaint(
             size: Size.infinite,
-            painter: _BodyPainter(_mesh, _yaw, _t, widget.spots, widget.selected, (h) => _hits = h),
+            painter: _BodyPainter(_meshes.putIfAbsent(widget.sex == 'M', () => _Mesh.elder(male: widget.sex == 'M')), _yaw, _t, widget.spots, widget.selected, (h) => _hits = h),
           ),
         ),
       ),
@@ -170,11 +174,11 @@ class _BodyPainter extends CustomPainter {
       final lambert = math.max(0.0, nx1 * lx + ny2 * ly + nz2 * lz);
       final fill = math.max(0.0, -nx1 * 0.6 + nz2 * 0.4) * 0.25; // cahaya isi dari kanan
       final rim = math.pow(1 - nz2.abs().clamp(0.0, 1.0), 3).toDouble() * 0.55; // tepi biru lembut
-      final base = 0.50 + lambert * 0.46 + fill;
-      // Porselen biru-krem: gelap ke arah brandDeep, terang ke arah putih krem.
-      final r = (196 * base + 120 * rim).clamp(0, 255).toInt();
-      final g = (208 * base + 160 * rim).clamp(0, 255).toInt();
-      final b = (228 * base + 230 * rim).clamp(0, 255).toInt();
+      final base = 0.52 + lambert * 0.50 + fill;
+      // Warna bahan × cahaya, ditambah cahaya tepi biru langit supaya siluet tetap terbaca di latar putih.
+      final r = (255 * mesh.cr[i] * base + 110 * rim).clamp(0, 255).toInt();
+      final g = (255 * mesh.cg[i] * base + 150 * rim).clamp(0, 255).toInt();
+      final b = (255 * mesh.cb[i] * base + 230 * rim).clamp(0, 255).toInt();
       colors[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
     }
 
@@ -252,41 +256,118 @@ class _BodyPainter extends CustomPainter {
   bool shouldRepaint(covariant _BodyPainter old) => true;
 }
 
-/// Mesh manusia sederhana: daftar verteks (posisi + normal) dan indeks segitiga.
+typedef _Rgb = (double, double, double);
+typedef _Paint = _Rgb Function(double x, double y, double z);
+
+/// Palet bahan. Kulit sawo matang, rambut uban, kain dari palet aplikasi (biru langit, navy).
+abstract final class _Mat {
+  static const _Rgb skin = (0.80, 0.62, 0.49);
+  static const _Rgb grey = (0.86, 0.86, 0.88);
+  static const _Rgb peci = (0.13, 0.14, 0.18);
+  static const _Rgb batik = (0.40, 0.60, 0.90);
+  static const _Rgb trousers = (0.22, 0.27, 0.38);
+  static const _Rgb kebaya = (0.72, 0.84, 0.98); // kebaya biru muda, jelas beda dari kulit
+  static const _Rgb jarik = (0.20, 0.29, 0.52);
+  static const _Rgb sandal = (0.36, 0.27, 0.22);
+  static const _Rgb wood = (0.56, 0.39, 0.25);
+}
+
+_Paint _solid(_Rgb c) => (_, _, _) => c;
+
+/// Mesh lansia: daftar verteks (posisi + normal + warna bahan) dan indeks segitiga.
 class _Mesh {
-  _Mesh(this.vx, this.vy, this.vz, this.nx, this.ny, this.nz, this.tri);
-  final Float32List vx, vy, vz, nx, ny, nz;
+  _Mesh(this.vx, this.vy, this.vz, this.nx, this.ny, this.nz, this.cr, this.cg, this.cb, this.tri);
+  final Float32List vx, vy, vz, nx, ny, nz, cr, cg, cb;
   final Int32List tri;
 
-  factory _Mesh.human() {
+  factory _Mesh.elder({required bool male}) {
     final b = _MeshBuilder();
-    // Kepala, leher, lalu badan sebagai SATU permukaan loft (pinggul → pinggang → dada → bahu): elipsoid yang
-    // saling menembus membuat garis potong bergerigi karena urutan segitiga, loft tidak punya garis potong.
-    b.ellipsoid((0, 1.615, 0.005), (0.092, 0.112, 0.102));
-    b.capsule((0, 1.43, -0.005), (0, 1.53, 0), 0.046);
-    b.loft(const [
-      (0.79, 0.0, 0.0, 0.0),
-      (0.81, 0.11, 0.075, 0.0),
-      (0.86, 0.160, 0.100, 0.0),
-      (0.92, 0.172, 0.106, -0.004),
-      (0.99, 0.160, 0.100, 0.0),
-      (1.06, 0.140, 0.092, 0.006),
-      (1.14, 0.150, 0.097, 0.008),
-      (1.23, 0.172, 0.106, 0.008),
-      (1.31, 0.184, 0.104, 0.004),
-      (1.37, 0.180, 0.094, -0.004),
-      (1.42, 0.120, 0.072, -0.006),
-      (1.455, 0.060, 0.050, -0.006),
-      (1.47, 0.0, 0.0, -0.006),
-    ]);
+    // Punggung sedikit membungkuk: leher condong ke depan, kepala maju ±3 cm.
+    const head = (0.0, 1.612, 0.035);
+    // Kepala diwarnai per verteks. Pria: uban pendek di belakang/samping (atas tertutup peci). Wanita: rambut uban
+    // menutup atas & belakang, wajah tetap kulit.
+    b.ellipsoid(head, (0.092, 0.112, 0.102), paint: (x, y, z) {
+      final up = y - head.$2, back = z - head.$3;
+      final hair = male ? (back < -0.035 && up > -0.06) || up > 0.06 : up > 0.04 + back * 0.45 || (back < -0.03 && up > -0.07);
+      return hair ? _Mat.grey : _Mat.skin;
+    });
+    b.capsule((0, 1.43, -0.012), (0, 1.53, 0.02), 0.046, paint: _solid(_Mat.skin));
+    if (male) {
+      // Peci hitam: silinder oval rata atas.
+      b.loft(const [(1.665, 0.0, 0.0, 0.03), (1.666, 0.097, 0.108, 0.03), (1.742, 0.093, 0.104, 0.03), (1.743, 0.0, 0.0, 0.03)],
+          perSeg: 2, paint: _solid(_Mat.peci));
+    } else {
+      b.ellipsoid((0, 1.64, -0.085), (0.052, 0.048, 0.044), paint: _solid(_Mat.grey)); // sanggul
+    }
+    final top = male ? _Mat.batik : _Mat.kebaya;
+    // Badan: satu loft (pinggul → pinggang → dada → bahu), tanpa garis potong. Pria lebih lebar di bahu dan
+    // berperut; wanita lebih lebar di pinggul. dz negatif di atas = punggung membulat.
+    b.loft(
+      male
+          ? const [
+              (0.79, 0.0, 0.0, 0.0),
+              (0.81, 0.115, 0.08, 0.0),
+              (0.86, 0.165, 0.105, 0.0),
+              (0.93, 0.172, 0.112, 0.006),
+              (1.01, 0.168, 0.118, 0.016),
+              (1.08, 0.160, 0.114, 0.018),
+              (1.15, 0.160, 0.104, 0.010),
+              (1.23, 0.176, 0.106, 0.002),
+              (1.31, 0.190, 0.106, -0.010),
+              (1.37, 0.184, 0.098, -0.020),
+              (1.42, 0.122, 0.074, -0.020),
+              (1.455, 0.060, 0.050, -0.016),
+              (1.47, 0.0, 0.0, -0.014),
+            ]
+          : const [
+              (0.86, 0.0, 0.0, 0.0),
+              (0.88, 0.12, 0.08, 0.0),
+              (0.93, 0.176, 0.108, -0.004),
+              (0.99, 0.160, 0.100, 0.0),
+              (1.06, 0.136, 0.090, 0.006),
+              (1.14, 0.144, 0.100, 0.012),
+              (1.22, 0.160, 0.112, 0.012),
+              (1.30, 0.168, 0.100, -0.008),
+              (1.36, 0.164, 0.092, -0.018),
+              (1.42, 0.112, 0.070, -0.020),
+              (1.455, 0.056, 0.048, -0.016),
+              (1.47, 0.0, 0.0, -0.014),
+            ],
+      // Pria: bagian bawah badan berwarna celana (kemeja dimasukkan), jadi pertemuan paha–badan tidak terlihat bergerigi.
+      paint: male ? (_, y, _) => y < 0.9 ? _Mat.trousers : top : _solid(top),
+    );
+    final sh = male ? 0.178 : 0.160;
     for (final sx in [-1.0, 1.0]) {
-      b.ellipsoid((0.175 * sx, 1.385, -0.005), (0.07, 0.062, 0.068)); // bahu
-      b.capsule((0.205 * sx, 1.37, -0.01), (0.245 * sx, 1.12, -0.01), 0.047); // lengan atas
-      b.capsule((0.245 * sx, 1.12, -0.01), (0.27 * sx, 0.87, 0.02), 0.039); // lengan bawah
-      b.ellipsoid((0.275 * sx, 0.80, 0.025), (0.03, 0.06, 0.042)); // tangan
-      b.capsule((0.088 * sx, 0.90, 0), (0.098 * sx, 0.50, 0.0), 0.074); // paha
-      b.capsule((0.098 * sx, 0.50, 0.0), (0.098 * sx, 0.09, -0.015), 0.052); // betis
-      b.ellipsoid((0.098 * sx, 0.04, 0.035), (0.045, 0.032, 0.105)); // kaki
+      final cane = male && sx > 0; // tangan kanan memegang tongkat, sedikit ke depan
+      final elbow = (sh * 1.36 * sx, 1.12, -0.01);
+      final wrist = cane ? (0.262, 0.86, 0.11) : (sh * 1.5 * sx, 0.87, 0.02);
+      b.ellipsoid((sh * sx, 1.375, -0.014), (0.068, 0.06, 0.066), paint: _solid(top)); // bahu
+      b.capsule((sh * 1.15 * sx, 1.36, -0.02), elbow, 0.046, paint: _solid(top)); // lengan atas
+      b.capsule(elbow, wrist, 0.038, paint: _solid(top)); // lengan bawah (lengan panjang)
+      b.ellipsoid((wrist.$1 + 0.004 * sx, wrist.$2 - 0.06, wrist.$3 + 0.006), (0.03, 0.058, 0.042), paint: _solid(_Mat.skin));
+      if (male) {
+        b.capsule((0.088 * sx, 0.90, 0), (0.098 * sx, 0.50, 0.0), 0.074, paint: _solid(_Mat.trousers)); // paha
+        b.capsule((0.098 * sx, 0.50, 0.0), (0.098 * sx, 0.09, -0.015), 0.054, paint: _solid(_Mat.trousers)); // betis
+      } else {
+        b.capsule((0.092 * sx, 0.20, -0.01), (0.096 * sx, 0.085, -0.015), 0.042, paint: _solid(_Mat.skin)); // di bawah kain
+      }
+      b.ellipsoid((0.098 * sx, 0.04, 0.035), (0.046, 0.032, 0.106), paint: _solid(_Mat.sandal)); // kaki + sandal
+    }
+    if (male) {
+      // Tongkat kayu dengan gagang.
+      b.capsule((0.268, 0.78, 0.115), (0.30, 0.012, 0.16), 0.013, paint: _solid(_Mat.wood));
+      b.capsule((0.268, 0.80, 0.115), (0.268, 0.80, 0.045), 0.014, paint: _solid(_Mat.wood));
+    } else {
+      // Kain jarik panjang sampai mata kaki, sedikit mengembang.
+      b.loft(const [
+        (0.15, 0.0, 0.0, 0.01),
+        (0.152, 0.150, 0.128, 0.01),
+        (0.40, 0.168, 0.130, 0.008),
+        (0.70, 0.184, 0.128, 0.002),
+        (0.90, 0.186, 0.116, -0.004),
+        (0.99, 0.166, 0.104, 0.0),
+        (1.0, 0.0, 0.0, 0.0),
+      ], paint: _solid(_Mat.jarik));
     }
     return b.build();
   }
@@ -295,9 +376,10 @@ class _Mesh {
 class _MeshBuilder {
   final _p = <double>[];
   final _n = <double>[];
+  final _c = <double>[];
   final _t = <int>[];
 
-  void _grid(int rows, int cols, (double, double, double, double, double, double) Function(int r, int c) at) {
+  void _grid(int rows, int cols, (double, double, double, double, double, double) Function(int r, int c) at, _Paint paint) {
     final start = _p.length ~/ 3;
     for (var r = 0; r <= rows; r++) {
       for (var c = 0; c <= cols; c++) {
@@ -305,6 +387,8 @@ class _MeshBuilder {
         _p.addAll([x, y, z]);
         final len = math.sqrt(nx * nx + ny * ny + nz * nz);
         _n.addAll([nx / len, ny / len, nz / len]);
+        final (cr, cg, cb) = paint(x, y, z);
+        _c.addAll([cr, cg, cb]);
       }
     }
     for (var r = 0; r < rows; r++) {
@@ -315,18 +399,19 @@ class _MeshBuilder {
     }
   }
 
-  void ellipsoid((double, double, double) c, (double, double, double) r, {int rows = 16, int cols = 26}) {
+  void ellipsoid((double, double, double) c, (double, double, double) r, {required _Paint paint, int rows = 16, int cols = 26}) {
     final (cx, cy, cz) = c;
     final (ax, ay, az) = r;
     _grid(rows, cols, (i, j) {
       final th = math.pi * i / rows, ph = 2 * math.pi * j / cols;
       final ux = math.sin(th) * math.cos(ph), uy = math.cos(th), uz = math.sin(th) * math.sin(ph);
       return (cx + ax * ux, cy + ay * uy, cz + az * uz, ux / ax, uy / ay, uz / az);
-    });
+    }, paint);
   }
 
   /// Kapsul dari a ke b: dua belahan bola disambung silinder (baris khatulistiwa digandakan).
-  void capsule((double, double, double) a, (double, double, double) b, double radius, {int half = 9, int cols = 26}) {
+  void capsule((double, double, double) a, (double, double, double) b, double radius,
+      {required _Paint paint, int half = 9, int cols = 26}) {
     final (ax, ay, az) = a;
     final (bx, by, bz) = b;
     var dx = ax - bx, dy = ay - by, dz = az - bz; // sumbu lokal "atas" = menuju a
@@ -351,12 +436,12 @@ class _MeshBuilder {
       final nz = dz * co + (ez * math.cos(ph) + fz * math.sin(ph)) * s;
       final (cx, cy, cz) = top ? a : b;
       return (cx + nx * radius, cy + ny * radius, cz + nz * radius, nx, ny, nz);
-    });
+    }, paint);
   }
 
   /// Permukaan putar berpenampang elips. [profile]: (y, rx, rz, geser-z) dari bawah ke atas; nilai di antaranya
   /// dihaluskan Catmull-Rom. Normal dihitung dari tetangga grid lalu diarahkan keluar.
-  void loft(List<(double, double, double, double)> profile, {int perSeg = 6, int cols = 40}) {
+  void loft(List<(double, double, double, double)> profile, {required _Paint paint, int perSeg = 6, int cols = 40}) {
     double cr(double p0, double p1, double p2, double p3, double t) =>
         0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t);
     final rows = <(double, double, double, double)>[];
@@ -394,12 +479,13 @@ class _MeshBuilder {
       if (nx * x + nz * (z - dz) < 0 || (nx == 0 && nz == 0)) (nx, ny, nz) = (-nx, -ny, -nz);
       if (nx.abs() + ny.abs() + nz.abs() < 1e-9) (nx, ny, nz) = (0.0, r < top.length / 2 ? 1.0 : -1.0, 0.0);
       return (x, y, z, nx, ny, nz);
-    });
+    }, paint);
   }
 
   _Mesh build() {
     final n = _p.length ~/ 3;
     final vx = Float32List(n), vy = Float32List(n), vz = Float32List(n), nx = Float32List(n), ny = Float32List(n), nz = Float32List(n);
+    final cr = Float32List(n), cg = Float32List(n), cb = Float32List(n);
     for (var i = 0; i < n; i++) {
       vx[i] = _p[i * 3];
       vy[i] = _p[i * 3 + 1];
@@ -407,7 +493,10 @@ class _MeshBuilder {
       nx[i] = _n[i * 3];
       ny[i] = _n[i * 3 + 1];
       nz[i] = _n[i * 3 + 2];
+      cr[i] = _c[i * 3];
+      cg[i] = _c[i * 3 + 1];
+      cb[i] = _c[i * 3 + 2];
     }
-    return _Mesh(vx, vy, vz, nx, ny, nz, Int32List.fromList(_t));
+    return _Mesh(vx, vy, vz, nx, ny, nz, cr, cg, cb, Int32List.fromList(_t));
   }
 }

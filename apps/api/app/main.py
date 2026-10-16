@@ -74,6 +74,17 @@ class AckIn(Strict):
     by: str = Field(min_length=1, max_length=60)
 
 
+class ConsultIn(Strict):
+    contact_id: str
+    mode: Literal["video", "voice"] = "video"
+    reason: str = Field(default="", max_length=300)
+
+
+class ConsultUpdate(Strict):
+    status: Literal["in_call", "ended", "declined"]
+    note: str = Field(default="", max_length=500)
+
+
 # ---------- util ----------
 
 def _age(birth_year: int) -> int:
@@ -420,7 +431,119 @@ def contact_feed(cid: str) -> dict[str, Any]:
         "notifications": notes,
         "pending_messages": db.query("SELECT id, text, status, created_at FROM family_messages WHERE from_contact_id = ? ORDER BY created_at DESC LIMIT 5",
                                      (cid,)),
+        "doctor": {**config.DOCTOR, "suggest": _health_concerns(p["id"])},
+        "doctor_consult": _consult_view(dc) if (dc := db.one(
+            "SELECT * FROM doctor_consults WHERE contact_id = ? AND status IN ('ringing', 'in_call') ORDER BY created_at DESC LIMIT 1", (cid,))) else None,
     }
+
+
+# ---------- telekonsultasi dokter (wali → dokter jaga Puskesmas) ----------
+
+def _health_concerns(pid: str) -> dict[str, Any]:
+    """Hal yang janggal hari ini: dasar saran "hubungi dokter" di aplikasi wali dan ringkasan yang dikirim ke dokter."""
+    reasons: list[str] = []
+    level = "green"
+    today = db.one("SELECT final_level FROM call_sessions WHERE patient_id = ? AND started_at >= ? ORDER BY started_at DESC LIMIT 1",
+                   (pid, _today_start()))
+    if today and today["final_level"] in ("yellow", "red"):
+        level = safety.max_level(level, today["final_level"])
+        reasons.append("Telepon pagi menandai " + ("darurat" if today["final_level"] == "red" else "perlu tindak lanjut"))
+    alert = db.one("SELECT level, reasons FROM alerts WHERE patient_id = ? AND status != 'closed' ORDER BY created_at DESC LIMIT 1", (pid,))
+    if alert:
+        level = safety.max_level(level, alert["level"])
+        reasons += [r.get("label", "") for r in db.loads(alert["reasons"], []) if r.get("label")][:3]
+    v = vitals.summary(pid, 7)
+    th, latest = v["thresholds"], v["latest"]
+    bp = latest.get("blood_pressure") or (_bp_history(pid, 7) or [None])[-1]
+    if bp and bp.get("systolic") and bp["systolic"] >= 160:
+        level = safety.max_level(level, "yellow")
+        reasons.append(f"Tensi tinggi {bp['systolic']}/{bp.get('diastolic')} mmHg")
+    if (s := latest.get("spo2")) and s["value"] < th["spo2_low"]:
+        level = safety.max_level(level, "yellow")
+        reasons.append(f"Oksigen rendah {round(s['value'])}%")
+    if (r := latest.get("resting_hr")) and r["value"] >= th["hr_high_rest"]:
+        level = safety.max_level(level, "yellow")
+        reasons.append(f"Detak istirahat tinggi {round(r['value'])}/menit")
+    adh = _adherence(pid, 7)
+    if adh["total"] and adh["total"] - adh["taken"] >= 2:
+        level = safety.max_level(level, "yellow")
+        reasons.append(f"Obat terlewat {adh['total'] - adh['taken']} hari minggu ini")
+    seen: set[str] = set()
+    reasons = [r for r in reasons if not (r in seen or seen.add(r))]
+    return {"level": level, "reasons": reasons, "recommended": level != "green"}
+
+
+def _consult_view(c: dict[str, Any]) -> dict[str, Any]:
+    p = db.one("SELECT display_name, birth_year FROM patients WHERE id = ?", (c["patient_id"],))
+    who = db.one("SELECT name, relation FROM contacts WHERE id = ?", (c["contact_id"],))
+    return {
+        **{k: c[k] for k in ("id", "patient_id", "contact_id", "mode", "reason", "level", "status", "doctor_note", "created_at", "answered_at", "ended_at")},
+        "context": db.loads(c["context"], {}),
+        "patient_name": p["display_name"] if p else None,
+        "patient_age": _age(p["birth_year"]) if p else None,
+        "requested_by": who["name"] if who else None,
+        "doctor": config.DOCTOR,
+    }
+
+
+@app.post("/v1/patients/{pid}/doctor-consults")
+def request_consult(pid: str, body: ConsultIn) -> dict[str, Any]:
+    """Wali menekan "Hubungi dokter": dokter jaga ditelepon dengan ringkasan kondisi terbaru. Mode demo: simulasi."""
+    p = _patient_or_404(pid)
+    c = db.one("SELECT * FROM contacts WHERE id = ? AND patient_id = ?", (body.contact_id, pid))
+    if not c:
+        raise HTTPException(400, "Kontak bukan wali pasien ini")
+    active = db.one("SELECT * FROM doctor_consults WHERE patient_id = ? AND status IN ('ringing', 'in_call')", (pid,))
+    if active:
+        return _consult_view(active)
+    concern = _health_concerns(pid)
+    v = vitals.summary(pid, 7)["latest"]
+    context = {
+        "concerns": concern["reasons"],
+        "conditions": db.loads(p["conditions"], []),
+        "medications": db.loads(p["medications"], []),
+        "blood_pressure": (_bp_history(pid, 7) or [None])[-1],
+        "heart_rate": v.get("heart_rate"),
+        "spo2": v.get("spo2"),
+        "adherence_7d": {k: _adherence(pid, 7)[k] for k in ("taken", "total")},
+    }
+    cid = db.new_id()
+    now = config.now().isoformat()
+    db.execute("""INSERT INTO doctor_consults (id, patient_id, contact_id, mode, reason, level, context, status, created_at)
+                  VALUES (?,?,?,?,?,?,?, 'ringing', ?)""",
+               (cid, pid, c["id"], body.mode, body.reason.strip() or "; ".join(concern["reasons"]) or "Wali ingin berkonsultasi",
+                concern["level"], db.dumps(context), now))
+    return _consult_view(db.one("SELECT * FROM doctor_consults WHERE id = ?", (cid,)))
+
+
+@app.get("/v1/doctor-consults")
+def list_consults(active: bool = True) -> list[dict[str, Any]]:
+    where = "WHERE status IN ('ringing', 'in_call')" if active else ""
+    return [_consult_view(c) for c in db.query(f"SELECT * FROM doctor_consults {where} ORDER BY created_at DESC LIMIT 30")]
+
+
+@app.get("/v1/doctor-consults/{cid}")
+def get_consult(cid: str) -> dict[str, Any]:
+    c = db.one("SELECT * FROM doctor_consults WHERE id = ?", (cid,))
+    if not c:
+        raise HTTPException(404, "Konsultasi tidak ditemukan")
+    return _consult_view(c)
+
+
+@app.post("/v1/doctor-consults/{cid}/status")
+def update_consult(cid: str, body: ConsultUpdate) -> dict[str, Any]:
+    c = get_consult(cid)
+    now = config.now().isoformat()
+    if body.status == "in_call":
+        db.execute("UPDATE doctor_consults SET status = 'in_call', answered_at = COALESCE(answered_at, ?) WHERE id = ?", (now, cid))
+    else:
+        db.execute("UPDATE doctor_consults SET status = ?, ended_at = ?, doctor_note = COALESCE(NULLIF(?, ''), doctor_note) WHERE id = ?",
+                   (body.status, now, body.note, cid))
+        if body.note.strip():
+            contact = db.one("SELECT * FROM contacts WHERE id = ?", (c["contact_id"],))
+            if contact:
+                escalation.notify(contact, c["patient_id"], "doctor_note", "app", f"🩺 Catatan {config.DOCTOR['name']}", body.note.strip())
+    return get_consult(cid)
 
 
 @app.post("/v1/notifications/{nid}/action")

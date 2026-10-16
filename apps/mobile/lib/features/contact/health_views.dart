@@ -500,7 +500,7 @@ class _BodyViewState extends State<BodyView> {
             gradient: const RadialGradient(center: Alignment(0, -0.2), radius: 0.9, colors: [Color(0xFFFFFFFF), Color(0xFFE6EDF7)]),
             boxShadow: TShadow.soft,
           ),
-          child: Body3D(spots: [for (final s in spots) s.$1], selected: _sel, onSelect: (id) => setState(() => _sel = id), height: 420),
+          child: Body3D(spots: [for (final s in spots) s.$1], sex: (widget.feed['patient']['sex'] as String?) ?? 'F', selected: _sel, onSelect: (id) => setState(() => _sel = id), height: 420),
         ),
         const SizedBox(height: 12),
         SizedBox(

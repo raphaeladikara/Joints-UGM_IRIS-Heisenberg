@@ -164,13 +164,27 @@ CREATE TABLE IF NOT EXISTS device_syncs (
   sample_count INTEGER NOT NULL,
   synced_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS doctor_consults (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  contact_id TEXT NOT NULL REFERENCES contacts(id),
+  mode TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  level TEXT NOT NULL,
+  context TEXT NOT NULL DEFAULT '{}',
+  status TEXT NOT NULL DEFAULT 'ringing',
+  doctor_note TEXT,
+  created_at TEXT NOT NULL,
+  answered_at TEXT,
+  ended_at TEXT
+);
 CREATE INDEX IF NOT EXISTS idx_obs_patient ON observations(patient_id, observed_at);
 CREATE INDEX IF NOT EXISTS idx_calls_patient ON call_sessions(patient_id, started_at);
 CREATE INDEX IF NOT EXISTS idx_notif_contact ON notifications(contact_id, created_at);
 """
 
 TABLES = [
-    "device_syncs", "notifications", "events", "family_messages", "memories", "alerts", "travel_times", "hospitals",
+    "doctor_consults", "device_syncs", "notifications", "events", "family_messages", "memories", "alerts", "travel_times", "hospitals",
     "observations", "call_turns", "call_sessions", "contacts", "patients",
 ]
 

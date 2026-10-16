@@ -296,7 +296,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
           const Spacer(),
           Text(
             '${now.hour.toString().padLeft(2, '0')}.${now.minute.toString().padLeft(2, '0')}',
-            style: const TextStyle(fontFamily: 'Fredoka', fontSize: 72, color: Colors.white, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontFamily: 'Jakarta', fontSize: 72, color: Colors.white, fontWeight: FontWeight.w500),
           ),
           Text(dayLabel(DateTime.now().toIso8601String()), style: TText.body.copyWith(color: Colors.white70)),
           const SizedBox(height: 28),

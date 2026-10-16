@@ -21,6 +21,14 @@ LLM_TIMEOUT_S = float(os.getenv("TILIK_LLM_TIMEOUT_S", "6"))
 
 PUSKESMAS_NAME = os.getenv("TILIK_PUSKESMAS_NAME", "Puskesmas Wonosari I (simulasi)")
 
+# Dokter jaga penerima telekonsultasi dari wali. Mode demo: panggilannya disimulasikan di aplikasi Puskesmas.
+DOCTOR = {
+    "name": os.getenv("TILIK_DOCTOR_NAME", "dr. Ayu Lestari (simulasi)"),
+    "role": "Dokter jaga",
+    "facility": PUSKESMAS_NAME,
+    "hours": "24 jam",
+}
+
 # Zona waktu demo: WIB. Offset tetap supaya image slim tidak butuh tzdata.
 WIB = timezone(timedelta(hours=7), "WIB")
 

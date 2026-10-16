@@ -114,6 +114,12 @@ class Api {
   Future<Json> sendFamilyMessage(String patientId, String contactId, String text) =>
       post('/v1/patients/$patientId/family-messages', {'contact_id': contactId, 'text': text});
   Future<Json> vitals(String patientId) => get('/v1/patients/$patientId/vitals');
+  Future<Json> requestDoctor(String patientId, String contactId, {String mode = 'video', String reason = ''}) =>
+      post('/v1/patients/$patientId/doctor-consults', {'contact_id': contactId, 'mode': mode, 'reason': reason});
+  Future<Json> consult(String id) => get('/v1/doctor-consults/$id');
+  Future<List<dynamic>> activeConsults() => list('/v1/doctor-consults');
+  Future<Json> setConsultStatus(String id, String status, {String note = ''}) =>
+      post('/v1/doctor-consults/$id/status', {'status': status, 'note': note});
   Future<Json> postVitals(String patientId, String source, String device, List<Json> samples) =>
       post('/v1/patients/$patientId/vitals', {'source': source, 'device': device, 'samples': samples});
 }

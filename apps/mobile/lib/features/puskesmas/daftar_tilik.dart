@@ -7,6 +7,7 @@ import '../../core/widgets.dart';
 import '../contact/health_views.dart';
 import '../phone/mbah_phone.dart';
 import 'call_transcript.dart';
+import 'doctor_inbox.dart';
 
 /// F-13 Daftar Tilik Hari Ini untuk perawat Prolanis: 🔴/🟡 di paling atas, alasan tindak lanjut, tensi, kepatuhan.
 class DaftarTilik extends StatefulWidget {
@@ -54,6 +55,7 @@ class _DaftarTilikState extends State<DaftarTilik> with Poller<DaftarTilik> {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     children: [
                       if (pollError != null) ErrorBanner(pollError!),
+                      const DoctorInbox(),
                       _counts(d['counts'] as Json),
                       const SectionTitle('Prioritas tindak lanjut'),
                       for (final r in (d['rows'] as List).cast<Json>()) _row(r),

@@ -78,7 +78,11 @@ Tidak diangkat dua kali berturut-turut → 🟡. Sinyal jatuh dari jam tangan ya
 | F-18 Endpoint sinyal + jam tangan (LATER) | ✅ melebihi target | `/v1/events`, ingest tanda vital, tren 7 hari, sinkron jam tangan di aplikasi |
 | F-19 Protokol tidak diangkat (SHOULD) | ⚠️ | Baru aturan "2× tidak diangkat → 🟡". Ulang 15 menit dan minta Sahabat Tilik mengecek rumah belum |
 
-Tambahan di luar PRD: tubuh 3D interaktif untuk menunjuk keluhan, desain ramah lansia, log latensi suara (`GET /latency` di server suara).
+Tambahan di luar PRD:
+- **Hubungi dokter.** Wali bisa langsung video call atau menelepon dokter jaga Puskesmas dari beranda. Kartunya otomatis menonjol bila TILIK menemukan hal janggal (warna kuning/merah, tensi ≥ 160, oksigen rendah, detak istirahat tinggi, obat terlewat ≥ 2 hari). Ringkasan kondisi ikut terkirim ke dokter. Dokter menerima panggilan di aplikasi Puskesmas, dan catatannya masuk ke pesan keluarga. Endpoint: `/v1/patients/{id}/doctor-consults` dan `/v1/doctor-consults`. Mode demo: tidak ada nomor sungguhan yang ditelepon.
+- **Tubuh 3D sesuai gender.** Lansia pria memakai peci, kemeja batik, dan tongkat. Lansia wanita memakai sanggul uban, kebaya, dan kain jarik.
+- **Sinkron data kesehatan.** Apple Health (iPhone) dan Health Connect (Android: Samsung Health, Fitbit, Mi Fitness, dll.) sudah tersambung lewat paket `health` dan hanya membaca data. Di web/laptop memakai simulasi jam tangan.
+- Desain ramah lansia (Plus Jakarta Sans, putih-biru, gradien Pipo) dan log latensi suara (`GET /latency` di server suara).
 
 **Ringkasnya:** semua 14 fitur MUST sudah jalan end-to-end dalam mode demo. Kekurangan utamanya ada di kanal **dunia nyata** (Twilio PSTN, WhatsApp Cloud API, voice note asli) dan tiga fitur SHOULD (F-16, sebagian F-15 dan F-19).
 
