@@ -4,8 +4,26 @@
     {
       "name": "kring-web",
       "runtimeExecutable": "py",
-      "runtimeArgs": ["-m", "http.server", "8090", "--directory", "apps/mobile/build/web"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8090",
+        "--directory",
+        "apps/mobile/build/web"
+      ],
       "port": 8090
+    },
+    {
+      "name": "kring-video-static",
+      "runtimeExecutable": "py",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "video/kring-demo"
+      ],
+      "port": 8765
     }
   ]
 }
