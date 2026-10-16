@@ -6,7 +6,9 @@ def test_seeded_watch_summary(client):
     assert v["connected"] and v["last_sync"]["source_label"] == "Jam tangan (simulasi)"
     assert len(v["daily"]["steps"]) == 7 and v["latest"]["spo2"]["value"] >= 90
     assert client.get("/v1/contacts/c-dika/feed").json()["vitals"]["connected"]
-    assert not client.get("/v1/patients/p-harjo/vitals").json()["connected"]
+    # Semua pasien punya data dummy, dari sumber yang berbeda-beda.
+    labels = {pid: client.get(f"/v1/patients/{pid}/vitals").json()["last_sync"]["source_label"] for pid in ("p-harjo", "p-wiryo")}
+    assert labels == {"p-harjo": "Apple Health", "p-wiryo": "Health Connect"}
 
 
 def test_normal_sync_stays_green_and_replaces_daily_totals(client):

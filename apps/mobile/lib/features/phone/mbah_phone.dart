@@ -258,9 +258,9 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1513),
+      backgroundColor: const Color(0xFF0B1424),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1513),
+        backgroundColor: const Color(0xFF0B1424),
         foregroundColor: Colors.white,
         title: Text('HP ${_patient?['display_name'] ?? 'Mbah'}', style: TText.h2.copyWith(color: Colors.white)),
         actions: [
@@ -474,9 +474,9 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: ActionChip(
-                      backgroundColor: const Color(0xFF223029),
-                      disabledColor: const Color(0xFF223029),
-                      side: const BorderSide(color: Color(0xFF34443C)),
+                      backgroundColor: const Color(0xFF1C2A40),
+                      disabledColor: const Color(0xFF1C2A40),
+                      side: const BorderSide(color: Color(0xFF2E4060)),
                       label: Text(s, style: TText.small.copyWith(color: Colors.white)),
                       onPressed: _sending ? null : () => _send(s),
                     ),
@@ -503,7 +503,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
               ),
               const SizedBox(width: 8),
               Material(
-                color: _listening ? TColors.clay : const Color(0xFF223029),
+                color: _listening ? TColors.clay : const Color(0xFF1C2A40),
                 shape: const CircleBorder(),
                 child: InkWell(
                   customBorder: const CircleBorder(),
@@ -556,7 +556,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: l.fromTilik ? const Color(0xFF1F2D27) : TColors.brand,
+          color: l.fromTilik ? const Color(0xFF1A2638) : TColors.brand,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),

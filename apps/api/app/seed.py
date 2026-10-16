@@ -141,8 +141,10 @@ def run() -> None:
                 _alert(conn, p["id"], sid, t, [{"path": "rule", "code": "BP_CRISIS_ASYMPTOMATIC",
                                                 "label": "Tensi krisis tanpa gejala (hubungi hari ini)", "quote": "seratus delapan puluh empat per seratus empat"}])
 
-        # Jam tangan Bu Sri (simulasi): 7 hari langkah, tidur, detak, SpO2. Pasien lain belum punya perangkat.
-        _watch(conn, rng, "p-sri", today, now)
+        # Data kesehatan DUMMY 7 hari untuk semua pasien: langkah, tidur, detak, SpO2. Sumbernya sengaja beragam
+        # (jam simulasi, Apple Health, Health Connect) supaya semua jalur sinkron terlihat di demo.
+        for pid, prof in WATCH.items():
+            _watch(conn, rng, pid, today, now, **prof)
 
         # Memori & titip pesan untuk Bu Sri (babak 1 demo).
         conn.execute("INSERT INTO memories (id, patient_id, fact, category, created_at) VALUES (?,?,?,?,?)",
@@ -152,8 +154,19 @@ def run() -> None:
                       (now - timedelta(hours=10)).isoformat()))
 
 
-def _watch(conn, rng: random.Random, pid: str, today: datetime, now: datetime) -> None:
-    device, source = "Jam tangan Bu Sri (simulasi)", "watch_sim"
+# Profil jam tangan dummy per pasien: sumber, perangkat, rata-rata langkah, detak istirahat, SpO2, tidur (menit).
+WATCH: dict[str, dict[str, Any]] = {
+    "p-sri": {"source": "watch_sim", "device": "Jam tangan Bu Sri (simulasi)", "steps": 3100, "rhr": 70, "spo2": 96, "sleep": 360},
+    "p-harjo": {"source": "apple_health", "device": "Apple Watch SE (dummy)", "steps": 2300, "rhr": 78, "spo2": 95, "sleep": 330},
+    "p-painem": {"source": "health_connect", "device": "Mi Band 8 (dummy)", "steps": 1400, "rhr": 74, "spo2": 95, "sleep": 300},
+    "p-wiryo": {"source": "health_connect", "device": "Galaxy Watch5 (dummy)", "steps": 5600, "rhr": 66, "spo2": 97, "sleep": 390},
+    "p-lastri": {"source": "apple_health", "device": "Apple Watch Series 8 (dummy)", "steps": 2600, "rhr": 88, "spo2": 96, "sleep": 320},
+    "p-darmo": {"source": "health_connect", "device": "Fitbit Inspire 3 (dummy)", "steps": 1900, "rhr": 72, "spo2": 94, "sleep": 345},
+}
+
+
+def _watch(conn, rng: random.Random, pid: str, today: datetime, now: datetime, *, source: str, device: str,
+           steps: int, rhr: int, spo2: int, sleep: int) -> None:
 
     def obs(kind: str, value: dict[str, Any], at: datetime) -> None:
         conn.execute("INSERT INTO observations VALUES (?,?,?,?,?,?,?,?)", (db.new_id(), pid, None, kind, db.dumps(value), device, source, at.isoformat()))
@@ -162,14 +175,14 @@ def _watch(conn, rng: random.Random, pid: str, today: datetime, now: datetime) -
         day = today - timedelta(days=d)
         # Hari ini baru separuh jalan: langkah dihitung sampai jam sekarang.
         frac = 1.0 if d else max(0.15, min(1.0, (now.hour * 60 + now.minute - 300) / 900))
-        steps = int((3100 + rng.randint(-900, 1600)) * frac)
-        obs("steps", {"value": steps, "date": day.date().isoformat()}, day.replace(hour=12) if d else now)
-        obs("sleep", {"value": 360 + rng.randint(-50, 70), "date": day.date().isoformat()}, day.replace(hour=5, minute=30))
-        obs("resting_hr", {"value": float(70 + rng.randint(-4, 5))}, day.replace(hour=6))
-        obs("spo2", {"value": float(96 + rng.randint(-1, 2))}, day.replace(hour=4))
+        n = int((steps + rng.randint(-steps // 3, steps // 2)) * frac)
+        obs("steps", {"value": n, "date": day.date().isoformat()}, day.replace(hour=12) if d else now)
+        obs("sleep", {"value": sleep + rng.randint(-50, 60), "date": day.date().isoformat()}, day.replace(hour=5, minute=30))
+        obs("resting_hr", {"value": float(rhr + rng.randint(-4, 5))}, day.replace(hour=6))
+        obs("spo2", {"value": float(min(99, spo2 + rng.randint(-1, 2)))}, day.replace(hour=4))
         last_hour = 21 if d else max(6, now.hour)
         for h in range(6, last_hour + 1, 2):
-            obs("heart_rate", {"value": float(72 + rng.randint(-6, 14) + (8 if 8 <= h <= 10 else 0))}, day.replace(hour=h, minute=10))
+            obs("heart_rate", {"value": float(rhr + 2 + rng.randint(-6, 14) + (8 if 8 <= h <= 10 else 0))}, day.replace(hour=h, minute=10))
     conn.execute("INSERT INTO device_syncs (id, patient_id, source, device, sample_count, synced_at) VALUES (?,?,?,?,?,?)",
                  (db.new_id(), pid, source, device, 60, (now - timedelta(minutes=12)).isoformat()))
 
