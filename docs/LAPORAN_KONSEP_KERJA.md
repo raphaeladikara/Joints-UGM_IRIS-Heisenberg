@@ -91,7 +91,7 @@ Tambahan di luar PRD:
 - **Jadwal kontrol & obat.** Jadwal kontrol Prolanis/posyandu, stok obat dan saran ambil obat, pengingat di penutup telepon, kalender kepatuhan 30 hari.
 - **Suasana hati.** Ringkasan suasana hati dan kesepian 14/30 hari dari cerita harian; tanggapan KRING mengikuti suasana hati.
 - **Menu rendah garam, air & garam, rapor 30 hari untuk dokter, maskot Kiki, mode luring di APK.**
-- Desain ramah lansia (Plus Jakarta Sans, putih-biru, gradien Pipo) dan log latensi suara (`GET /latency` di server suara).
+- Desain ramah lansia (Nunito, palet "Daun & Tanah" krem-hijau-terakota, logo piringan telepon) dan log latensi suara (`GET /latency` di server suara).
 
 **Ringkasnya:** semua 14 fitur MUST sudah jalan end-to-end dalam mode demo. Kekurangan utamanya ada di kanal **dunia nyata** (Twilio PSTN ke nomor Indonesia) dan dua fitur SHOULD (F-16, sebagian F-15). Hasil evaluasi kuantitatif ada di §7.
 

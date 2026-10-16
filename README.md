@@ -26,7 +26,7 @@ flutter build apk --release        # build/app/outputs/flutter-apk/app-release.a
 ```
 
 Fitur baru di aplikasi keluarga: ringkasan harian + skor sehat, streak obat & telepon, jadwal & stok obat, air & garam,
-menu rendah garam (kirim resep ke Mbah), rapor 30 hari untuk dokter, model 3D lansia realistis (MakeHuman CC0), dan
+menu rendah garam (kirim resep ke Mbah), rapor 30 hari untuk dokter, model 3D nenek/kakek bergaya kartun (kebaya & jarik batik, peci & sarung), dan
 maskot Kiki. Endpoint fitur ini (`/care`, `/meds/*`, `/intake`, `/family-calls`, `/report`, pesan suara, protokol tidak diangkat) ada di API dan di mode offline.
 
 ## Status: Stage 1 (prototype aplikasi berjalan)
@@ -165,7 +165,7 @@ Daftar Kring sekali per hari; ambangnya ada di `content/red_flags.json` → `wea
 | iPhone | **Apple Health** | Folder `apps/mobile/ios` sudah berisi izin HealthKit; build di Mac (Xcode → Signing & Capabilities → HealthKit). |
 | Web / laptop | Simulasi jam tangan | Tombol "Simulasi jam tangan": hari biasa, oksigen turun, tensi tinggi. |
 
-Data jam tangan juga menghidupkan tab **Tubuh**: model 3D lansia (MakeHuman CC0, pria/wanita) dengan
+Data jam tangan juga menghidupkan tab **Tubuh**: model 3D lansia bergaya kartun (nenek berkebaya / kakek berpeci) dengan
 titik otak, jantung, paru, lengan (tensi), perut (obat), dan kaki (langkah) yang berwarna sesuai status.
 Setelah memperbarui server, tekan **Ulang data demo** supaya data jam tangan contoh Bu Sri ikut terisi.
 
