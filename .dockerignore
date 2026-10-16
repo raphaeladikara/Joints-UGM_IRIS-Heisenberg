@@ -1,0 +1,7 @@
+**/.venv
+**/__pycache__
+**/data
+apps/mobile
+paper
+docs
+.git

@@ -33,3 +33,14 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# Prototype: basis data lokal SQLite & artefak build Flutter
+apps/api/data/
+*.db
+*.db-shm
+*.db-wal
+apps/mobile/build/
+apps/mobile/.dart_tool/
+apps/mobile/android/key.properties
+*.jks
+*.iml

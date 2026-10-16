@@ -1,0 +1,35 @@
+# TILIK prototype.
+#   docker compose up --build -d          → API di http://127.0.0.1:8080 (docs: /docs)
+#   docker compose run --rm api pytest -q → tes backend
+#   docker compose --profile web up -d    → juga sajikan build web Flutter di http://127.0.0.1:8081
+#                                            (bangun dulu: cd apps/mobile && flutter build web --dart-define=TILIK_API=http://127.0.0.1:8080)
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DEMO_MODE: "true"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL_CLASSIFIER: ${OPENAI_MODEL_CLASSIFIER:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      TILIK_LLM_TIMEOUT_S: ${TILIK_LLM_TIMEOUT_S:-6}
+      TILIK_PUSKESMAS_NAME: ${TILIK_PUSKESMAS_NAME:-Puskesmas Wonosari I (simulasi)}
+    volumes:
+      - tilik-data:/data
+    restart: unless-stopped
+
+  web:
+    profiles: ["web"]
+    image: nginx:1.27-alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./apps/mobile/build/web:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+
+volumes:
+  tilik-data:

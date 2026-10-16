@@ -39,6 +39,7 @@ Aturan dokumen ini: **tidak ada keputusan berdasarkan asumsi.** Hal yang belum d
 | D-31 | 15 Okt | Akun Meta (WhatsApp Cloud API): **akun Raphael** | Tim | |
 | D-32 | 15 Okt | Kode: **nama variabel/fungsi/kelas bahasa Inggris**. **Komentar & docstring bahasa Indonesia**. Konten percakapan Indonesia/Jawa | Delegasi | Inggris konsisten dengan API library (Pipecat, OpenAI, Twilio). Komentar Indonesia konsisten dengan dokumen (D-08) dan mudah dibaca juri |
 | D-33 | 15 Okt | Arsitektur eskalasi **event-driven & agnostik perangkat**: sinyal apa pun (panggilan, telepon balik, tombol SOS, jam tangan, sensor) masuk ke mesin eskalasi yang sama. MVP: hanya sinyal dari panggilan. Stage 2: endpoint event + simulasi "jam tangan mendeteksi jatuh" | Delegasi | Menjawab pertanyaan "kalau krisis mendadak di luar jam telepon?" (lihat [15](15_DEFENSE_BANK.md)) |
+| D-34 | 16 Okt | Prototype aplikasi: **Flutter** (Android + web, 5 peran) + **FastAPI + SQLite di Docker** (`apps/mobile`, `apps/api`). Logika dialog, Safety Agent, dan eskalasi ditulis sebagai API yang nanti dipanggil pipeline Pipecat. Supabase/Next.js (D-16, D-17) belum dipakai; realtime diganti polling | Tim (minta prototype HP seperti Nyambung) + Delegasi (stack) | Bisa didemokan tanpa kunci API apa pun; jalur LLM opsional. Tidak menggantikan D-03–D-06 untuk pipeline telepon |
 | D-23 | – | Transport utama (PSTN vs WebRTC) | **Spike S-01** | Diisi setelah uji |
 | D-24 | – | Model TTS & voice ID ElevenLabs | **Spike S-02** | |
 | D-25 | – | Kode bahasa STT & dukungan Jawa | **Spike S-03** | |

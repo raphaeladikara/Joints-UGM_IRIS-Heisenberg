@@ -8,14 +8,16 @@ TILIK adalah agen suara AI yang setiap pagi menelepon lansia penderita hipertens
 
 ---
 
-## Status: Stage 0 (persiapan)
+## Status: Stage 1 (prototype aplikasi berjalan)
 
-Repo ini **belum berisi kode produk**. Saat ini isinya dokumen persiapan: blueprint, roadmap, keputusan, dan checklist yang harus selesai sebelum kode ditulis.
+Sudah ada **prototype yang bisa dijalankan**: API "otak" TILIK (dialog manager, Safety Agent, mesin eskalasi) di Docker,
+dan aplikasi HP Flutter dengan lima peran. Pipeline telepon sungguhan (Pipecat + Twilio + ElevenLabs) belum dipasang;
+di prototype, telepon Mbah disimulasikan di aplikasi (suara TTS/STT perangkat). Lihat [Prototype](#prototype-aplikasi-hp).
 
 | Stage | Periode | Status |
 |---|---|---|
-| Stage 0: Persiapan | 15 Okt 2026 | 🟡 Berjalan |
-| Stage 1: MVP | 16–18 Okt 2026 | ⏳ |
+| Stage 0: Persiapan | 15 Okt 2026 | ✅ |
+| Stage 1: MVP | 16–18 Okt 2026 | 🟡 Prototype aplikasi + API jalan; pipeline telepon belum |
 | Stage 2: Menuju Grand Final | 19–31 Okt 2026 | ⏳ |
 | Grand Final | 1 Nov 2026 | ⏳ |
 
@@ -59,8 +61,64 @@ Kalau baru bergabung, baca dengan urutan ini:
 ## Stack (rencana)
 Pipecat (Python) · ElevenLabs (Scribe STT + TTS) · OpenAI · Twilio · WhatsApp Cloud API · Supabase · Next.js. Detail dan alasannya ada di [03_ARSITEKTUR_TEKNIS.md](docs/stage-0/03_ARSITEKTUR_TEKNIS.md).
 
+## Prototype aplikasi HP
+
+```
+apps/mobile (Flutter, Android + web) ──HTTP/JSON, polling 2 dtk──▶ apps/api (FastAPI + SQLite, Docker)
+  ├─ HP Mbah (simulator telepon biasa)                               ├─ dialog.py      state machine percakapan
+  ├─ Keluarga (rapor, bahan obrolan, titip pesan, darurat)           ├─ safety.py      jalur aturan ∥ LLM (OR-gate)
+  ├─ Sahabat Tilik (panggilan darurat, langkah tolong)               ├─ nlu.py         angka/tensi/jam ID + Jawa
+  ├─ Puskesmas (Daftar Tilik Hari Ini, Tilik sekarang, simulasi)     ├─ escalation.py  event-driven, 3 warna
+  └─ IGD (Board pre-alert: LKW, golden period, skrining, ETA)        └─ content/       skrip & aturan (sumber tunggal)
+```
+
+### Alur yang bisa didemokan
+| Babak | Langkah di aplikasi | Yang terjadi |
+|---|---|---|
+| 1. Pagi biasa | **HP Mbah** → "minta TILIK menelepon" → Angkat → jawab (mikrofon, ketik, atau tombol jawaban) | Disclosure AI + kata sandi → titip pesan Mas Dika → obat → tensi dikonfirmasi ulang → gejala → cerita (memori kemarin dipakai) → penutup + edukasi SeGeRa Ke RS |
+| 1b. Hasil | **Keluarga** · **Puskesmas** | Rapor + bahan obrolan + tombol "Telepon Bu Sri"; Daftar Tilik ter-update, 🔴/🟡 di atas |
+| 2. Darurat | Di panggilan, jawab "Ngomongku kok angel, tangan kiwa lemes" | 🔴 seketika: pre-alert IGD + HP Bu Tini & Mas Dika berdering → skrining (ulang kalimat, angkat tangan, jam terakhir normal) → konferensi |
+| 2b. Eskalasi | **Keluarga** / **Sahabat Tilik** / **IGD** | Panggilan darurat layar penuh, hitung mundur golden period 4,5 jam, RS ber-CT terdekat + ETA, board IGD dengan tombol terima |
+| 3. Di luar jam telepon | **Puskesmas** → pasien → "Jam tangan: jatuh" | TILIK langsung menelepon Mbah; tidak diangkat → 🔴 otomatis (F-18) |
+
+Jalur aturan jalan **tanpa API key apa pun**. Bila `OPENAI_API_KEY` diisi, jalur LLM ikut mengklasifikasi tanda bahaya
+(OR-gate, tidak bisa menurunkan level) dan mengekstrak fakta untuk memori.
+
 ## Cara menjalankan
-*Akan diisi di Stage 1.* Ringkasan rencananya ada di [14_DELIVERABLE.md §6](docs/stage-0/14_DELIVERABLE.md).
+
+Prasyarat: Docker Desktop, Flutter 3.47 (Dart 3.13). Windows: cukup jalankan **`start.bat`**
+(`start.bat rebuild` · `start.bat apk` · `start.bat test` · `start.bat stop`). `.env` dibuat otomatis dari
+`.env.example`; prototype jalan tanpa mengisi apa pun, `OPENAI_API_KEY` opsional untuk jalur LLM.
+
+```bash
+docker compose up -d --build api            # API: http://127.0.0.1:8080  (dokumentasi: /docs)
+docker compose run --rm api pytest -q        # 36 tes: parser, aturan tanda bahaya, skenario demo
+```
+
+Aplikasi versi web (cepat untuk demo di laptop/proyektor):
+
+```bash
+cd apps/mobile
+flutter build web --release --dart-define=TILIK_API=http://127.0.0.1:8080
+cd ../.. && docker compose --profile web up -d web   # http://127.0.0.1:8081
+```
+
+APK Android (HP dan laptop di Wi-Fi yang sama; pakai IP laptop, bukan `localhost`):
+
+```bash
+cd apps/mobile
+flutter build apk --release --split-per-abi --dart-define=TILIK_API=http://<IP-laptop>:8080
+```
+
+Alamat server juga bisa diganti dari ikon ⚙ di layar awal. Emulator Android memakai `http://10.0.2.2:8080`.
+Tombol **Ulang data demo** mengembalikan semua data fiktif ke kondisi awal.
+
+### Batasan prototype (jujur)
+- Telepon Mbah disimulasikan di aplikasi; belum PSTN. Suara memakai TTS/STT perangkat, belum ElevenLabs.
+- WhatsApp dan konferensi telepon keluarga disimulasikan sebagai notifikasi di aplikasi.
+- Realtime memakai polling, belum Supabase Realtime. Belum ada autentikasi (prototype lokal, data fiktif).
+- Pengenalan ucapan berbasis aturan sederhana; frasa Jawa belum divalidasi penutur asli (Q-07).
+- Aturan klinis **draf**, belum direview nakes (Q-08). RS & waktu tempuh berlabel simulasi (Q-13).
 
 ## Catatan penting
 - Semua data di prototype adalah **data fiktif**.
