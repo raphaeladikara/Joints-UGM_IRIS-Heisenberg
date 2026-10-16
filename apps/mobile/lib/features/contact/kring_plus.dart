@@ -149,7 +149,7 @@ class _VoiceRecorderState extends State<VoiceRecorder> {
       style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52), backgroundColor: Colors.white),
       onPressed: _start,
       icon: const Icon(Icons.mic_rounded),
-      label: const Text('Rekam pesan suara (suara asli Anda)'),
+      label: const Text('Rekam pesan suara'),
     );
   }
 }
@@ -390,14 +390,14 @@ class _ScheduleCardState extends State<ScheduleCard> {
       _ => (TColors.greenTint, Icons.inventory_2_rounded),
     };
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: _card(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (pickup != null)
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: pc, borderRadius: BorderRadius.circular(18)),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,7 +443,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
       child: Row(
         children: [
           Container(
-            width: 52,
+            width: 48,
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(color: prolanis ? TColors.sky : TColors.sage, borderRadius: BorderRadius.circular(14)),
             child: Column(
@@ -458,7 +458,8 @@ class _ScheduleCardState extends State<ScheduleCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${a['title']} · $when', style: TText.h3.copyWith(fontSize: 16.5)),
+                Text(when.toUpperCase(), style: TText.label.copyWith(fontSize: 11.5, color: d <= 1 ? TColors.brandDeep : TColors.muted)),
+                Text('${a['title']}', style: TText.h3.copyWith(fontSize: 16.5)),
                 Text('${(a['time'] as String).replaceAll(':', '.')} · ${a['place']}', style: TText.small),
                 if ((a['note'] as String?)?.isNotEmpty ?? false) Text(a['note'] as String, style: TText.label.copyWith(color: TColors.muted)),
               ],

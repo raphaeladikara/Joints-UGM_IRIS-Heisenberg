@@ -29,8 +29,9 @@ Sudut 26 untuk panel/ubin, 30 untuk kartu utama, 18 untuk tombol dan input. Baya
 
 ## Komponen
 - `MetricTile`, `MiniBars`, `HeartLine`, `ActivityRings`, `BpGauge`, `PillNav` di `lib/core/health_widgets.dart`.
-- `Human3D` di `lib/core/human3d.dart`: model GLB lansia realistis (MakeHuman CC0, dibangun `tool/build_elder_glb.py`,
-  titik organ dari `tool/glb_anchors.py` → `assets/models/anchors.json`) di `<model-viewer>` (WebView, offline). Titik
+- `Human3D` di `lib/core/human3d.dart`: model GLB lansia bergaya kartun senada Kiki (nenek: kebaya
+  kutubaru, jarik kawung, sanggul uban, kacamata; kakek: peci, kemeja batik parang, sarung), dibangun
+  `tool/build_toon_elder_glb.py` tanpa aset pihak ketiga; titik organ ikut dihitung ke `assets/models/anchors.json`) di `<model-viewer>` (WebView, offline). Titik
   status = hotspot berdenyut; ketuk → panel detail, kamera menghadap titik. Desktop jatuh ke `Body3D` prosedural.
 - Maskot **Kiki** (burung kutilang biru, `lib/core/mascot.dart`): ekspresi mengikuti status (senang/cemas/siaga/ngantuk),
   dipakai di hero, kartu pasien, jadwal obat, layar kosong, dan rapor (`TiliSays`).

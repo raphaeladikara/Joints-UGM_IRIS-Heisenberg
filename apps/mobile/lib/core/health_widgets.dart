@@ -455,17 +455,27 @@ class PillNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    // Latar memudar di belakang pil: isi yang menggulir di bawah navigasi tidak "mengintip" berantakan.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [TColors.bg.withValues(alpha: 0), TColors.bg.withValues(alpha: 0.92), TColors.bg],
+          stops: const [0, 0.45, 1],
+        ),
+      ),
+      child: SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
         child: Center(
           heightFactor: 1,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: TColors.night, borderRadius: BorderRadius.circular(40), boxShadow: TShadow.lift),
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(color: TColors.night, borderRadius: BorderRadius.circular(30), boxShadow: TShadow.lift),
               child: Row(
                 children: [
                   for (final (i, it) in items.indexed)
@@ -480,8 +490,8 @@ class PillNav extends StatelessWidget {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 280),
                             curve: Curves.easeOutCubic,
-                            height: 60,
-                            decoration: BoxDecoration(color: i == index ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(32)),
+                            height: 54,
+                            decoration: BoxDecoration(color: i == index ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(25)),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -489,16 +499,16 @@ class PillNav extends StatelessWidget {
                                   isLabelVisible: it.badge > 0,
                                   label: Text('${it.badge}'),
                                   backgroundColor: TColors.clay,
-                                  child: Icon(it.icon, size: 25, color: i == index ? TColors.ink : Colors.white),
+                                  child: Icon(it.icon, size: 23, color: i == index ? TColors.ink : Colors.white),
                                 ),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: 1),
                                 Text(
                                   it.label,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontFamily: 'Jakarta',
-                                    fontSize: 12.5,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w800,
                                     color: i == index ? TColors.ink : Colors.white.withValues(alpha: 0.86),
                                   ),
@@ -514,6 +524,7 @@ class PillNav extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

@@ -487,12 +487,13 @@ class _BodyViewState extends State<BodyView> {
     final sel = spots.firstWhere((s) => s.$1.id == _sel, orElse: () => spots.first);
     final c = spotColor(sel.$1.level);
     final name = widget.feed['patient']['display_name'] as String;
+    // Model mengisi ± separuh layar: di HP 9:16 chip & panel detail tetap terlihat tanpa menggulir jauh.
+    final modelH = (MediaQuery.sizeOf(context).height * 0.5).clamp(300.0, 460.0);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
       children: [
-        Text('Tubuh $name hari ini', style: TText.h1),
-        const SizedBox(height: 4),
-        Text('Geser untuk memutar. Ketuk titik untuk melihat detail.', style: TText.small),
+        Text('Tubuh $name hari ini', style: context.compact ? TText.h2 : TText.h1),
+        Text('Geser untuk memutar, ketuk titik untuk detail.', style: TText.small),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -500,11 +501,11 @@ class _BodyViewState extends State<BodyView> {
             gradient: const RadialGradient(center: Alignment(0, -0.2), radius: 0.9, colors: [Color(0xFFFFFFFF), Color(0xFFE6EDF7)]),
             boxShadow: TShadow.soft,
           ),
-          child: Human3D(spots: [for (final s in spots) s.$1], sex: (widget.feed['patient']['sex'] as String?) ?? 'F', selected: _sel, onSelect: (id) => setState(() => _sel = id), height: 460),
+          child: Human3D(spots: [for (final s in spots) s.$1], sex: (widget.feed['patient']['sex'] as String?) ?? 'F', selected: _sel, onSelect: (id) => setState(() => _sel = id), height: modelH),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         SizedBox(
-          height: 52,
+          height: 50,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [

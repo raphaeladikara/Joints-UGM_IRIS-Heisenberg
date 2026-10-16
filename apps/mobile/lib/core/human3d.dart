@@ -11,7 +11,7 @@ import 'theme.dart';
 
 export 'body3d.dart' show BodySpot, spotColor;
 
-/// Model 3D lansia realistis (GLB dari aset MakeHuman CC0, lihat `tool/build_elder_glb.py`) di `<model-viewer>`.
+/// Model 3D lansia bergaya kartun (nenek berkebaya / kakek berpeci, GLB dari `tool/build_toon_elder_glb.py`) di `<model-viewer>`.
 /// Titik status organ = hotspot model-viewer; ketuk titik → [onSelect]. Warna titik & pilihan diperbarui lewat JS
 /// tanpa memuat ulang model. Di platform tanpa WebView (desktop) jatuh ke [Body3D] prosedural.
 class Human3D extends StatefulWidget {
@@ -108,7 +108,7 @@ class _Human3DState extends State<Human3D> {
       // auto-rotate memutar model (turntable), bukan kamera: kembalikan supaya titik menghadap pengguna.
       if (mv.resetTurntableRotation) mv.resetTurntableRotation(0);
       mv.cameraTarget = '0m ' + (cy + (p[1] - cy) * 0.35) + 'm 0m';
-      mv.cameraOrbit = (p[0] > 0.12 ? '28deg' : (p[0] < -0.12 ? '-28deg' : '0deg')) + ' 82deg 2.7m';
+      mv.cameraOrbit = (p[0] > 0.12 ? '28deg' : (p[0] < -0.12 ? '-28deg' : '0deg')) + ' 82deg 2.2m';
       mv.fieldOfView = '30deg';
     }
     // Beberapa GPU Android macet di render pertama WebView: paksa render ulang setelah model dimuat.
@@ -150,7 +150,7 @@ class _Human3DState extends State<Human3D> {
         autoRotateDelay: 2500,
         rotationPerSecond: '14deg',
         interactionPrompt: InteractionPrompt.none,
-        cameraOrbit: '-18deg 84deg 3.1m',
+        cameraOrbit: '-18deg 84deg 2.6m',
         cameraTarget: '0m ${cy}m 0m',
         fieldOfView: '30deg',
         minCameraOrbit: 'auto 55deg auto',

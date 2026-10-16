@@ -102,9 +102,10 @@ class SummaryCard extends StatelessWidget {
       (steps / stepGoal).clamp(0.0, 1.0),
     ];
     final score = (parts.reduce((a, b) => a + b) / parts.length * 100).round();
+    final ring = context.compact ? 124.0 : 150.0;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, context.compact ? 16 : 20),
       decoration: BoxDecoration(color: TColors.night, borderRadius: BorderRadius.circular(30), boxShadow: TShadow.lift),
       child: Column(
         children: [
@@ -115,7 +116,7 @@ class SummaryCard extends StatelessWidget {
               Text(dayLabel(DateTime.now().toIso8601String()), style: TText.label.copyWith(color: Colors.white60)),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: context.compact ? 8 : 14),
           Row(
             children: [
               Expanded(child: _side(bp == null ? '–' : '${bp['systolic']}/${bp['diastolic']}', 'Tensi pagi')),
@@ -124,14 +125,14 @@ class SummaryCard extends StatelessWidget {
                 duration: const Duration(milliseconds: 1200),
                 curve: Curves.easeOutExpo,
                 builder: (_, k, _) => CustomPaint(
-                  size: const Size.square(150),
+                  size: Size.square(ring),
                   painter: _GapRingPainter(k, const Color(0xFF2EE6B6)),
                   child: SizedBox.square(
-                    dimension: 150,
+                    dimension: ring,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('${(k * 100).round()}', style: TText.metric.copyWith(color: Colors.white, fontSize: 44)),
+                        Text('${(k * 100).round()}', style: TText.metric.copyWith(color: Colors.white, fontSize: ring * 0.29)),
                         Text('skor sehat', style: TText.small.copyWith(color: Colors.white70)),
                       ],
                     ),
@@ -141,7 +142,7 @@ class SummaryCard extends StatelessWidget {
               Expanded(child: _side(_fmtInt(steps), 'Langkah')),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.compact ? 10 : 16),
           Row(
             children: [
               _bar('Obat', '$taken / ${doses.length}', doses.isEmpty ? 0 : taken / doses.length, const Color(0xFF2EE6B6)),
@@ -515,12 +516,12 @@ class _MedsViewState extends State<MedsView> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
         children: [
-          Text('Jadwal obat $name', style: TText.h1),
-          const SizedBox(height: 4),
-          Text('Obat pagi dicatat otomatis dari telepon pagi; obat sore/malam bisa ditandai keluarga.', style: TText.small),
-          const SizedBox(height: 14),
+          Text('Jadwal obat $name', style: context.compact ? TText.h2 : TText.h1),
+          const SizedBox(height: 2),
+          Text('Obat pagi dicatat dari telepon pagi; obat sore/malam ditandai keluarga.', style: TText.small),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, context.compact ? 16 : 22),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
               gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF26354C), TColors.night]),
@@ -532,29 +533,29 @@ class _MedsViewState extends State<MedsView> {
                   allDone ? 'Semua obat hari ini sudah diminum!' : (next == null ? 'Tidak ada jadwal lagi hari ini' : (due ? 'Waktunya minum obat' : 'Obat berikutnya')),
                   style: TText.h3.copyWith(color: Colors.white),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: context.compact ? 8 : 14),
                 SizedBox.square(
-                  dimension: 190,
+                  dimension: context.compact ? 150 : 190,
                   child: CustomPaint(
                     painter: _DoseRingPainter(ring, [
                       for (final d in doses) (_dayFrac(d['time'] as String), d['status'] as String),
                     ], _dayFrac('${two(now.hour)}:${two(now.minute)}')),
-                    child: Center(child: Tili(size: 104, mood: allDone ? TiliMood.happy : (due ? TiliMood.worried : TiliMood.calm), waving: allDone)),
+                    child: Center(child: Tili(size: context.compact ? 80 : 104, mood: allDone ? TiliMood.happy : (due ? TiliMood.worried : TiliMood.calm), waving: allDone)),
                   ),
                 ),
                 const SizedBox(height: 10),
                 if (next != null) ...[
                   Text(left!.isNegative ? 'terlambat ${two(-left.inHours)}:${two(-left.inMinutes % 60)}' : countdown,
-                      style: TText.metric.copyWith(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 38)),
+                      style: TText.metric.copyWith(color: Colors.white, fontWeight: FontWeight.w600, fontSize: context.compact ? 32 : 38)),
                   const SizedBox(height: 4),
                   Text('${next['name']} · pukul ${(next['time'] as String).replaceAll(':', '.')}', style: TText.small.copyWith(color: Colors.white70)),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
                       backgroundColor: due ? const Color(0xFF2EE6B6) : Colors.white.withValues(alpha: 0.14),
                       foregroundColor: due ? TColors.night : Colors.white,
                       shape: const StadiumBorder(),
-                      minimumSize: const Size(240, 56),
+                      minimumSize: const Size(220, 52),
                     ),
                     onPressed: next['status'] == 'out' ? null : () => _take(next),
                     icon: const Icon(Icons.check_circle_rounded),
@@ -670,10 +671,10 @@ class _DoseRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
-            width: 56,
+            width: 50,
             child: Column(
               children: [
-                Text((dose['time'] as String).replaceAll(':', '.'), style: TText.h3),
+                Text((dose['time'] as String).replaceAll(':', '.'), style: TText.h3.copyWith(fontSize: 16)),
                 if (!last) Expanded(child: Container(width: 2, margin: const EdgeInsets.symmetric(vertical: 4), color: TColors.line)),
               ],
             ),
@@ -681,13 +682,13 @@ class _DoseRow extends StatelessWidget {
           Expanded(
             child: Container(
               margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: TColors.panel, borderRadius: BorderRadius.circular(20), boxShadow: TShadow.soft),
               child: Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
                     child: const Center(child: Text('💊', style: TextStyle(fontSize: 22))),
                   ),

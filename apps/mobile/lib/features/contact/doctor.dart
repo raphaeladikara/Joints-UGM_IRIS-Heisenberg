@@ -66,13 +66,13 @@ class DoctorCard extends StatelessWidget {
               ),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    const _DoctorAvatar(size: 52),
+                    const _DoctorAvatar(size: 46),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -93,7 +93,7 @@ class DoctorCard extends StatelessWidget {
                       : 'Ragu dengan kondisi $name? Dokter jaga siap ${doc['hours']}, ringkasan kondisi ikut terkirim.',
                   style: TText.small,
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 if (active != null)
                   FilledButton.icon(
                     onPressed: () async {
@@ -110,18 +110,22 @@ class DoctorCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: FilledButton.icon(
-                          style: flagged ? FilledButton.styleFrom(backgroundColor: s.fg == TColors.grey ? TColors.brand : s.fg) : null,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: flagged ? (s.fg == TColors.grey ? TColors.brand : s.fg) : null,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                          ),
                           onPressed: () => _start(context, 'video'),
                           icon: const Icon(Icons.videocam_rounded),
-                          label: const Text('Video call'),
+                          label: const Text('Video', maxLines: 1),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12)),
                           onPressed: () => _start(context, 'voice'),
                           icon: const Icon(Icons.call_rounded),
-                          label: const Text('Telepon'),
+                          label: const Text('Telepon', maxLines: 1),
                         ),
                       ),
                     ],
@@ -154,7 +158,7 @@ class _OnlineDot extends StatelessWidget {
   const _OnlineDot();
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(color: TColors.greenTint, borderRadius: BorderRadius.circular(99)),
     child: Row(
       mainAxisSize: MainAxisSize.min,

@@ -49,6 +49,15 @@ abstract final class TColors {
   static const nightLine = Color(0xFF2C3A50);
 }
 
+/// Layar ringkas: HP 9:16 (≈ 360×640 dp) atau lebar ≤ 380 dp. Dipakai untuk merapatkan jarak & mengecilkan grafik,
+/// bukan untuk mengecilkan teks.
+extension CompactX on BuildContext {
+  bool get compact {
+    final s = MediaQuery.sizeOf(this);
+    return s.height < 720 || s.width < 380;
+  }
+}
+
 abstract final class TShadow {
   /// Bayangan biru yang sangat tipis: kartu putih terangkat di atas latar putih tanpa terlihat kotor.
   static const soft = [BoxShadow(color: Color(0x120E3A7A), blurRadius: 28, offset: Offset(0, 10)), BoxShadow(color: Color(0x0A0E3A7A), blurRadius: 3, offset: Offset(0, 1))];

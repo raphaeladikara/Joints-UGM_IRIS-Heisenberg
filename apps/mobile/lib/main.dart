@@ -15,6 +15,17 @@ class TilikApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'KRING', debugShowCheckedModeBanner: false, theme: buildTheme(), home: const RoleGate());
+    return MaterialApp(
+      title: 'KRING',
+      debugShowCheckedModeBanner: false,
+      theme: buildTheme(),
+      home: const RoleGate(),
+      // Huruf sistem yang diperbesar tetap dihormati, tapi dibatasi supaya kartu tidak pecah di HP 360 dp.
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        final max = mq.size.width < 380 ? 1.15 : 1.3;
+        return MediaQuery(data: mq.copyWith(textScaler: mq.textScaler.clamp(minScaleFactor: 0.9, maxScaleFactor: max)), child: child!);
+      },
+    );
   }
 }

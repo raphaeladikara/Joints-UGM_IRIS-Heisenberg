@@ -136,29 +136,29 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
     final h = toWib(DateTime.now()).hour;
     final greet = h < 11 ? 'Selamat pagi' : (h < 15 ? 'Selamat siang' : (h < 18 ? 'Selamat sore' : 'Selamat malam'));
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(8, 4, 14, 6),
       child: Row(
         children: [
           IconButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const Icon(Icons.arrow_back_rounded, size: 22),
             tooltip: 'Kembali',
-            style: IconButton.styleFrom(backgroundColor: TColors.panel),
+            style: IconButton.styleFrom(backgroundColor: TColors.panel, minimumSize: const Size(46, 46)),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(greet, style: TText.small),
-                Text('${contact['name']}', style: TText.h2, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(greet, style: TText.label),
+                Text('${contact['name']}', style: TText.h3.copyWith(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
             decoration: BoxDecoration(color: TColors.panel, borderRadius: BorderRadius.circular(99), border: Border.all(color: TColors.line)),
-            child: Text(_isChild ? 'Keluarga' : 'Sahabat Kring', style: TText.small.copyWith(color: TColors.ink, fontWeight: FontWeight.w800)),
+            child: Text(_isChild ? 'Keluarga' : 'Sahabat Kring', style: TText.label.copyWith(color: TColors.ink, fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -227,39 +227,39 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
       child: PipoBackground(
         borderRadius: BorderRadius.circular(30),
         child: Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Tili(mood: moodForLevel(status), size: 76),
-              const SizedBox(width: 16),
+              Tili(mood: moodForLevel(status), size: 60),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: TText.h1),
-                    Text('${p['age']} tahun · ${p['village']}', style: TText.small.copyWith(color: TColors.ink.withValues(alpha: 0.7))),
+                    Text(name, style: TText.h1, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text('${p['age']} tahun · ${p['village']}', maxLines: 2, style: TText.small.copyWith(color: TColors.ink.withValues(alpha: 0.7))),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
             child: Row(
               children: [
-                Icon(s.icon, color: s.fg, size: 26),
+                Icon(s.icon, color: s.fg, size: 24),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Hari ini: ${s.label}', style: TText.h3.copyWith(color: s.fg == TColors.grey ? TColors.ink : s.fg)),
-                      Text('KRING menelepon setiap pukul ${p['call_time_local']}', style: TText.small),
+                      Text('KRING menelepon tiap ${p['call_time_local']}', style: TText.small),
                     ],
                   ),
                 ),
@@ -267,12 +267,12 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
             ),
           ),
           if (callButton) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             FilledButton.icon(
-              style: FilledButton.styleFrom(backgroundColor: TColors.night, minimumSize: const Size.fromHeight(58)),
+              style: FilledButton.styleFrom(backgroundColor: TColors.night, minimumSize: const Size.fromHeight(54)),
               onPressed: _callPatient,
               icon: const Icon(Icons.call_rounded),
-              label: Text('Telepon $name sekarang'),
+              label: Text('Telepon $name', maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ],
         ],
@@ -343,16 +343,16 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
             MoodCard(mood: f['care']['mood'] as Json, name: name, onCall: _callPatient),
           ],
           if (f['care']?['schedule'] != null) ...[
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
             _heading('Jadwal kontrol & ambil obat'),
             ScheduleCard(feed: f, onChanged: refreshNow),
           ],
           if (f['care'] != null) ...[
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
             _heading('Air & garam'),
             IntakeCard(feed: f, onChanged: refreshNow),
           ],
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
           _heading('Tensi & obat', trailing: f['care'] != null ? 'Rapor 30 hari' : null, onTrailing: _openReport),
           BpCard(f),
           const SizedBox(height: 12),
@@ -383,7 +383,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
               ],
             ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
           _heading('Dari jam tangan', trailing: connected ? 'Lihat tubuh' : null, onTrailing: () => setState(() => _tab = 1)),
           if (connected) ...[
             WatchTiles(vitals!),
@@ -436,11 +436,11 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           ],
           _patientHero(f, callButton: false),
           if (f['care']?['schedule'] != null) ...[
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
             _heading('Jadwal posyandu & kontrol'),
             ScheduleCard(feed: f, onChanged: refreshNow),
           ],
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
           _heading('Peran Anda'),
           HealthPanel(
             child: Text(
@@ -450,7 +450,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
               style: TText.body,
             ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
           _heading('Kalau KRING menelepon darurat'),
           HealthPanel(
             child: Column(
@@ -505,8 +505,8 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Pesan', style: TText.h1),
-              Text('WhatsApp dari KRING, disimulasikan di aplikasi ini.', style: TText.small),
+              Text('Pesan', style: context.compact ? TText.h2 : TText.h1),
+              Text('WhatsApp dari KRING (simulasi).', style: TText.small),
               if (_isChild) ...[const SizedBox(height: 14), _composeCard(f)],
               const SizedBox(height: 16),
               if (notes.isEmpty)
@@ -598,8 +598,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
             ],
           ),
           const SizedBox(height: 4),
-          Text('KRING membacakannya di telepon pagi berikutnya, diawali "${f['contact']['name']} titip pesan…". '
-              'Pesan suara diputar apa adanya, dengan suara Anda sendiri.',
+          Text('Dibacakan KRING di telepon pagi berikutnya. Pesan suara diputar dengan suara Anda sendiri.',
               style: TText.small.copyWith(color: TColors.butterInk)),
           const SizedBox(height: 10),
           VoiceRecorder(patientId: f['patient']['id'] as String, contactId: widget.contactId, onSent: refreshNow),

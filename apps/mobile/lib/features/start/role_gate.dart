@@ -157,18 +157,18 @@ class _RoleGateState extends State<RoleGate> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
-                _hero(),
                 const SizedBox(height: 12),
+                _hero(),
+                const SizedBox(height: 10),
                 _serverStatus(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
                 const Padding(
-                  padding: EdgeInsets.only(left: 4, bottom: 12),
+                  padding: EdgeInsets.only(left: 4, bottom: 10),
                   child: Text('Masuk sebagai', style: TText.h2),
                 ),
                 LayoutBuilder(
                   builder: (context, box) {
-                    final cols = box.maxWidth >= 340 ? 2 : 1;
+                    final cols = box.maxWidth >= 300 ? 2 : 1;
                     final w = (box.maxWidth - 12 * (cols - 1)) / cols;
                     final tiles = [
                       _RoleTile(
@@ -255,23 +255,26 @@ class _RoleGateState extends State<RoleGate> {
 
   /// Blok pembuka: janji produk di kiri, maskot melambai di kanan.
   Widget _hero() {
+    final c = context.compact;
     return DecoratedBox(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), boxShadow: TShadow.soft),
       child: PipoBackground(
         borderRadius: BorderRadius.circular(30),
         child: Stack(
           children: [
-            const Positioned(right: 4, bottom: 6, child: Tili(size: 132, waving: true)),
+            Positioned(right: 2, bottom: 4, child: Tili(size: c ? 96 : 132, waving: true)),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 138, 22),
+              padding: EdgeInsets.fromLTRB(18, c ? 16 : 22, c ? 100 : 138, c ? 16 : 22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Jalur cepat stroke dimulai dari rumah Mbah.', style: TText.h1.copyWith(fontSize: 25)),
-                  const SizedBox(height: 10),
+                  Text('Jalur cepat stroke dimulai dari rumah Mbah.', style: TText.h1.copyWith(fontSize: c ? 21 : 25)),
+                  const SizedBox(height: 8),
                   Text(
-                    'Telepon biasa tiap pagi: obat, tensi, gejala. Ada tanda bahaya, tetangga, anak, dan IGD langsung bergerak.',
-                    style: TText.body.copyWith(fontSize: 15.5, color: TColors.ink.withValues(alpha: 0.78)),
+                    c
+                        ? 'Telepon tiap pagi: obat, tensi, gejala. Ada tanda bahaya, semua langsung bergerak.'
+                        : 'Telepon biasa tiap pagi: obat, tensi, gejala. Ada tanda bahaya, tetangga, anak, dan IGD langsung bergerak.',
+                    style: TText.body.copyWith(fontSize: c ? 14.5 : 15.5, color: TColors.ink.withValues(alpha: 0.78)),
                   ),
                 ],
               ),
@@ -376,27 +379,27 @@ class _RoleTile extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 42,
+                    height: 42,
                     decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: Icon(icon, color: ink, size: 26),
+                    child: Icon(icon, color: ink, size: 23),
                   ),
                   const Spacer(),
-                  Icon(Icons.arrow_outward_rounded, color: ink),
+                  Icon(Icons.arrow_outward_rounded, color: ink, size: 20),
                 ],
               ),
-              const SizedBox(height: 14),
-              Text(title, style: TText.h3),
+              const SizedBox(height: 10),
+              Text(title, style: TText.h3, maxLines: 1, overflow: TextOverflow.ellipsis),
               Text(who, style: TText.small.copyWith(color: ink, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 6),
-              Text(subtitle, style: TText.small.copyWith(color: TColors.ink.withValues(alpha: 0.82))),
+              const SizedBox(height: 4),
+              Text(subtitle, maxLines: 3, overflow: TextOverflow.ellipsis, style: TText.label.copyWith(color: TColors.ink.withValues(alpha: 0.78), fontWeight: FontWeight.w600, height: 1.35)),
             ],
           ),
         ),
