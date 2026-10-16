@@ -2,8 +2,8 @@
  "ringkasan": {
   "mode": "aturan",
   "model": null,
-  "commit": "68185b7",
-  "waktu": "2026-10-16T20:07:36",
+  "commit": "167fc90",
+  "waktu": "2026-10-16T21:49:45",
   "recall_merah": "26/35",
   "alarm_palsu_merah_per_100": 13.0,
   "level_benar_non_kritis": "87/100",
@@ -19,14 +19,14 @@
   "guardrail_lolos": "6/8",
   "pola_sensitif_di_teks_kring": 0,
   "latensi_giliran_ms": {
-   "p50": 4.6,
-   "p95": 7.7,
+   "p50": 5.3,
+   "p95": 9.5,
    "n": 947
   },
   "latensi_giliran_gejala_llm_ms": null,
   "pemicu_merah_ke_feed_keluarga_ms": {
-   "p50": 15.6,
-   "maks": 21.0,
+   "p50": 16.4,
+   "maks": 23.8,
    "n": 40
   }
  },

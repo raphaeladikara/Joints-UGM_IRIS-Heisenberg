@@ -15,7 +15,7 @@ apps/voice  Pipecat: Silero VAD → ElevenLabs Scribe Realtime → KRING Brain �
                               │ HTTP, satu giliran = POST /v1/calls/{sid}/turns
                               ▼
 apps/api    FastAPI + SQLite: dialog.py (state machine, kalimat dari content/scripts.json) · nlu.py (aturan,
-            Indonesia + Jawa) · safety.py (aturan ∥ gpt-5.4-mini, OR-gate, batas 6 s) · escalation.py (event-driven)
+            Indonesia + Jawa) · safety.py (aturan ∥ gpt-6-luna, OR-gate, batas 6 s) · escalation.py (event-driven)
             · vitals.py (jam tangan) · care.py (obat, jadwal, rapor) · protocol.py (tidak diangkat)
                               │ HTTP/JSON, polling 2 detik
                               ▼
@@ -32,7 +32,7 @@ apps/mobile Flutter (Android, iOS, web): HP Mbah (simulator) · Keluarga · Saha
 | Event bus + Memory Agent terpisah | Fungsi di API yang dipanggil per giliran / akhir panggilan | Cukup untuk skala prototipe |
 | Konferensi Twilio | Disimulasikan sebagai panggilan darurat layar penuh di aplikasi | Twilio belum dikonfigurasi |
 
-Latensi terukur (WebRTC, 12 giliran): p50 1,78 s (VAD 0,70 · STT 0,34 · API 0,008 · TTS pertama 0,16), p95 5,1 s. Detail: [07 §6](07_EVALUASI.md).
+Latensi terukur (WebRTC, 12 giliran): p50 1,21 s (VAD 0,70 · STT 0,32 · API 0,014 · TTS pertama 0,16), p95 4,6 s. Detail: [07 §6](07_EVALUASI.md).
 
 ---
 

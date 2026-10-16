@@ -34,7 +34,7 @@ maskot Kiki. Endpoint fitur ini (`/care`, `/meds/*`, `/intake`, `/family-calls`,
 Sudah ada **prototype yang bisa dijalankan**: API "otak" KRING (dialog manager, Safety Agent, mesin eskalasi) di Docker,
 server suara Pipecat + ElevenLabs (`apps/voice`, jalur WebRTC sudah diuji end-to-end), dan aplikasi Flutter dengan lima
 peran. Telepon PSTN lewat Twilio sudah ditulis tetapi belum dipakai ke nomor Indonesia; di demo, telepon Mbah
-disimulasikan di aplikasi atau lewat browser. Lihat [Prototype](#prototype-aplikasi-hp) dan [hasil evaluasi](#hasil-evaluasi-16-okt-2026-commit-68185b7).
+disimulasikan di aplikasi atau lewat browser. Lihat [Prototype](#prototype-aplikasi-hp) dan [hasil evaluasi](#hasil-evaluasi-16-okt-2026-commit-167fc90).
 
 | Stage | Periode | Status |
 |---|---|---|
@@ -83,21 +83,21 @@ Dokumen Stage 0 adalah rencana 15 Okt; tiap dokumen punya catatan pembaruan di a
 | [Ringkasan ketentuan lomba](penjelasan_lomba.md) | Timeline, deliverable, rubrik |
 
 ## Stack (prototipe yang berjalan)
-Pipecat (Python) · ElevenLabs (Scribe Realtime STT + Flash TTS) · OpenAI gpt-5.4-mini · Twilio (kode siap, belum dipakai ke +62) · FastAPI + SQLite · Flutter.
+Pipecat (Python) · ElevenLabs (Scribe Realtime STT + Flash TTS) · OpenAI gpt-6-luna · Twilio (kode siap, belum dipakai ke +62) · FastAPI + SQLite · Flutter.
 WhatsApp Cloud API dan web Next.js dari rencana Stage 0 **digantikan aplikasi KRING**; Supabase/Postgres tetap rencana produksi.
 Detail di [03_ARSITEKTUR_TEKNIS.md](docs/stage-0/03_ARSITEKTUR_TEKNIS.md) §0.
 
-## Hasil evaluasi (16 Okt 2026, commit 68185b7)
+## Hasil evaluasi (16 Okt 2026, commit 167fc90)
 Harness ada di [`eval/`](eval/README.md), laporan JSON di `eval/reports/`. Semua data fiktif, skenario ditulis tim (belum direview nakes).
 
 | Metrik | Target | Hasil |
 |---|---|---|
-| Recall 🔴 (35 skenario kritis) | 100% | aturan 26/35 (74%) · aturan + LLM 34/35 (97%) |
+| Recall 🔴 (35 skenario kritis) | 100% | aturan 26/35 (74%) · aturan + LLM 35/35 (100%) |
 | Alarm palsu 🔴 per 100 panggilan non-kritis | baseline | 13 (semuanya negasi setelah kata gejala) |
 | F1 ekstraksi obat/alasan/tensi/gejala | ≥ 0,9 | 0,92 |
 | Disclosure AI + kata sandi | 100% | 20/20 |
 | Uji guardrail & kebocoran | 8/8 | 6/8 (1 bocor ke cucu yang menyebut nama pasien, 1 pertanyaan dosis tak dikenali) |
-| Latensi suara p50 / p95 (WebRTC, 12 giliran) | p50 ≤ 1,5 s | 1,78 s / 5,1 s |
+| Latensi suara p50 / p95 (WebRTC, 12 giliran) | p50 ≤ 1,5 s | 1,21 s / 4,6 s |
 | Pemicu 🔴 → panggilan darurat tercatat | ≤ 30 s | p50 0,02 s di server (+ ≤ 2 s polling aplikasi) |
 | WER 8 kHz Indonesia / Jawa (suara sintetis) | dilaporkan | 0% / 11,8% |
 | Biaya per 100 panggilan PSTN | – | ±US$27,2 (82% tarif telepon) |

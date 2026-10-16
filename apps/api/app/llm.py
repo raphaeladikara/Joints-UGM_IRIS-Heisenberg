@@ -60,4 +60,5 @@ def extract_facts(story: str) -> list[str] | None:
     data = _chat_json(EXTRACT_PROMPT, story)
     if not data or not isinstance(data.get("facts"), list):
         return None
-    return [str(f)[:140] for f in data["facts"][:2] if str(f).strip()]
+    # Titik akhir dibuang karena template pembuka memori sudah menambahkan tanda baca sendiri.
+    return [str(f).strip().rstrip(".")[:140] for f in data["facts"][:2] if str(f).strip().rstrip(".")]

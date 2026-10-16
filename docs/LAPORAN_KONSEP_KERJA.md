@@ -1,6 +1,6 @@
 # Laporan Konsep Kerja Aplikasi KRING
 
-Status per 16 Oktober 2026, branch `main` (commit `68185b7`). Seluruh data demo fiktif. Mode demo tidak pernah menelepon 119/RS.
+Status per 16 Oktober 2026, branch `main` (commit `167fc90`). Seluruh data demo fiktif. Mode demo tidak pernah menelepon 119/RS.
 
 ## 1. Gambaran singkat
 
@@ -49,7 +49,7 @@ Semua orang di sekitar Mbah (anak, Sahabat Kring, perawat Puskesmas, IGD) memaka
 5. **Cek gejala** (SeGeRa Ke RS + gejala krisis hipertensi), lalu obrolan ringan memakai memori dari panggilan sebelumnya.
 6. **Penilaian keselamatan dua jalur (OR-gate):**
    - Jalur 1, aturan deterministik (`safety.py` + `content/red_flags.json`), termasuk penanganan negasi ("tidak pusing").
-   - Jalur 2, LLM `gpt-5.4-mini` mengklasifikasi transkrip. Bila gagal atau lewat 6 detik, sistem tetap jalan di jalur aturan.
+   - Jalur 2, LLM `gpt-6-luna` mengklasifikasi transkrip. Bila gagal atau lewat 6 detik, sistem tetap jalan di jalur aturan.
    - Cukup satu jalur terpicu. Setiap keputusan menyimpan jalur pemicu, kutipan ucapan, dan waktu.
 7. **Warna hasil:**
    - 🟢 dicatat.
@@ -99,7 +99,7 @@ Tambahan di luar PRD:
 
 | Variabel | Nilai | Alasan |
 |---|---|---|
-| `OPENAI_MODEL_CLASSIFIER` / `OPENAI_MODEL_DIALOG` | `gpt-5.4-mini` | Tersedia di akun, cepat dan murah. Klasifikasi live 2,2 detik, di bawah batas 6 detik |
+| `OPENAI_MODEL_CLASSIFIER` / `OPENAI_MODEL_DIALOG` | `gpt-6-luna` | Tersedia di akun, termurah (US$0,10/0,50 per juta token) dan recall 35/35. Giliran gejala dengan LLM p50 2,3 s / p95 4,5 s, di bawah batas 6 detik |
 | `ELEVENLABS_VOICE_ID` | `WQ4h6sgS9p2XXvLsESBT` (Selina) | Suara perempuan Indonesia, paruh baya, tenang. Cocok untuk lansia |
 | `ELEVENLABS_SIM_VOICE_ID` | `j7n5yC6BN3oA2ZIWImty` (Bambang) | Suara pria Indonesia yang lebih berat untuk peran "Mbah" di simulator |
 | `ELEVENLABS_TTS_MODEL` / `STT_MODEL` / `STT_LANGUAGE` | `eleven_flash_v2_5` / `scribe_v2_realtime` / `id` | Latensi rendah, mendukung bahasa Indonesia |
@@ -121,23 +121,23 @@ Belum bisa diisi karena butuh akun tim: Twilio (SID, API key, nomor), `PUBLIC_BA
 
 Belum diuji: panggilan suara penuh lewat browser (perlu mikrofon/manusia) dan panggilan Twilio PSTN.
 
-## 7. Hasil evaluasi (16 Oktober 2026, commit `68185b7`)
+## 7. Hasil evaluasi (16 Oktober 2026, commit `167fc90`)
 
 Harness: [`eval/`](../eval/README.md). Laporan JSON: `eval/reports/`. Skenario ditulis tim dan kuncinya belum direview nakes.
 
 | Metrik | Target | Hasil |
 |---|---|---|
-| Recall 🔴, 35 skenario kritis | 100% | aturan 26/35 · aturan + gpt-5.4-mini 34/35 |
+| Recall 🔴, 35 skenario kritis | 100% | aturan 26/35 · aturan + gpt-6-luna 35/35 |
 | Alarm palsu 🔴 per 100 panggilan non-kritis | baseline | 13 |
 | F1 ekstraksi (obat, alasan, tensi, gejala) | ≥ 0,9 | 0,915 (P 0,913 · R 0,916) |
 | Disclosure AI + kata sandi | 100% | 20/20 |
 | Uji guardrail & kebocoran | 8/8 | 6/8 |
-| Latensi suara p50 / p95 (WebRTC, 12 giliran) | p50 ≤ 1,5 s | 1,78 s / 5,1 s |
-| Pemicu 🔴 → panggilan darurat tercatat | ≤ 30 s | p50 17 ms di server, maks 1,6 s (dengan LLM) + polling aplikasi ≤ 2 s |
+| Latensi suara p50 / p95 (WebRTC, 12 giliran) | p50 ≤ 1,5 s | 1,21 s / 4,6 s |
+| Pemicu 🔴 → panggilan darurat tercatat | ≤ 30 s | p50 20 ms di server, maks 5,3 s (dengan LLM) + polling aplikasi ≤ 2 s |
 | WER 8 kHz Indonesia / Jawa (suara sintetis) | dilaporkan | 0% (48 kata) / 11,8% (34 kata) |
-| Biaya 100 panggilan PSTN (75 dtk, 1.029 karakter, 659 token) | – | ±US$27,2: telepon 22,2 · TTS 4,1 · STT 0,8 · LLM 0,09 |
+| Biaya 100 panggilan PSTN (75 dtk, 1.029 karakter, 659 token) | – | ±US$27,1: telepon 22,2 · TTS 4,1 · STT 0,8 · LLM ±0,01 |
 
-Rincian latensi (p50): jeda VAD 700 ms, STT 343 ms, API 8 ms, suara pertama TTS 162 ms. Ekor p95 datang dari LLM di giliran gejala/cerita (±1,2–2 s) dan pesan keluarga panjang di awal panggilan.
+Rincian latensi (p50): jeda VAD 700 ms, STT 324 ms, API 14 ms, suara pertama TTS 156 ms. Ekor p95 datang dari LLM di giliran gejala/cerita (±1,5–3,6 s) dan pesan keluarga panjang di awal panggilan.
 
 ### Temuan yang perlu diperbaiki (belum diubah di kode)
 | Temuan | Contoh | Akibat |

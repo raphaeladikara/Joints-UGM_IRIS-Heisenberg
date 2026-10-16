@@ -114,7 +114,8 @@ Hasil pengukuran (diisi setelah tiap uji):
 | Tanggal | Transport | Giliran | p50 total | p95 total | Catatan |
 |---|---|---|---|---|---|
 | 2026-10-16 | teks (tes integrasi) | 6 | – | – | Hanya `api_ms`: 20–60 ms per giliran, jalur aturan tanpa LLM |
-| 2026-10-16 | WebRTC (`webrtc_sim.py`, babak 1 ×2, LLM aktif) | 12 | 1.780 ms | 5.101 ms | VAD 700 · STT 343 · API 8 (p95 1.970, LLM) · TTS pertama 162 (p95 4.006, pesan keluarga panjang) |
+| 2026-10-16 | WebRTC (`webrtc_sim.py`, babak 1 ×2, LLM gpt-5.4-mini) | 12 | 1.780 ms | 5.101 ms | VAD 700 · STT 343 · API 8 (p95 1.970, LLM) · TTS pertama 162 (p95 4.006, pesan keluarga panjang) |
+| 2026-10-16 | WebRTC (`webrtc_sim.py`, babak 1 ×2, LLM gpt-6-luna) | 12 | 1.214 ms | 4.611 ms | VAD 700 · STT 324 · API 14 (p95 3.306, LLM) · TTS pertama 156 (p95 1.647, pesan keluarga panjang) |
 
 ## Tes
 

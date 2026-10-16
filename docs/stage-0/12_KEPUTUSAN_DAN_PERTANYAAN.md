@@ -43,7 +43,8 @@ Aturan dokumen ini: **tidak ada keputusan berdasarkan asumsi.** Hal yang belum d
 | D-35 | 16 Okt | Nama produk **KRING** (dulu TILIK): bunyi dering telepon, satu-satunya yang perlu dilakukan Mbah adalah mengangkat | Tim | Hindari kebingungan dengan film *Tilik* (CMP-01); mudah diingat |
 | D-36 | 16 Okt | Kanal: **lansia lewat telepon biasa**, semua pihak lain lewat **satu aplikasi KRING** (Flutter, 5 peran). WhatsApp Cloud API (D-15, D-31) dan web Next.js (D-17) tidak dipakai | Tim | Sesuai prototipe; satu aplikasi lebih kaya (3D, jam tangan, dokter, jadwal obat) daripada WA + web |
 | D-37 | 16 Okt | Framing utama: **companion + jembatan keluarga dua arah**; kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga | Tim | Ide awal tim; lebih empatik. Stroke tetap pembeda dan sumber angka dampak |
-| D-38 | 16 Okt | Harness evaluasi `eval/` (E1 teks, E2 audio) dan hasil baseline commit 68185b7 dipakai di paper; temuan **tidak** di-*tune* ke set uji yang sama | Tim + Delegasi | Angka jujur; perbaikan diuji dengan set skenario baru |
+| D-39 | 16 Okt | Model OpenAI diganti `gpt-5.4-mini` → **`gpt-6-luna`** (menggantikan D-26) | Tim | Lebih murah (US$0,10/0,50 vs 0,75/4,50 per juta token) dan recall 🔴 naik 34/35 → 35/35. Konsekuensi: giliran gejala dengan LLM lebih lambat (p50 2,3 s vs 1,4 s) |
+| D-38 | 16 Okt | Harness evaluasi `eval/` (E1 teks, E2 audio) dan hasil baseline commit 167fc90 dipakai di paper; temuan **tidak** di-*tune* ke set uji yang sama | Tim + Delegasi | Angka jujur; perbaikan diuji dengan set skenario baru |
 | D-23 | 16 Okt | Transport utama (PSTN vs WebRTC) | Tim | **WebRTC** untuk demo (diuji end-to-end); kode Twilio siap tapi kredensial belum ada |
 | D-24 | 16 Okt | Model TTS & voice ID ElevenLabs | Tim | `eleven_flash_v2_5`, suara Selina (KRING) dan Bambang (simulator Mbah) |
 | D-25 | 16 Okt | Kode bahasa STT & dukungan Jawa | Tim | `scribe_v2_realtime`, bahasa `id` untuk semua; WER Jawa 11,8% (sintetis) |

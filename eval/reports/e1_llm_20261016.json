@@ -1,12 +1,12 @@
 {
  "ringkasan": {
   "mode": "aturan+LLM",
-  "model": "gpt-5.4-mini",
-  "commit": "68185b7",
-  "waktu": "2026-10-16T20:15:01",
-  "recall_merah": "34/35",
+  "model": "gpt-6-luna",
+  "commit": "167fc90",
+  "waktu": "2026-10-16T21:59:21",
+  "recall_merah": "35/35",
   "alarm_palsu_merah_per_100": 13.0,
-  "level_benar_non_kritis": "84/100",
+  "level_benar_non_kritis": "85/100",
   "ekstraksi": {
    "precision": 0.913,
    "recall": 0.916,
@@ -19,19 +19,19 @@
   "guardrail_lolos": "6/8",
   "pola_sensitif_di_teks_kring": 0,
   "latensi_giliran_ms": {
-   "p50": 4.4,
-   "p95": 1363.5,
-   "n": 812
+   "p50": 6.0,
+   "p95": 2288.8,
+   "n": 814
   },
   "latensi_giliran_gejala_llm_ms": {
-   "p50": 1405,
-   "p95": 2212,
+   "p50": 2293,
+   "p95": 4463,
    "n": 151
   },
   "pemicu_merah_ke_feed_keluarga_ms": {
-   "p50": 17.5,
-   "maks": 1582.6,
-   "n": 48
+   "p50": 20.0,
+   "maks": 5296.5,
+   "n": 49
   }
  },
  "kritis": [
@@ -98,7 +98,7 @@
    "red": true,
    "codes": [],
    "llm_reasons": [
-    "KELUHAN_SEPARUH_BADAN"
+    "KEBAS_SESISI"
    ]
   },
   {
@@ -188,7 +188,7 @@
    "red": true,
    "codes": [],
    "llm_reasons": [
-    "GANGGUAN_LIHAT_MENDADAK"
+    "GANGGUAN_PENGLIHATAN"
    ]
   },
   {
@@ -224,7 +224,7 @@
    "red": true,
    "codes": [],
    "llm_reasons": [
-    "WJAH_MIRING"
+    "WAJAH_MENCONG"
    ]
   },
   {
@@ -269,7 +269,7 @@
    "red": true,
    "codes": [],
    "llm_reasons": [
-    "SAKIT_KEPALA_HEBAT_MENDADAK"
+    "SAKIT_KEPALA_HEBAT"
    ]
   },
   {
@@ -293,10 +293,10 @@
   {
    "set": "critical",
    "symptom": "Asta kiwa kula mboten saged dipun angkat",
-   "red": false,
+   "red": true,
    "codes": [],
    "llm_reasons": [
-    "LEMAH_SESATU"
+    "LEMAH_SESISI"
    ]
   },
   {
@@ -307,7 +307,7 @@
     "MILD_SYMPTOM"
    ],
    "llm_reasons": [
-    "LEMAH_SESESI"
+    "LEMAH_KEBAS_SESISI"
    ]
   },
   {
@@ -442,9 +442,7 @@
    "codes": [
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TENSI_TINGGI_TANPA_GEJALA",
-    "TIDAK_ADA_KELUHAN"
+    "OBAT_HABIS"
    ],
    "med": "Dereng, obate telas",
    "bp": "seratus lima puluh per sembilan puluh",
@@ -485,9 +483,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_TERLUPA",
-    "TENSI_TINGGI"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "seratus lima puluh per sembilan puluh",
@@ -515,9 +511,8 @@
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
     "MED_MISSED",
-    "OBAT_BELUM",
     "TANPA_GEJALA",
-    "TD_TINGGI"
+    "TENSI_TINGGI"
    ],
    "med": "Belum, saya merasa sudah sehat",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -530,8 +525,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_TERLUPA"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "seratus tiga puluh per delapan puluh",
@@ -546,8 +540,7 @@
    "codes": [
     "BINGUNG",
     "CONFUSION",
-    "MED_MISSED",
-    "OBAT_LUPA"
+    "MED_MISSED"
    ],
    "med": "Belum, saya lupa",
    "bp": "140/85",
@@ -560,10 +553,9 @@
   {
    "set": "normal",
    "codes": [
-    "EFEK_SAMPING",
+    "EFEK_SAMPING_OBAT",
     "MED_MISSED",
-    "MED_OUT",
-    "OBAT_HABIS"
+    "MED_OUT"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "140/85",
@@ -582,8 +574,7 @@
    "codes": [
     "BINGUNG",
     "CONFUSION",
-    "MED_MISSED",
-    "OBAT_TERLUPA"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "140/85",
@@ -620,9 +611,7 @@
    "codes": [
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TENSI_TINGGI",
-    "TIDAK_Ada_GEJALA_URGENT"
+    "OBAT_HABIS"
    ],
    "med": "Dereng, obate telas",
    "bp": "satus sèket per sangang puluh",
@@ -678,9 +667,8 @@
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
     "MED_MISSED",
-    "OBAT_BELUM_MINUM",
-    "PUSING_RINGAN",
-    "TD_TINGGI"
+    "OBAT_BELUM_DIMINUM",
+    "TENSI_SANGAT_TINGGI"
    ],
    "med": "Belum, saya merasa sudah sehat",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -715,8 +703,7 @@
    "codes": [
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TENSI_TINGGI_TANPA_GAJALA"
+    "OBAT_HABIS"
    ],
    "med": "Dereng, obate telas",
    "bp": "seratus lima puluh per sembilan puluh",
@@ -760,10 +747,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_HABIS_LUPA",
-    "TANPA_GEJALA",
-    "TENSI_TINGGI"
+    "MED_MISSED"
    ],
    "med": "Belum, saya lupa",
    "bp": "seratus enam puluh lima per seratus",
@@ -776,7 +760,6 @@
   {
    "set": "normal",
    "codes": [
-    "GANGGUAN_PENGELIHATAN_LAMA",
     "MED_MISSED",
     "MED_OUT",
     "OBAT_HABIS"
@@ -808,9 +791,7 @@
    "set": "normal",
    "codes": [
     "BINGUNG",
-    "CONFUSION",
-    "OBAT_SUDAH",
-    "TD_TINGGI"
+    "CONFUSION"
    ],
    "med": "Sampun, tadi habis sarapan",
    "bp": "seratus lima puluh per sembilan puluh",
@@ -840,8 +821,7 @@
    "codes": [
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TENSI_TINGGI"
+    "OBAT_HABIS"
    ],
    "med": "Dereng, obate telas",
    "bp": "satus sèket per sangang puluh",
@@ -870,10 +850,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_LUPA",
-    "PUSING",
-    "TD_TINGGI"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "satus sèket per sangang puluh",
@@ -888,8 +865,7 @@
    "codes": [
     "BINGUNG",
     "CONFUSION",
-    "MED_MISSED",
-    "OBAT_BELUM"
+    "MED_MISSED"
    ],
    "med": "Belum, saya merasa sudah sehat",
    "bp": "140/85",
@@ -933,8 +909,7 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
-    "OBAT_SUDAH_MINUM",
-    "TENSI_TINGGI"
+    "TENSI_SANGAT_TINGGI"
    ],
    "med": "Inggih sampun",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -964,8 +939,7 @@
    "codes": [
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TD_TINGGI"
+    "OBAT_HABIS"
    ],
    "med": "Dereng, obate telas",
    "bp": "seratus enam puluh lima per seratus",
@@ -980,8 +954,7 @@
    "codes": [
     "EFEK_SAMPING",
     "MED_MISSED",
-    "MED_OUT",
-    "OBAT_HABIS"
+    "MED_OUT"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "belum ukur hari ini",
@@ -998,8 +971,7 @@
   {
    "set": "normal",
    "codes": [
-    "TD_TINGGI",
-    "TIDAK_ADA_GAJALA"
+    "TENSI_TINGGI"
    ],
    "med": "Sudah, barusan",
    "bp": "seratus enam puluh lima per seratus",
@@ -1013,10 +985,8 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
-    "JATUH_TAPI_BANGUN",
     "MED_MISSED",
-    "OBAT_BELUM",
-    "TENSI_TINGGI"
+    "TENSI_SANGAT_TINGGI"
    ],
    "med": "Belum, saya lupa",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -1043,14 +1013,11 @@
   },
   {
    "set": "normal",
-   "codes": [
-    "OBAT_SUDAH",
-    "TD_TINGGI"
-   ],
+   "codes": [],
    "med": "Wis tak ombe mau esuk",
    "bp": "seratus enam puluh lima per seratus",
    "symptom": "Kemarin batuk pilek sedikit",
-   "level": "yellow",
+   "level": "green",
    "expected": "green",
    "missing": [],
    "extra": []
@@ -1058,10 +1025,10 @@
   {
    "set": "normal",
    "codes": [
+    "EFEK_SAMPING",
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TD_TINGGI_TANPA_GEJALA"
+    "OBAT_HABIS"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "seratus lima puluh per sembilan puluh",
@@ -1091,7 +1058,6 @@
    "codes": [
     "MED_MISSED",
     "MED_OUT",
-    "MUAL_SETELAH_OBAT",
     "OBAT_HABIS"
    ],
    "med": "Belum, habis minum obat itu saya mual",
@@ -1150,9 +1116,7 @@
   {
    "set": "normal",
    "codes": [
-    "BELUM_MINUM_OBAT",
-    "MED_MISSED",
-    "OBAT_HABIS_SKIP"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "belum ukur hari ini",
@@ -1193,9 +1157,7 @@
    "codes": [
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TENSI_TINGGI_TANPA_GEJALA",
-    "TIDAK_ADA_GEJALA"
+    "OBAT_HABIS"
    ],
    "med": "Dereng, obate telas",
    "bp": "satus sèket per sangang puluh",
@@ -1208,10 +1170,10 @@
   {
    "set": "normal",
    "codes": [
+    "EFEK_SAMPING",
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TD_TINGGI"
+    "OBAT_HABIS"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "seratus enam puluh lima per seratus",
@@ -1230,9 +1192,9 @@
    "codes": [
     "BINGUNG",
     "CONFUSION",
+    "EFEK_SAMPING",
     "MED_MISSED",
-    "MED_OUT",
-    "OBAT_HABIS"
+    "MED_OUT"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "140/85",
@@ -1250,9 +1212,8 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
-    "OBAT_MINUM",
-    "TD_TINGGI",
-    "TIDAK_ADA_GEJALA"
+    "TANPA_GEJALA",
+    "TENSI_TINGGI"
    ],
    "med": "Inggih sampun",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -1317,9 +1278,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_BELUM_DITELAN",
-    "OBAT_HIPERTENSI_TERTUNDA"
+    "MED_MISSED"
    ],
    "med": "Belum, saya merasa sudah sehat",
    "bp": "seratus lima puluh per sembilan puluh",
@@ -1389,9 +1348,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_BELUM_MINUM",
-    "TENSI_TINGGI_TANPA_GEJALA"
+    "MED_MISSED"
    ],
    "med": "Belum, saya lupa",
    "bp": "satus sèket per sangang puluh",
@@ -1406,8 +1363,7 @@
    "codes": [
     "BINGUNG",
     "CONFUSION",
-    "MED_MISSED",
-    "OBAT_BELUM"
+    "MED_MISSED"
    ],
    "med": "Belum, saya merasa sudah sehat",
    "bp": "satus sèket per sangang puluh",
@@ -1458,10 +1414,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_LUPA",
-    "TENSI_TINGGI",
-    "TIDAK_Ada_Gejala"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "satus sèket per sangang puluh",
@@ -1485,10 +1438,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_LUPA",
-    "TENSI_TINGGI",
-    "TIDAK_ADA_GEJALA"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "seratus enam puluh lima per seratus",
@@ -1517,10 +1467,10 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
+    "EFEK_SAMPING_OBAT",
     "MED_MISSED",
     "MED_OUT",
-    "OBAT_HABIS",
-    "TEKANAN_TINGGI"
+    "TENSI_TINGGI"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -1590,7 +1540,7 @@
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
     "PUSING_RINGAN",
-    "TD_TINGGI"
+    "TENSI_TINGGI"
    ],
    "med": "Wis tak ombe mau esuk",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -1603,8 +1553,7 @@
   {
    "set": "normal",
    "codes": [
-    "MED_MISSED",
-    "OBAT_TERLEWAT"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "140/85",
@@ -1671,8 +1620,8 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
-    "OBAT_SUDAH_MINUM",
-    "TD_TINGGI"
+    "TANPA_KELUHAN",
+    "TENSI_SANGAT_TINGGI"
    ],
    "med": "Sudah, barusan",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -1687,8 +1636,7 @@
    "codes": [
     "BINGUNG",
     "CONFUSION",
-    "MED_MISSED",
-    "OBAT_HABIS_LEWAT"
+    "MED_MISSED"
    ],
    "med": "Dereng, kelalen",
    "bp": "140/85",
@@ -1703,8 +1651,7 @@
    "codes": [
     "EFEK_SAMPING",
     "MED_MISSED",
-    "MED_OUT",
-    "OBAT_HABIS"
+    "MED_OUT"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "seratus tiga puluh per delapan puluh",
@@ -1723,6 +1670,7 @@
    "codes": [
     "BINGUNG",
     "CONFUSION",
+    "EFEK_SAMPING",
     "MED_MISSED",
     "MED_OUT",
     "OBAT_HABIS"
@@ -1743,8 +1691,7 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
-    "OBAT_SUDAH_DIMINUM",
-    "TENSI_TINGGI"
+    "TENSI_SANGAT_TINGGI"
    ],
    "med": "Sudah, barusan",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -1757,10 +1704,7 @@
   {
    "set": "normal",
    "codes": [
-    "KELUHAN_RINGAN",
-    "MED_MISSED",
-    "OBAT_BELUM",
-    "TENSI_TINGGI_TANPA_GEJALA"
+    "MED_MISSED"
    ],
    "med": "Belum, saya lupa",
    "bp": "satus sèket per sangang puluh",
@@ -1774,8 +1718,7 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
-    "OBAT_SUDAH_MINUM",
-    "TD_TINGGI"
+    "TENSI_TINGGI"
    ],
    "med": "Sampun, tadi habis sarapan",
    "bp": "seratus delapan puluh lima per seratus lima",
@@ -1790,7 +1733,7 @@
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
     "MED_MISSED",
-    "OBAT_HABIS_LUPA",
+    "OBAT_TERLEWAT",
     "TENSI_TINGGI"
    ],
    "med": "Belum, saya lupa",
@@ -1817,8 +1760,7 @@
    "codes": [
     "EFEK_SAMPING",
     "MED_MISSED",
-    "MED_OUT",
-    "OBAT_HABIS"
+    "MED_OUT"
    ],
    "med": "Belum, habis minum obat itu saya mual",
    "bp": "seratus tiga puluh per delapan puluh",
@@ -1835,8 +1777,8 @@
   {
    "set": "normal",
    "codes": [
-    "OBAT_MINUM",
-    "TD_TINGGI"
+    "TANPA_GEJALA",
+    "TENSI_TINGGI"
    ],
    "med": "Inggih sampun",
    "bp": "seratus enam puluh lima per seratus",
@@ -1872,6 +1814,7 @@
    "set": "normal",
    "codes": [
     "BP_CRISIS_ASYMPTOMATIC",
+    "EFEK_SAMPING",
     "MED_MISSED",
     "MED_OUT",
     "OBAT_HABIS",

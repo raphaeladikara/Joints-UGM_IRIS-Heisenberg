@@ -16,7 +16,7 @@ DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() != "false"
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-OPENAI_MODEL_CLASSIFIER = os.getenv("OPENAI_MODEL_CLASSIFIER", "").strip() or "gpt-5.4-mini"
+OPENAI_MODEL_CLASSIFIER = os.getenv("OPENAI_MODEL_CLASSIFIER", "").strip() or "gpt-6-luna"
 LLM_TIMEOUT_S = float(os.getenv("TILIK_LLM_TIMEOUT_S", "6"))
 
 PUSKESMAS_NAME = os.getenv("TILIK_PUSKESMAS_NAME", "Puskesmas Wonosari I (simulasi)")

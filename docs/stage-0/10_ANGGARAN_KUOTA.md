@@ -76,8 +76,8 @@ biaya_per_panggilan ≈ Σ_giliran (token_input × harga_input + token_output ×
 
 ## Biaya terukur (16 Okt 2026)
 
-Diukur dari satu panggilan pagi di uji E2 (75 detik, 1.029 karakter TTS, 564 token masuk + 95 token keluar) dengan harga
-publik per 16 Okt: gpt-5.4-mini US$0,75/4,50 per juta token, ElevenLabs Flash US$0,04/1.000 karakter, Scribe Realtime
+Diukur dari satu panggilan pagi di uji E2 (75 detik, 1.029 karakter TTS, 564 token masuk + 95 token keluar, diukur dengan gpt-5.4-mini; token penalaran gpt-6-luna bisa menambah sedikit) dengan harga
+publik per 16 Okt: gpt-6-luna US$0,10/0,50 per juta token, ElevenLabs Flash US$0,04/1.000 karakter, Scribe Realtime
 US$0,39/jam, Twilio ke ponsel Indonesia US$0,1066/menit + Media Streams US$0,0044/menit (dibulatkan 2 menit).
 
 | Pos | Per 100 panggilan |
@@ -85,7 +85,7 @@ US$0,39/jam, Twilio ke ponsel Indonesia US$0,1066/menit + Media Streams US$0,004
 | Telepon (Twilio) | US$22,2 |
 | TTS | US$4,1 |
 | STT | US$0,8 |
-| LLM | US$0,09 |
-| **Total** | **±US$27,2** (tanpa PSTN/WebRTC: ±US$5,0) |
+| LLM | ±US$0,01 |
+| **Total** | **±US$27,1** (tanpa PSTN/WebRTC: ±US$5,0) |
 
 Pemakaian kredit ElevenLabs per 16 Okt malam: 23.493 dari 40.000 karakter (paket Starter).

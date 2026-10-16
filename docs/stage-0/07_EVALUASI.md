@@ -75,7 +75,7 @@ eval/
 - Hitung `articulation_rate`, `pause_ratio` dengan parselmouth/librosa → plot vs baseline.
 - **Framing jujur:** ini demonstrasi kemampuan teknis, bukan validasi klinis.
 
-## 6. Hasil baseline (16 Okt 2026, commit 68185b7)
+## 6. Hasil baseline (16 Okt 2026, commit 167fc90, LLM gpt-6-luna)
 
 Implementasi harness berbeda dari rancangan §4: **E1 memakai skenario tertulis** (bukan pasien sintetis LLM) supaya hasilnya
 deterministik dan bisa diulang. Kode: [`eval/run_eval.py`](../../eval/run_eval.py), [`eval/run_wer.py`](../../eval/run_wer.py).
@@ -83,12 +83,12 @@ Laporan: `eval/reports/`.
 
 | Metrik | Target MVP | Hasil |
 |---|---|---|
-| Recall 🔴 (35 skenario kritis: 30 di giliran gejala + 5 disebut lebih awal) | 100% | aturan 26/35 · aturan + LLM 34/35 |
+| Recall 🔴 (35 skenario kritis: 30 di giliran gejala + 5 disebut lebih awal) | 100% | aturan 26/35 · aturan + LLM 35/35 |
 | Alarm palsu 🔴 per 100 panggilan non-kritis | baseline | 13 |
 | F1 ekstraksi (obat, alasan, tensi, gejala) | baseline | 0,915 |
 | Kepatuhan disclosure | 100% | 20/20 |
 | Guardrail & kebocoran (8 uji) | 0 pelanggaran | 2 gagal (1 kebocoran ke cucu, 1 frasa dosis) |
-| Latensi p50 / p95 (WebRTC, 12 giliran) | p50 ≤ 1,5 s | 1,78 s / 5,1 s |
+| Latensi p50 / p95 (WebRTC, 12 giliran) | p50 ≤ 1,5 s | 1,21 s / 4,6 s |
 | WER 8 kHz Indonesia / Jawa (suara sintetis) | baseline | 0% / 11,8% |
 | Waktu eskalasi (pemicu 🔴 → panggilan darurat tercatat di server) | ≤ 30 s | p50 17 ms (+ polling aplikasi ≤ 2 s) |
 
