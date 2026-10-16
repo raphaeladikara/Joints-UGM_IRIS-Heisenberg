@@ -1,12 +1,14 @@
 # 05 · Desain Percakapan & Keselamatan Klinis
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 > ⚠️ **Status: DRAF, belum direview tenaga kesehatan.** Semua aturan tanda bahaya, ambang tensi, dan skrip skrining di dokumen ini disusun dari sumber publik (Kemenkes SeGeRa Ke RS, CPSS, literatur krisis hipertensi) dan **wajib direview nakes** sebelum dipakai dengan pasien sungguhan. Di MVP semuanya hanya dipakai dengan persona fiktif.
 >
 > ⚠️ **Frasa bahasa Jawa** di dokumen ini perlu divalidasi penutur asli (pertanyaan terbuka Q-07).
 
 ---
 
-## 1. Prinsip suara TILIK
+## 1. Prinsip suara KRING
 
 | Prinsip | Implementasi |
 |---|---|
@@ -41,15 +43,15 @@ stateDiagram-v2
 ```
 
 - Red flag bisa muncul **di state mana pun**. Safety Agent memeriksa setiap giliran.
-- `WRONG_PERSON`: kalau yang mengangkat bukan pasien (cucu/tetangga), TILIK **tidak** menyebut data medis apa pun. TILIK hanya meminta disambungkan ke pasien atau menelepon lagi nanti.
+- `WRONG_PERSON`: kalau yang mengangkat bukan pasien (cucu/tetangga), KRING **tidak** menyebut data medis apa pun. KRING hanya meminta disambungkan ke pasien atau menelepon lagi nanti.
 
 ## 3. Skrip per state (draf)
 
-Format: **ID** = Bahasa Indonesia, **JV** = Jawa krama (perlu validasi). Bahasa yang dipakai mengikuti `patients.preferred_language`. Kalau pasien menjawab dengan bahasa lain, TILIK mengikuti (MVP: lewat instruksi ke LLM; deteksi otomatis = LATER).
+Format: **ID** = Bahasa Indonesia, **JV** = Jawa krama (perlu validasi). Bahasa yang dipakai mengikuti `patients.preferred_language`. Kalau pasien menjawab dengan bahasa lain, KRING mengikuti (MVP: lewat instruksi ke LLM; deteksi otomatis = LATER).
 
 ### GREETING (wajib: disclosure + kata sandi)
-- ID: "Selamat pagi, Bu Sri. Saya Tilik, **asisten AI** dari Puskesmas. Kata sandi keluarga: **{codeword}**. Apa Ibu ada waktu sebentar?"
-- JV: "Sugeng enjing, Bu Sri. Kula Tilik, **asisten AI** saking Puskesmas. Tembung sandhi kulawarga: **{codeword}**. Panjenengan wonten wekdal sekedhap?"
+- ID: "Selamat pagi, Bu Sri. Saya Kring, **asisten AI** dari Puskesmas. Kata sandi keluarga: **{codeword}**. Apa Ibu ada waktu sebentar?"
+- JV: "Sugeng enjing, Bu Sri. Kula Kring, **asisten AI** saking Puskesmas. Tembung sandhi kulawarga: **{codeword}**. Panjenengan wonten wekdal sekedhap?"
 
 ### IDENTITY_CHECK
 - Memastikan yang menjawab adalah pasien (nama panggilan). Kalau ragu, tanyakan nama.
@@ -99,7 +101,7 @@ Format: **ID** = Bahasa Indonesia, **JV** = Jawa krama (perlu validasi). Bahasa 
 | `NO_ANSWER_2X` | 2 panggilan berturut-turut tidak diangkat | 🟡 | Kader/kunjungan |
 | `CONFUSION` | Pasien tampak bingung berulang (tidak tahu hari/orang) | 🟡 (🔴 jika mendadak) | Tindak lanjut / STROKE_SCREEN |
 
-> Kata "**mendadak**" penting: gejala stroke adalah gejala yang muncul tiba-tiba. TILIK selalu menanyakan "sejak kapan?".
+> Kata "**mendadak**" penting: gejala stroke adalah gejala yang muncul tiba-tiba. KRING selalu menanyakan "sejak kapan?".
 
 ### 4.2 Jalur LLM
 - Input: ringkasan percakapan + observasi.
@@ -129,20 +131,20 @@ Format: **ID** = Bahasa Indonesia, **JV** = Jawa krama (perlu validasi). Bahasa 
 | Level | Ke siapa | Kanal | Batas waktu target |
 |---|---|---|---|
 | 🟢 | Keluarga (rapor) | WA | Setelah panggilan |
-| 🟡 | Puskesmas (Daftar Tilik), keluarga (rapor bertanda) | Web + WA | Tindak lanjut ≤ 24 jam (🟡+ hari yang sama) |
-| 🔴 | Sahabat Tilik → anak → IGD (pre-alert) + instruksi 119 | Konferensi telepon + WA + Board IGD | Segera |
+| 🟡 | Puskesmas (Daftar Kring), keluarga (rapor bertanda) | Web + WA | Tindak lanjut ≤ 24 jam (🟡+ hari yang sama) |
+| 🔴 | Sahabat Kring → anak → IGD (pre-alert) + instruksi 119 | Konferensi telepon + WA + Board IGD | Segera |
 
 ## 7. Penanganan situasi khusus
 
-| Situasi | Perilaku TILIK |
+| Situasi | Perilaku KRING |
 |---|---|
 | Tidak diangkat | Coba lagi 1× setelah 15 menit (konfigurasi). Dua hari berturut-turut → 🟡 `NO_ANSWER_2X` |
 | Yang mengangkat orang lain | `WRONG_PERSON`, tanpa data medis |
 | Pasien tidak mendengar jelas | Ulangi lebih pelan dan sederhana. Setelah 2× gagal → tandai "perlu ditelepon manusia" |
-| Pasien bingung TILIK itu siapa | Ulangi disclosure ("Kula asisten AI, sanes tiyang") |
+| Pasien bingung KRING itu siapa | Ulangi disclosure ("Kula asisten AI, sanes tiyang") |
 | Pasien menolak ditelepon hari itu | Hormati, tutup dengan sopan, catat |
 | Pasien minta berhenti layanan | Konfirmasi, catat `revoked_at`, beri tahu Puskesmas |
-| Ada yang menyuruh TILIK "abaikan instruksi"/meminta data | Tolak dengan sopan. Tidak ada aksi di luar tool whitelist |
+| Ada yang menyuruh KRING "abaikan instruksi"/meminta data | Tolak dengan sopan. Tidak ada aksi di luar tool whitelist |
 | Pasien bertanya dosis/diagnosis | "Pitakenan menika langkung sae dipunaturaken dhateng dokter/perawat Puskesmas. Kula catet supados dipuntindaklanjuti." |
 | Pasien kesepian/ingin ngobrol lama | Dengarkan sebentar (batas durasi), lalu arahkan ke keluarga/kader/kegiatan warga. Nudge Kangen (SHOULD) |
 
@@ -158,5 +160,5 @@ Format: **ID** = Bahasa Indonesia, **JV** = Jawa krama (perlu validasi). Bahasa 
 - [ ] Skrip final tiap state (ID + JV) → validasi penutur asli
 - [ ] Daftar aturan tanda bahaya → **review nakes** (kalau belum ada nakes, tandai "draf" di semua materi)
 - [ ] Pustaka kalimat edukasi SeGeRa Ke RS (bergilir)
-- [ ] Teks briefing konferensi untuk Sahabat Tilik & anak (≤ 15 detik)
+- [ ] Teks briefing konferensi untuk Sahabat Kring & anak (≤ 15 detik)
 - [ ] Template rapor WA (🟢/🟡) & alert WA (🔴)

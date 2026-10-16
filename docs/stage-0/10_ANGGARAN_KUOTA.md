@@ -1,5 +1,7 @@
 # 10 · Anggaran & Kuota
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 Prinsip dari tim: **pakai yang paling hemat.** Yang berbayar hanya ElevenLabs Starter. OpenAI dipakai dari billing yang sudah ada dengan model termurah yang lolos uji. Twilio tetap trial. Sisanya free tier.
 
 > Angka harga di dokumen ini berasal dari sumber sekunder dan **harus dicek ulang di dashboard/halaman pricing resmi** (Q-05). Tujuannya untuk perencanaan, bukan tagihan.
@@ -47,7 +49,7 @@ Tanggal reset kredit **belum diketahui** (Q-05). Sampai diketahui, anggap 15.000
 |---|---|
 | **Mode teks** untuk pengembangan dialog & safety (CLI tanpa STT/TTS) | Kredit ElevenLabs hanya dipakai saat uji suara |
 | **Cache TTS**: kunci = hash(teks + voice + model + format). Frasa statis tidak pernah di-generate ulang | Hemat besar untuk sapaan/pertanyaan baku |
-| Respons TILIK pendek (1–2 kalimat per giliran) | Hemat karakter TTS + lebih ramah lansia |
+| Respons KRING pendek (1–2 kalimat per giliran) | Hemat karakter TTS + lebih ramah lansia |
 | Harness evaluasi E1 tanpa audio | 0 kredit ElevenLabs |
 | Audio uji E2 direkam sekali, dipakai ulang | STT hanya untuk skenario terpilih |
 | Pantau kredit setiap hari (dashboard / endpoint subscription API ElevenLabs) | Hindari kehabisan mendadak |
@@ -71,3 +73,19 @@ biaya_per_panggilan ≈ Σ_giliran (token_input × harga_input + token_output ×
 | 16 Okt | | | | |
 | 17 Okt | | | | |
 | 18 Okt | | | | |
+
+## Biaya terukur (16 Okt 2026)
+
+Diukur dari satu panggilan pagi di uji E2 (75 detik, 1.029 karakter TTS, 564 token masuk + 95 token keluar) dengan harga
+publik per 16 Okt: gpt-5.4-mini US$0,75/4,50 per juta token, ElevenLabs Flash US$0,04/1.000 karakter, Scribe Realtime
+US$0,39/jam, Twilio ke ponsel Indonesia US$0,1066/menit + Media Streams US$0,0044/menit (dibulatkan 2 menit).
+
+| Pos | Per 100 panggilan |
+|---|---|
+| Telepon (Twilio) | US$22,2 |
+| TTS | US$4,1 |
+| STT | US$0,8 |
+| LLM | US$0,09 |
+| **Total** | **±US$27,2** (tanpa PSTN/WebRTC: ±US$5,0) |
+
+Pemakaian kredit ElevenLabs per 16 Okt malam: 23.493 dari 40.000 karakter (paket Starter).

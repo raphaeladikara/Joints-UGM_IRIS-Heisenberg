@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kring-web",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-m", "http.server", "8090", "--directory", "apps/mobile/build/web"],
+      "port": 8090
+    }
+  ]
+}

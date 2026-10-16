@@ -1,5 +1,7 @@
 # 04 · Data Model
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 Database: **Supabase (Postgres)**. Semua data di MVP **fiktif** (persona demo). Skema ini rancangan Stage 0 dan akan diwujudkan sebagai migration di Stage 1.
 
 ---
@@ -52,7 +54,7 @@ erDiagram
 | name | text | |
 | phone_e164 | text | |
 | whatsapp_e164 | text | |
-| escalation_order | int | 1 = dihubungi pertama (biasanya Sahabat Tilik) |
+| escalation_order | int | 1 = dihubungi pertama (biasanya Sahabat Kring) |
 | receives_daily_report | bool | |
 
 ### `consents`
@@ -158,7 +160,7 @@ erDiagram
 
 ## 3. Pemetaan ke FHIR R4 (label "SATUSEHAT-ready", ekspor JSON di Stage 2)
 
-| Data TILIK | Resource FHIR | Catatan |
+| Data KRING | Resource FHIR | Catatan |
 |---|---|---|
 | patients | `Patient` | |
 | observations (tensi) | `Observation` | LOINC panel tekanan darah, kode komponen sistolik/diastolik. **Kode diverifikasi saat implementasi** |
@@ -178,6 +180,6 @@ erDiagram
 Kebijakan lengkap ada di [06_ETIKA_PRIVASI_REGULASI.md](06_ETIKA_PRIVASI_REGULASI.md).
 
 ## 5. Data seed (Stage 1)
-- 1 pasien utama (Bu Sri) + 4–6 pasien pengisi untuk Daftar Tilik (variasi 🟢/🟡/🔴/no-answer).
-- Kontak: Mas Dika (anak), Bu Tini (Sahabat Tilik). **Nomor = nomor HP anggota tim yang terverifikasi di Twilio.**
+- 1 pasien utama (Bu Sri) + 4–6 pasien pengisi untuk Daftar Kring (variasi 🟢/🟡/🔴/no-answer).
+- Kontak: Mas Dika (anak), Bu Tini (Sahabat Kring). **Nomor = nomor HP anggota tim yang terverifikasi di Twilio.**
 - 5 RS + tabel waktu tempuh untuk 2–3 desa demo di Gunungkidul.

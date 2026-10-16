@@ -1,5 +1,9 @@
 # 13 · Konvensi Repo
 
+> **Struktur nyata per 16 Okt:** `apps/api` (FastAPI + SQLite), `apps/voice` (Pipecat), `apps/mobile` (Flutter, 5 peran + mode luring), `content/` (skrip & aturan), `eval/` (harness), `paper/` (proposal).
+
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 ## 1. Struktur folder (rencana)
 
 ```
@@ -13,7 +17,7 @@ Joints-UGM_IRIS-Heisenberg/
 │   └── research/              # Riset ide v1–v4 + audit etika
 ├── apps/
 │   ├── voice/                 # Server suara Python (Pipecat, dialog manager, safety, eskalasi)
-│   └── web/                   # Next.js: Daftar Tilik, Board IGD, konsol demo, webhook WA
+│   └── web/                   # (tidak dibuat: digantikan apps/mobile, D-36)
 ├── supabase/
 │   ├── migrations/            # Skema SQL
 │   └── seed/                  # Data persona fiktif, RS, waktu tempuh

@@ -1,6 +1,6 @@
-# apps/voice: server suara TILIK (Pipecat)
+# apps/voice: server suara KRING (Pipecat)
 
-Telinga dan mulut TILIK. Otak percakapan (state machine, Safety Agent, eskalasi) tetap di `apps/api`;
+Telinga dan mulut KRING. Otak percakapan (state machine, Safety Agent, eskalasi) tetap di `apps/api`;
 server ini tidak menulis ulang logikanya, hanya mengubah suara jadi teks dan sebaliknya.
 
 ```
@@ -18,7 +18,7 @@ Browser / SmallWebRTC (16 kHz)      ─┘        → TilikBrain ── POST /v1
 | `tilik_voice/server.py` | FastAPI: halaman HP Mbah + `/api/offer` (WebRTC), `/calls` + `/twilio/ws` + `/twilio/status` (Twilio), `/latency` |
 | `tilik_voice/dialing.py` | Pagar nomor: DEMO_MODE hanya allowlist; 119/112 dan nomor darurat lain tidak pernah ditelepon |
 | `tilik_voice/latency.py` | Log JSONL per giliran + ringkasan p50/p95 |
-| `scripts/webrtc_sim.py` | "HP Mbah" otomatis: memutar ucapan babak 1 lewat WebRTC dan merekam jawaban TILIK |
+| `scripts/webrtc_sim.py` | "HP Mbah" otomatis: memutar ucapan babak 1 lewat WebRTC dan merekam jawaban KRING |
 
 Alur panggilan:
 - **Twilio:** `POST /calls` → API `POST /v1/calls` (berdering) → Twilio menelepon nomor allowlist dengan TwiML
@@ -53,7 +53,7 @@ Isi `.env` di **akar repo** (salin dari `.env.example`, jangan di-commit). Minim
 
 ### Babak 1 lewat browser (WebRTC)
 
-Buka `http://127.0.0.1:7860/` di Chrome, pilih **Bu Sri**, tekan **Angkat telepon TILIK**, izinkan mikrofon,
+Buka `http://127.0.0.1:7860/` di Chrome, pilih **Bu Sri**, tekan **Angkat telepon KRING**, izinkan mikrofon,
 pakai headset. Jawab seperti skenario babak 1:
 
 1. "Iya, saya sendiri"
@@ -63,7 +63,7 @@ pakai headset. Jawab seperti skenario babak 1:
 5. "Tidak ada keluhan"
 6. "Tomatnya sudah panen dua keranjang, dibagi ke tetangga"
 
-Teks TILIK, state, dan level tampil di halaman. Hasilnya ikut muncul di aplikasi Flutter (Daftar Tilik, rapor keluarga).
+Teks KRING, state, dan level tampil di halaman. Hasilnya ikut muncul di aplikasi Flutter (Daftar Kring, rapor keluarga).
 
 ### Babak 1 otomatis (tanpa mikrofon)
 
@@ -100,7 +100,7 @@ Setiap giliran dicatat di `logs/latency.jsonl` (tidak di-commit). Ringkasan: `GE
 
 | Kolom | Arti |
 |---|---|
-| `total_ms` | akhir ucapan Mbah → audio TILIK pertama keluar dari server (target p50 ≤ 1,5 s) |
+| `total_ms` | akhir ucapan Mbah → audio KRING pertama keluar dari server (target p50 ≤ 1,5 s) |
 | `vad_wait_ms` | hening yang ditunggu VAD sebelum memutuskan giliran selesai (`TILIK_VAD_STOP_SECS`) |
 | `stt_ms` | commit VAD → transkrip final Scribe |
 | `api_ms` | `POST /turns` (dialog manager + Safety Agent) |
@@ -113,7 +113,8 @@ Hasil pengukuran (diisi setelah tiap uji):
 
 | Tanggal | Transport | Giliran | p50 total | p95 total | Catatan |
 |---|---|---|---|---|---|
-| 2026-10-16 | teks (tes integrasi) | 6 | – | – | Hanya `api_ms`: 20–60 ms per giliran, jalur aturan tanpa LLM. Audio belum diukur: kunci ElevenLabs belum ada |
+| 2026-10-16 | teks (tes integrasi) | 6 | – | – | Hanya `api_ms`: 20–60 ms per giliran, jalur aturan tanpa LLM |
+| 2026-10-16 | WebRTC (`webrtc_sim.py`, babak 1 ×2, LLM aktif) | 12 | 1.780 ms | 5.101 ms | VAD 700 · STT 343 · API 8 (p95 1.970, LLM) · TTS pertama 162 (p95 4.006, pesan keluarga panjang) |
 
 ## Tes
 
@@ -126,9 +127,9 @@ menjalankan babak 1 lewat `TilikBrain` ke `apps/api` sungguhan di :8080 dan dile
 
 ## Batasan saat ini
 
-- Belum ada barge-in: kalau Mbah bicara saat TILIK masih bicara, ucapannya dikirim sebagai giliran berikutnya
-  setelah TILIK selesai, bukan memotong TILIK.
-- Eskalasi 🔴 lewat suara (alihkan ke `<Conference>`, telepon Sahabat Tilik dan anak) belum disambungkan. API tetap
+- Belum ada barge-in: kalau Mbah bicara saat KRING masih bicara, ucapannya dikirim sebagai giliran berikutnya
+  setelah KRING selesai, bukan memotong KRING.
+- Eskalasi 🔴 lewat suara (alihkan ke `<Conference>`, telepon Sahabat Kring dan anak) belum disambungkan. API tetap
   membuat alert dan notifikasi simulasi seperti biasa.
 - Panggilan Twilio juga membuat HP Mbah di aplikasi Flutter berdering. Jangan diangkat dari aplikasi saat
   panggilan telepon sungguhan sedang berjalan.

@@ -1,17 +1,15 @@
-# tilik
+# apps/mobile: aplikasi KRING (Flutter)
 
-TILIK: aplikasi keluarga, Sahabat Tilik, Puskesmas, dan IGD (prototype).
+Satu aplikasi untuk orang-orang di sekitar lansia, dengan lima peran: **HP Mbah** (simulator telepon biasa, hanya untuk
+demo; di lapangan Mbah cukup mengangkat HP), **Keluarga**, **Sahabat Kring**, **Puskesmas** (Daftar Kring Hari Ini), dan
+**IGD** (Board Pre-alert). Bawaan memakai **mode luring**: logika API di-port ke `lib/core/local/`, jadi APK berjalan tanpa
+server. Server FastAPI bisa dipilih lewat ⚙ atau `--dart-define=TILIK_API=http://IP:8080`.
 
-## Getting Started
+```bash
+flutter pub get
+flutter build web --release      # build/web (mode luring)
+flutter build apk --release      # build/app/outputs/flutter-apk/app-release.apk
+flutter test
+```
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Sistem desain: [DESIGN.md](DESIGN.md). Cara menjalankan bersama API dan server suara: [README akar repo](../../README.md).

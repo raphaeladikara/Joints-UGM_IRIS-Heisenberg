@@ -1,0 +1,164 @@
+{
+ "ringkasan": {
+  "id": {
+   "wer": 0.0,
+   "errors": 0,
+   "words": 48,
+   "utterances": 10
+  },
+  "jv": {
+   "wer": 0.118,
+   "errors": 4,
+   "words": 34,
+   "utterances": 8
+  },
+  "stt_language": "id",
+  "waktu": "2026-10-16T20:17:37"
+ },
+ "baris": [
+  {
+   "group": "id",
+   "ref": "Iya, saya sendiri.",
+   "hyp": "Iya saya sendiri",
+   "errors": 0,
+   "words": 3,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Sampun, tadi habis sarapan.",
+   "hyp": "Sampun. Tadi habis sarapan",
+   "errors": 0,
+   "words": 4,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Seratus lima puluh per sembilan puluh.",
+   "hyp": "150 per 90",
+   "errors": 0,
+   "words": 6,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Iya, betul.",
+   "hyp": "Iya betul",
+   "errors": 0,
+   "words": 2,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Tidak ada keluhan.",
+   "hyp": "Tidak ada keluhan",
+   "errors": 0,
+   "words": 3,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Tomatnya sudah panen dua keranjang, dibagi ke tetangga.",
+   "hyp": "Tomatnya sudah panen dua keranjang dibagi ke tetangga",
+   "errors": 0,
+   "words": 8,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Belum, saya lupa minum obat.",
+   "hyp": "Belum saya lupa minum obat",
+   "errors": 0,
+   "words": 5,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Dada saya sakit seperti ditindih.",
+   "hyp": "Dada saya sakit seperti ditindih",
+   "errors": 0,
+   "words": 5,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Bicara saya jadi pelo sejak tadi pagi.",
+   "hyp": "Bicara saya jadi pelo sejak tadi pagi",
+   "errors": 0,
+   "words": 7,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "id",
+   "ref": "Saya kangen sama anak saya.",
+   "hyp": "Saya kangen sama anak saya",
+   "errors": 0,
+   "words": 5,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Sampun, wau sasampunipun sarapan.",
+   "hyp": "Sampun wau sasampunipun sarapan",
+   "errors": 0,
+   "words": 4,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Dereng, kula kesupen.",
+   "hyp": "Dereng, aku kesurupan",
+   "errors": 2,
+   "words": 3,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Obatipun sampun telas.",
+   "hyp": "Obatipun sampun telas",
+   "errors": 0,
+   "words": 3,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Mboten wonten keluhan, sehat.",
+   "hyp": "Mboten wonten keluhan, sehat",
+   "errors": 0,
+   "words": 4,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Ngomongku kok angel, tangan kiwa lemes.",
+   "hyp": "Ngomongku kok Angel tangan kiwa lemes",
+   "errors": 0,
+   "words": 6,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Sirahku lara banget wiwit esuk.",
+   "hyp": "Sirahku lara banget wiwit esuk",
+   "errors": 0,
+   "words": 5,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Tomate wis panen rong kranjang.",
+   "hyp": "Tomate wis panen rong keranjang",
+   "errors": 1,
+   "words": 5,
+   "model": "scribe_v2"
+  },
+  {
+   "group": "jv",
+   "ref": "Kula kangen kaliyan Dika.",
+   "hyp": "Kula kangen kaliyan Dhika",
+   "errors": 1,
+   "words": 4,
+   "model": "scribe_v2"
+  }
+ ]
+}

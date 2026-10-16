@@ -1,5 +1,7 @@
 # 09 · Checklist Stage 0: Persiapan Sebelum Menulis Kode
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 Stage 0 dianggap selesai (**Gate G0**) kalau semua item bertanda ⭐ sudah dicentang dan keputusan dari setiap spike sudah dicatat di [12_KEPUTUSAN_DAN_PERTANYAAN.md](12_KEPUTUSAN_DAN_PERTANYAAN.md).
 
 > Spike = percobaan kecil sekali pakai untuk menjawab satu pertanyaan teknis. Kode spike **tidak** masuk ke `main` sebagai kode produk. Simpan catatan hasilnya saja (atau taruh di `spikes/` kalau perlu diarsipkan).
@@ -17,7 +19,7 @@ Stage 0 dianggap selesai (**Gate G0**) kalau semua item bertanda ⭐ sudah dicen
 |---|---|---|---|
 | Twilio | Ada (trial, raphael.adikara@gmail.com) | Cek **saldo trial tersisa**. Catat Account SID. Buat **API Key** (lebih aman dari auth token). Catat nomor trial yang diberikan | ⭐ |
 | ElevenLabs | Ada, sisa ±15.000 kredit | Catat **tanggal reset kredit** (Q-05). Buat API key. Terapkan alokasi & credit guard di [10](10_ANGGARAN_KUOTA.md) | ⭐ |
-| OpenAI | Ada | Buat API key project khusus TILIK. Set **batas pemakaian (usage limit)** di dashboard supaya tidak kebobolan biaya | ⭐ |
+| OpenAI | Ada | Buat API key project khusus KRING. Set **batas pemakaian (usage limit)** di dashboard supaya tidak kebobolan biaya | ⭐ |
 | Meta (WhatsApp Cloud API) | Pakai **akun Raphael** (Q-09 terjawab) | Buat Meta Developer App → produk WhatsApp → nomor tes. Daftarkan nomor penerima (nomor tim A & B) | ⭐ |
 | Supabase | Belum diketahui | Buat project (free tier, region terdekat yang tersedia) | ⭐ |
 | Vercel | Belum diketahui | Hubungkan ke repo (Hobby) | |
@@ -37,11 +39,11 @@ Per 15 Okt tim memakai **2 nomor dulu** (nomor tim A & B, sudah diberikan ke tim
 |---|---|---|
 | Bu Sri (pasien) | Nomor A atau B, **pembagian peran belum ditentukan** → Q-06 | [ ] |
 | Mas Dika (anak, HP di meja juri) | Nomor A atau B → Q-06 | [ ] |
-| Bu Tini (Sahabat Tilik) | **Belum ada nomor ketiga** → Q-19 | [ ] |
+| Bu Tini (Sahabat Kring) | **Belum ada nomor ketiga** → Q-19 | [ ] |
 | Cadangan 1 | – | – |
 | Cadangan 2 | – | – |
 
-**Dampak 2 nomor:** konferensi darurat di demo hanya bisa melibatkan pasien + anak. Selama nomor ketiga belum ada, peran Sahabat Tilik di demo ditunjukkan lewat **WA alert** (bukan telepon).
+**Dampak 2 nomor:** konferensi darurat di demo hanya bisa melibatkan pasien + anak. Selama nomor ketiga belum ada, peran Sahabat Kring di demo ditunjukkan lewat **WA alert** (bukan telepon).
 
 - [ ] ⭐ Verifikasi nomor di Twilio Console → Verified Caller IDs (via SMS)
 - [ ] Siapkan HP jadul untuk peran Bu Sri (properti demo, opsional untuk MVP, wajib untuk final) → Q-14

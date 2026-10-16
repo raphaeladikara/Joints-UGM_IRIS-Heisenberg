@@ -1,5 +1,7 @@
 # 06 · Etika, Privasi & Regulasi (Requirement)
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 Dokumen ini mengubah hasil audit di [`docs/research/TILIK_Celah_Etika_dan_Defense.md`](../research/TILIK_Celah_Etika_dan_Defense.md) menjadi **requirement yang bisa dicek**. Argumen dan sumbernya ada di dokumen riset tersebut.
 
 ---
@@ -9,12 +11,12 @@ Dokumen ini mengubah hasil audit di [`docs/research/TILIK_Celah_Etika_dan_Defens
 | ID | Requirement | Menjawab celah | MVP? |
 |---|---|---|---|
 | ETH-01 | Setiap panggilan diawali disclosure "asisten AI" | Deception | ✅ MUST |
-| ETH-02 | **Kata sandi keluarga** disebut di awal setiap panggilan | Penipuan yang menyamar jadi TILIK | ✅ MUST |
+| ETH-02 | **Kata sandi keluarga** disebut di awal setiap panggilan | Penipuan yang menyamar jadi KRING | ✅ MUST |
 | ETH-03 | Tidak ada voice cloning. Pesan anak diputar dengan **suara asli** | Deception, AI menggantikan keluarga | ✅ MUST |
-| ETH-04 | TILIK tidak pernah mengaku punya perasaan atau memposisikan diri sebagai keluarga | Ketergantungan emosional | ✅ MUST (prompt + eval) |
+| ETH-04 | KRING tidak pernah mengaku punya perasaan atau memposisikan diri sebagai keluarga | Ketergantungan emosional | ✅ MUST (prompt + eval) |
 | ETH-05 | Rapor WA memuat **Bahan Obrolan** + tautan "Telepon Ibu sekarang" | "AI menggantikan telepon anak" | ✅ MUST |
 | ETH-06 | Eskalasi 3 warna. 🔴 hanya untuk kriteria mayor | Alarm palsu | ✅ MUST |
-| ETH-07 | Responder lokal (**Sahabat Tilik**) dihubungi pertama saat 🔴 | Anak jauh tidak bisa menolong | ✅ MUST |
+| ETH-07 | Responder lokal (**Sahabat Kring**) dihubungi pertama saat 🔴 | Anak jauh tidak bisa menolong | ✅ MUST |
 | ETH-08 | Edukasi SeGeRa Ke RS + informasi "boleh menelepon balik" di setiap penutup | Rasa aman palsu | ✅ MUST (telepon balik = SHOULD) |
 | ETH-09 | Tidak pernah meminta uang/OTP/NIK/rekening | Penipuan | ✅ MUST |
 | ETH-10 | Mode `WRONG_PERSON`: tanpa data medis | Privasi | ✅ MUST |
@@ -49,13 +51,13 @@ Dokumen ini mengubah hasil audit di [`docs/research/TILIK_Celah_Etika_dan_Defens
 - Ada mekanisme **regulatory sandbox** untuk produk yang bukti klinisnya untuk populasi Indonesia belum memadai.
 - Sumber: ringkasan firma hukum/konsultan regulasi. **Teks resmi belum dibaca tim**, jadi verifikasi di JDIH Kemenkes (pertanyaan terbuka Q-12).
 
-**Pemetaan modul TILIK:**
+**Pemetaan modul KRING:**
 | Modul | Sifat | Jalur |
 |---|---|---|
-| Pendamping, pengingat obat, rapor keluarga, titip pesan, Daftar Tilik (administratif) | Non-medis / administratif | Tidak memerlukan izin edar alkes (dugaan, perlu konfirmasi) |
+| Pendamping, pengingat obat, rapor keluarga, titip pesan, Daftar Kring (administratif) | Non-medis / administratif | Tidak memerlukan izin edar alkes (dugaan, perlu konfirmasi) |
 | Pemicu tanda bahaya, skrining stroke, analisis suara, pre-alert IGD | Berpotensi SaMD (tujuan medis: skrining/triase) | Regulatory sandbox bersama mitra RS + validasi klinis lokal |
 
-**Prinsip produk:** TILIK adalah *decision support*. Keputusan klinis selalu di tangan tenaga kesehatan.
+**Prinsip produk:** KRING adalah *decision support*. Keputusan klinis selalu di tangan tenaga kesehatan.
 
 ## 4. Etika lomba & produksi materi
 

@@ -1,5 +1,9 @@
 # 02 · Product Requirements Document (PRD)
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+>
+> Status implementasi tiap fitur ada di [Laporan Konsep Kerja §4](../LAPORAN_KONSEP_KERJA.md); semua MUST sudah berjalan dalam mode demo.
+
 Dokumen ini mendefinisikan **apa** yang dibangun. Bagaimana cara membangunnya ada di [03_ARSITEKTUR_TEKNIS.md](03_ARSITEKTUR_TEKNIS.md).
 
 Prioritas:
@@ -17,7 +21,7 @@ Prioritas:
 |---|---|---|
 | **Bu Sri** (pengguna utama) | 72 th, Gunungkidul, hipertensi (amlodipin), tinggal sendiri sejak suami wafat, HP jadul, nyaman berbahasa Jawa, pendengaran sedikit menurun | Tetap mandiri di rumah, tidak merepotkan anak, ditolong cepat kalau ada apa-apa |
 | **Mas Dika** (anak) | 38 th, bekerja di Jakarta, menelepon ibunya ±2× seminggu | Tahu kondisi ibu tanpa menginterogasi, punya bahan obrolan, dikabari cepat kalau darurat |
-| **Bu Tini** (Sahabat Tilik) | Tetangga sebelah rumah, 5 menit jalan kaki | Dihubungi pertama saat darurat, tahu harus berbuat apa |
+| **Bu Tini** (Sahabat Kring) | Tetangga sebelah rumah, 5 menit jalan kaki | Dihubungi pertama saat darurat, tahu harus berbuat apa |
 | **Perawat Prolanis** | Puskesmas, mengelola ±100 pasien hipertensi | Tahu siapa yang harus ditindaklanjuti hari ini tanpa menelepon satu per satu |
 | **Tim IGD RSUD Wonosari** | Bagian dari jejaring Code Stroke | Info jam onset & hasil skrining sebelum pasien tiba |
 
@@ -31,7 +35,7 @@ Prioritas:
 | US-02 | Bu Sri | mendengar pesan suara dari anak saya di telepon pagi | saya merasa dekat dengan anak |
 | US-03 | Bu Sri | ditanya obat dan tensi dengan sabar dan tidak menggurui | saya tetap merasa dihormati |
 | US-04 | Bu Sri | segera mendapat pertolongan kalau mendadak bicara pelo atau tubuh lemah sebelah | saya tidak terlambat dibawa ke RS |
-| US-05 | Bu Sri | yakin bahwa yang menelepon benar TILIK (bukan penipu) | saya aman dari penipuan |
+| US-05 | Bu Sri | yakin bahwa yang menelepon benar KRING (bukan penipu) | saya aman dari penipuan |
 | US-06 | Mas Dika | menerima rapor singkat + bahan obrolan setiap hari | telepon saya ke ibu jadi lebih nyambung |
 | US-07 | Mas Dika | dikabari dan disambungkan langsung ke ibu saat darurat | saya bisa mengambil keputusan cepat |
 | US-08 | Mas Dika | menitipkan pesan untuk disampaikan besok pagi | ibu tahu saya memperhatikan |
@@ -44,26 +48,26 @@ Prioritas:
 ## 3. Fitur
 
 ### F-01 Panggilan keluar harian (MUST)
-- Sistem bisa memulai panggilan ke nomor pasien pada jadwal atau dipicu manual (tombol "Tilik sekarang" untuk demo).
+- Sistem bisa memulai panggilan ke nomor pasien pada jadwal atau dipicu manual (tombol "Kring sekarang" untuk demo).
 - Percakapan real-time dua arah. Pasien bisa memotong (*barge-in*).
 - **Fallback (MUST):** kalau panggilan PSTN via Twilio trial ke nomor +62 tidak bisa dilakukan (hasil uji Stage 0), panggilan dilakukan lewat **browser (WebRTC)** dengan tampilan layar telepon.
 
 **Acceptance criteria**
-- [ ] Panggilan tersambung dan TILIK menyapa ≤ 3 detik setelah diangkat.
-- [ ] Pasien bisa memotong TILIK, dan TILIK berhenti bicara.
+- [ ] Panggilan tersambung dan KRING menyapa ≤ 3 detik setelah diangkat.
+- [ ] Pasien bisa memotong KRING, dan KRING berhenti bicara.
 - [ ] Panggilan yang tidak diangkat tercatat sebagai `no_answer`. Dua kali berturut-turut → masuk daftar 🟡.
 
 ### F-02 Pembuka: disclosure AI + kata sandi keluarga (MUST)
 - Kalimat pembuka **selalu** memuat: nama pasien, "asisten AI", asal (Puskesmas), dan **kata sandi keluarga**.
-- TILIK tidak pernah mengaku manusia atau mengaku punya perasaan.
+- KRING tidak pernah mengaku manusia atau mengaku punya perasaan.
 
 **AC**
 - [ ] 100% panggilan di harness evaluasi memuat disclosure + kata sandi pada giliran pertama.
-- [ ] Ditanya "Niki tiyang napa robot?", TILIK menjawab jujur bahwa ia AI.
+- [ ] Ditanya "Niki tiyang napa robot?", KRING menjawab jujur bahwa ia AI.
 
 ### F-03 Titip pesan dari anak (MUST, versi sederhana)
-- Anak mengirim pesan **suara** atau teks lewat WhatsApp.
-- MVP: pesan suara anak disimpan dan **diputar apa adanya** (suara asli, bukan dibacakan AI). Pesan teks dibacakan TILIK dengan awalan "Mas Dika titip pesan…".
+- Anak mengirim pesan **suara** atau teks lewat **aplikasi KRING** (rencana awal: WhatsApp).
+- MVP: pesan suara anak disimpan dan **diputar apa adanya** (suara asli, bukan dibacakan AI). Pesan teks dibacakan KRING dengan awalan "Mas Dika titip pesan…".
 
 **AC**
 - [ ] Pesan yang masuk sebelum panggilan muncul di panggilan berikutnya, lalu ditandai `delivered`.
@@ -100,9 +104,9 @@ Prioritas:
 
 ### F-09 Eskalasi 🔴 (MUST)
 Urutan:
-1. Telepon **Sahabat Tilik** (tetangga) → disambungkan ke konferensi dengan pasien.
+1. Telepon **Sahabat Kring** (tetangga) → disambungkan ke konferensi dengan pasien.
 2. Telepon **anak** → dibriefing ≤ 15 detik → masuk konferensi.
-3. WA alert ke anak + Sahabat Tilik: ringkasan, jam onset, **RS ber-CT terdekat** + estimasi waktu tempuh.
+3. Alert di aplikasi anak + Sahabat Kring: ringkasan, jam onset, **RS ber-CT terdekat** + estimasi waktu tempuh.
 4. Pre-alert ke **Board IGD**.
 5. Instruksi untuk menghubungi 119.
 
@@ -113,36 +117,36 @@ Urutan:
 - [ ] Board IGD menampilkan pre-alert ≤ 5 detik setelah pemicu.
 
 ### F-10 Penutup + edukasi (MUST)
-- Penutup hangat + satu kalimat edukasi SeGeRa Ke RS (bergilir) + info bahwa pasien boleh menelepon balik nomor TILIK kapan saja.
+- Penutup hangat + satu kalimat edukasi SeGeRa Ke RS (bergilir) + info bahwa pasien boleh menelepon balik nomor KRING kapan saja.
 
-### F-11 Rapor WA keluarga + Bahan Obrolan (MUST)
+### F-11 Rapor keluarga di aplikasi + Bahan Obrolan (MUST)
 - Setelah panggilan, anak menerima: status (obat/tensi/gejala, warna), **💬 Bahan obrolan** (1–2 hal yang diceritakan pasien), tombol/tautan **"Telepon Ibu sekarang"**.
 - Hanya informasi yang **diizinkan pasien** yang dikirim (MVP: pengaturan izin per pasien di data seed. UI pengaturan = LATER).
 
 ### F-12 Memori sederhana (MUST)
 - Setelah panggilan, 0–3 fakta personal diekstrak (misal "cucu wisuda bulan depan") lalu dipakai di panggilan berikutnya.
 
-### F-13 Web: Daftar Tilik Hari Ini (MUST)
+### F-13 Aplikasi (peran Puskesmas): Daftar Kring Hari Ini (MUST)
 - Tabel pasien: status panggilan, warna, tensi terakhir, kepatuhan 7 hari, alasan tindak lanjut. 🔴/🟡 di paling atas.
 
-### F-14 Web: Board Pre-alert IGD (MUST)
+### F-14 Aplikasi (peran IGD): Board Pre-alert IGD (MUST)
 - Kartu realtime: nama pasien (atau inisial), usia, jam onset/last known well, hasil skrining, obat yang diminum (termasuk antikoagulan: ya/tidak/tidak tahu), ETA, kontak keluarga. Ada label **"PRE-ALERT · keputusan klinis tetap di tim IGD"**.
 
-### F-15 Nomor TILIK bisa ditelepon balik (SHOULD)
-- Pasien menelepon nomor TILIK, langsung masuk sapaan + pertanyaan gejala (mode skrining).
+### F-15 Nomor KRING bisa ditelepon balik (SHOULD)
+- Pasien menelepon nomor KRING, langsung masuk sapaan + pertanyaan gejala (mode skrining).
 - *Catatan: pada Twilio trial, panggilan masuk juga memutar pesan trial dan nomornya nomor AS. Kelayakannya diuji di Stage 0.*
 
 ### F-16 Analisis suara offline (SHOULD)
 - Dari rekaman panggilan uji, hitung fitur (kecepatan bicara, rasio jeda) dan tampilkan grafik vs baseline. *Versi live = LATER.*
 
 ### F-17 Nudge Kangen + family-first (SHOULD)
-- Kalau pasien menyebut kangen → WA ke anak "Bu Sri tadi bilang kangen. Telepon 5 menit hari ini?".
+- Kalau pasien menyebut kangen → notifikasi di aplikasi anak "Bu Sri tadi bilang kangen. Telepon 5 menit hari ini?".
 
 ### F-18 Endpoint sinyal eksternal + simulasi jam tangan (LATER, Stage 2 prioritas)
 Menjawab pertanyaan "bagaimana kalau krisis mendadak di luar jam telepon?" (lihat [15_DEFENSE_BANK.md](15_DEFENSE_BANK.md) §1).
 - Endpoint `POST /events` menerima sinyal dari sumber apa pun: `fall_detected`, `sos_pressed`, `irregular_rhythm`, `bp_reading`, `missed_checkin`.
 - Sinyal masuk ke **mesin eskalasi yang sama** dengan panggilan harian.
-- Contoh alur `fall_detected`: TILIK langsung menelepon pasien ("Bu, jam tangan Ibu mendeteksi Ibu jatuh. Ibu baik-baik saja?"). Kalau tidak diangkat atau tidak ada jawaban dalam N detik → 🔴 ke Sahabat Tilik + anak + Board IGD.
+- Contoh alur `fall_detected`: KRING langsung menelepon pasien ("Bu, jam tangan Ibu mendeteksi Ibu jatuh. Ibu baik-baik saja?"). Kalau tidak diangkat atau tidak ada jawaban dalam N detik → 🔴 ke Sahabat Kring + anak + Board IGD.
 - **Demo:** tombol "Simulasikan: jam tangan mendeteksi jatuh" di konsol demo. Tanpa perangkat keras, tanpa biaya.
 
 **AC**
@@ -150,7 +154,7 @@ Menjawab pertanyaan "bagaimana kalau krisis mendadak di luar jam telepon?" (liha
 - [ ] Tidak ada jawaban → 🔴 tereskalasi otomatis.
 
 ### F-19 Protokol "tidak diangkat" untuk pasien berisiko tinggi (SHOULD)
-- Pasien dengan 🟡 kemarin, atau tensi krisis dalam 7 hari terakhir: kalau panggilan pagi tidak diangkat → ulang dalam 15 menit → masih tidak diangkat → **Sahabat Tilik diminta mengecek ke rumah** (WA/telepon), dan keluarga diberi tahu.
+- Pasien dengan 🟡 kemarin, atau tensi krisis dalam 7 hari terakhir: kalau panggilan pagi tidak diangkat → ulang dalam 15 menit → masih tidak diangkat → **Sahabat Kring diminta mengecek ke rumah** (lewat aplikasi), dan keluarga diberi tahu.
 
 ### Fitur LATER (Stage 2 / roadmap)
 Panel tanda vital suara live · endpointing personal & backchannel · deteksi krama/ngoko otomatis · mode DTMF · UI berbagi bertingkat + mode rahasia · Telepon Bareng akhir pekan · jam kronis (tren minggu) · mode sovereign · integrasi SATUSEHAT/PSC 119 · uji lansia sungguhan.
@@ -161,10 +165,10 @@ Panel tanda vital suara live · endpointing personal & backchannel · deteksi kr
 
 | Babak | Isi | Fitur |
 |---|---|---|
-| 1. Pagi biasa | TILIK menelepon Bu Sri: disclosure + kata sandi, pesan suara Mas Dika, obat sudah, tensi 150/90 dikonfirmasi, cerita tomat panen, penutup + SeGeRa | F-01–F-06, F-10, F-12 |
-| 1b. Hasilnya | Rapor WA Mas Dika + bahan obrolan. Daftar Tilik menampilkan Bu Sri 🟢 dan satu pasien lain 🟡 | F-11, F-13 |
+| 1. Pagi biasa | KRING menelepon Bu Sri: disclosure + kata sandi, pesan suara Mas Dika, obat sudah, tensi 150/90 dikonfirmasi, cerita tomat panen, penutup + SeGeRa | F-01–F-06, F-10, F-12 |
+| 1b. Hasilnya | Rapor di aplikasi Mas Dika + bahan obrolan. Daftar Kring menampilkan Bu Sri 🟢 dan satu pasien lain 🟡 | F-11, F-13 |
 | 2. Darurat | Panggilan pagi berikutnya: Bu Sri bicara pelo, tangan kiri lemas → skrining → last known well 06.40 | F-07, F-08 |
-| 2b. Eskalasi | HP Bu Tini berdering, lalu HP Mas Dika berdering (diletakkan di meja juri) → konferensi. WA alert + RSUD Wonosari. Board IGD menyala | F-09, F-14 |
+| 2b. Eskalasi | HP Bu Tini berdering, lalu HP Mas Dika berdering (diletakkan di meja juri) → konferensi. Alert di aplikasi + RSUD Wonosari. Board IGD menyala | F-09, F-14 |
 
 ---
 

@@ -11,8 +11,8 @@ Aturan dokumen ini: **tidak ada keputusan berdasarkan asumsi.** Hal yang belum d
 
 | ID | Tanggal | Keputusan | Sumber | Alasan / catatan |
 |---|---|---|---|---|
-| D-01 | 13 Okt | Ide final: **TILIK** (v4 + audit etika) | Tim | Lihat `docs/research/` |
-| D-02 | 15 Okt | Nama produk **TILIK**, nama tim **IRIS-Heisenberg** | Tim | |
+| D-01 | 13 Okt | Ide final: **KRING** (v4 + audit etika) | Tim | Lihat `docs/research/` |
+| D-02 | 15 Okt | Nama produk **KRING**, nama tim **IRIS-Heisenberg** | Tim | |
 | D-03 | 15 Okt | Orkestrasi suara: **Pipecat** (pipeline sendiri), bukan ElevenLabs Agents Platform | Tim | Kode inti karya tim (aturan orisinalitas), skor teknis |
 | D-04 | 15 Okt | **ElevenLabs** untuk TTS **dan** STT (Scribe) | Tim | Satu vendor suara |
 | D-05 | 15 Okt | LLM: **OpenAI**. Model spesifik ditentukan di S-04 (termurah yang lolos) | Tim + Spike | |
@@ -40,10 +40,14 @@ Aturan dokumen ini: **tidak ada keputusan berdasarkan asumsi.** Hal yang belum d
 | D-32 | 15 Okt | Kode: **nama variabel/fungsi/kelas bahasa Inggris**. **Komentar & docstring bahasa Indonesia**. Konten percakapan Indonesia/Jawa | Delegasi | Inggris konsisten dengan API library (Pipecat, OpenAI, Twilio). Komentar Indonesia konsisten dengan dokumen (D-08) dan mudah dibaca juri |
 | D-33 | 15 Okt | Arsitektur eskalasi **event-driven & agnostik perangkat**: sinyal apa pun (panggilan, telepon balik, tombol SOS, jam tangan, sensor) masuk ke mesin eskalasi yang sama. MVP: hanya sinyal dari panggilan. Stage 2: endpoint event + simulasi "jam tangan mendeteksi jatuh" | Delegasi | Menjawab pertanyaan "kalau krisis mendadak di luar jam telepon?" (lihat [15](15_DEFENSE_BANK.md)) |
 | D-34 | 16 Okt | Prototype aplikasi: **Flutter** (Android + web, 5 peran) + **FastAPI + SQLite di Docker** (`apps/mobile`, `apps/api`). Logika dialog, Safety Agent, dan eskalasi ditulis sebagai API yang nanti dipanggil pipeline Pipecat. Supabase/Next.js (D-16, D-17) belum dipakai; realtime diganti polling | Tim (minta prototype HP seperti Nyambung) + Delegasi (stack) | Bisa didemokan tanpa kunci API apa pun; jalur LLM opsional. Tidak menggantikan D-03–D-06 untuk pipeline telepon |
-| D-23 | – | Transport utama (PSTN vs WebRTC) | **Spike S-01** | Diisi setelah uji |
-| D-24 | – | Model TTS & voice ID ElevenLabs | **Spike S-02** | |
-| D-25 | – | Kode bahasa STT & dukungan Jawa | **Spike S-03** | |
-| D-26 | – | Model OpenAI (dialog & classifier) | **Spike S-04** | |
+| D-35 | 16 Okt | Nama produk **KRING** (dulu TILIK): bunyi dering telepon, satu-satunya yang perlu dilakukan Mbah adalah mengangkat | Tim | Hindari kebingungan dengan film *Tilik* (CMP-01); mudah diingat |
+| D-36 | 16 Okt | Kanal: **lansia lewat telepon biasa**, semua pihak lain lewat **satu aplikasi KRING** (Flutter, 5 peran). WhatsApp Cloud API (D-15, D-31) dan web Next.js (D-17) tidak dipakai | Tim | Sesuai prototipe; satu aplikasi lebih kaya (3D, jam tangan, dokter, jadwal obat) daripada WA + web |
+| D-37 | 16 Okt | Framing utama: **companion + jembatan keluarga dua arah**; kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga | Tim | Ide awal tim; lebih empatik. Stroke tetap pembeda dan sumber angka dampak |
+| D-38 | 16 Okt | Harness evaluasi `eval/` (E1 teks, E2 audio) dan hasil baseline commit 68185b7 dipakai di paper; temuan **tidak** di-*tune* ke set uji yang sama | Tim + Delegasi | Angka jujur; perbaikan diuji dengan set skenario baru |
+| D-23 | 16 Okt | Transport utama (PSTN vs WebRTC) | Tim | **WebRTC** untuk demo (diuji end-to-end); kode Twilio siap tapi kredensial belum ada |
+| D-24 | 16 Okt | Model TTS & voice ID ElevenLabs | Tim | `eleven_flash_v2_5`, suara Selina (KRING) dan Bambang (simulator Mbah) |
+| D-25 | 16 Okt | Kode bahasa STT & dukungan Jawa | Tim | `scribe_v2_realtime`, bahasa `id` untuk semua; WER Jawa 11,8% (sintetis) |
+| D-26 | 16 Okt | Model OpenAI (dialog & classifier) | Tim | `gpt-5.4-mini` untuk klasifikasi + ekstraksi memori; kalimat dialog dari skrip JSON, bukan LLM |
 | D-27 | – | Desain eskalasi konferensi final | **Spike S-05** | |
 
 ## 2. Pertanyaan terbuka
@@ -67,7 +71,7 @@ Aturan dokumen ini: **tidak ada keputusan berdasarkan asumsi.** Hal yang belum d
 | Q-15 | Bersedia upgrade Twilio (berbayar) kalau ternyata dibutuhkan untuk demo final? Saat ini keputusannya: tidak (hemat) | Tidak | Tim | Terjawab sementara: tidak |
 | Q-16 | Apakah ada lansia (keluarga anggota tim) yang bersedia ikut uji di Stage 2, dengan persetujuan? | Tidak (Stage 2) | Tim | Terbuka |
 | Q-17 | Bahasa untuk nama variabel/fungsi & komentar kode (Indonesia atau Inggris)? | Ya (sebelum kode ditulis) | Tim | **Terjawab:** didelegasikan → D-32 |
-| Q-19 | Ada nomor ketiga (peran Bu Tini / Sahabat Tilik) untuk demo? Tanpa itu, konferensi darurat hanya pasien + anak | Tidak (ada alternatif WA) | Tim | Terbuka |
+| Q-19 | Ada nomor ketiga (peran Bu Tini / Sahabat Kring) untuk demo? Tanpa itu, konferensi darurat hanya pasien + anak | Tidak (ada alternatif WA) | Tim | Terbuka |
 | Q-18 | Lisensi repo (misal MIT, Apache-2.0, atau tanpa lisensi)? | Tidak | Tim | Terbuka |
 
 ## 3. Cara memperbarui

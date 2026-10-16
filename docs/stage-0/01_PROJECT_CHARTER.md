@@ -1,8 +1,10 @@
-# 01 · Project Charter: TILIK
+# 01 · Project Charter: KRING
+
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
 
 | | |
 |---|---|
-| **Produk** | TILIK |
+| **Produk** | KRING |
 | **Tim** | IRIS-Heisenberg |
 | **Lomba** | Hackathon JOINTS x INSPIRE 2026 (HIMAKOM & HMEI UGM) |
 | **Tema** | Healthcare |
@@ -14,6 +16,8 @@
 ---
 
 ## 1. Masalah
+
+**Akar masalah: tidak ada yang menanyakan kabar lansia setiap hari.** Banyak lansia tinggal sendiri sementara anaknya merantau. Akibatnya tiga: **sepi** (WHO 2025: 1 dari 6 orang kesepian; kesepian dan isolasi sosial terkait risiko stroke +32%, Valtorta dkk. 2016), **kesehatan luput** (obat terhenti, keluhan tidak tercatat), dan **stroke terlambat ditolong**.
 
 Stroke adalah penyebab kematian nomor satu di Indonesia (18,5% dari total kematian, SKI 2023). Peluang pasien selamat ditentukan oleh *golden period* ±4,5 jam, tetapi:
 
@@ -29,22 +33,23 @@ Sumber lengkap ada di [`docs/research/Ideas_Breakdown_v4_FINAL.md`](../research/
 
 ## 2. Solusi (satu kalimat)
 
-**TILIK adalah agen suara AI yang setiap pagi menelepon lansia penderita hipertensi lewat telepon biasa. TILIK mengecek obat, tensi, dan gejala, menyaring tanda stroke saat itu juga, lalu menggerakkan tetangga, anak, dan IGD dengan informasi jam onset, sambil membuat anak lebih sering menelepon orang tuanya.**
+**KRING adalah teman bicara AI yang setiap pagi menelepon lansia penderita hipertensi lewat telepon biasa, menyambungkan cerita dan rasa kangennya ke anak (dan pesan suara anak kembali ke Mbah) lewat aplikasi KRING, sekaligus mengecek obat, tensi, dan gejala serta menggerakkan tetangga, anak, dan IGD ketika muncul tanda stroke.**
 
-Kerangka produk: **Cegah, Deteksi, Arahkan.**
-1. **Cegah**: telepon harian (obat, tensi, gejala) + rapor dan "bahan obrolan" untuk keluarga.
-2. **Deteksi**: pemicu tanda bahaya (aturan + LLM, ditambah analisis suara di tahap berikutnya) + skrining stroke verbal.
-3. **Arahkan**: eskalasi 3 warna, konferensi telepon dengan tetangga dan anak, pre-alert ke IGD, dan arahan ke RS ber-CT terdekat.
+Kerangka produk (16 Okt): **tiga lapis dalam satu panggilan.**
+1. **Teman & jembatan keluarga**: mendengarkan cerita, memori, suasana hati, Nudge Kangen, bahan obrolan untuk anak, pesan suara anak diputar ke Mbah.
+2. **Jaga kesehatan (Cegah)**: obat, tensi, gejala, jadwal kontrol, data jam tangan.
+3. **Jaring pengaman stroke (Deteksi + Arahkan)**: pemicu tanda bahaya (aturan + LLM, ditambah analisis suara di tahap berikutnya) + skrining stroke verbal.
+   **Arahkan**: eskalasi 3 warna, konferensi telepon dengan tetangga dan anak, pre-alert ke IGD, dan arahan ke RS ber-CT terdekat.
 
 ## 3. Pengguna
 
 | Pengguna | Antarmuka | Nilai yang didapat |
 |---|---|---|
 | Lansia ("Mbah") | Telepon biasa, tanpa layar | Ditemani, diingatkan, ditolong cepat |
-| Anak/keluarga | WhatsApp | Rapor, bahan obrolan, titip pesan, alert darurat |
-| Tetangga/kader ("Sahabat Tilik") | Telepon + WhatsApp | Dipanggil pertama saat darurat (paling dekat secara fisik) |
-| Puskesmas | Web: "Daftar Tilik Hari Ini" | Daftar prioritas tindak lanjut, data tensi & kepatuhan |
-| IGD RS | Web: "Board Pre-alert" | Info onset, hasil skrining, dan obat sebelum pasien tiba |
+| Anak/keluarga | Aplikasi KRING (peran Keluarga) | Rapor, bahan obrolan, Nudge Kangen, titip pesan teks/suara, kesehatan & jam tangan, alert darurat |
+| Tetangga/kader ("Sahabat Kring") | Aplikasi KRING + telepon | Dipanggil pertama saat darurat (paling dekat secara fisik) |
+| Puskesmas | Aplikasi KRING: "Daftar Kring Hari Ini" | Daftar prioritas tindak lanjut, data tensi & kepatuhan |
+| IGD RS | Aplikasi KRING: "Board Pre-alert" | Info onset, hasil skrining, dan obat sebelum pasien tiba |
 
 ## 4. Tujuan
 
@@ -73,16 +78,16 @@ Ringkasnya, detail ada di [02_PRD.md](02_PRD.md):
 - Skrip harian: disclosure AI + kata sandi keluarga → titip pesan → obat → tensi → gejala → penutup + edukasi SeGeRa Ke RS
 - Pemicu tanda bahaya 2 jalur (aturan + LLM) + eskalasi 3 warna
 - Skrining stroke verbal + catat *last known well*
-- Eskalasi 🔴: konferensi telepon (Sahabat Tilik + anak), WA alert + RS ber-CT, pre-alert ke board IGD
-- Rapor WA dengan "Bahan Obrolan"
-- Web: Daftar Tilik Hari Ini, Board IGD
+- Eskalasi 🔴: konferensi telepon (Sahabat Kring + anak), alert di aplikasi + RS ber-CT, pre-alert ke board IGD
+- Rapor di aplikasi keluarga dengan "Bahan Obrolan"
+- Aplikasi: Daftar Kring Hari Ini, Board IGD (sebelumnya direncanakan web + WA; diganti 16 Okt)
 - Memori sederhana per pasien
 - Harness evaluasi tingkat teks (30 skenario)
 
 ### 5.2 Di luar scope MVP (masuk Stage 2/roadmap)
 Panel tanda vital suara *live*, endpointing personal, backchannel, deteksi krama/ngoko otomatis, mode DTMF, berbagi bertingkat penuh, Telepon Bareng, jam kronis (gagal jantung/kognitif), mode sovereign (Sahabat-AI), integrasi SATUSEHAT/PSC 119, uji lansia sungguhan (Stage 2).
 
-### 5.3 Non-goals (tidak akan pernah dilakukan TILIK)
+### 5.3 Non-goals (tidak akan pernah dilakukan KRING)
 - Mendiagnosis penyakit atau mengubah dosis obat
 - Meniru suara anggota keluarga (voice cloning)
 - Mengaku sebagai manusia

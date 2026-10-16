@@ -1,5 +1,7 @@
 # 08 · Roadmap & Job Breakdown
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 Pembagian kerja **per job/workstream, tidak per orang** (keputusan tim). Tim bebas mengambil job mana pun. Yang penting setiap job punya *definition of done* dan urutan ketergantungannya jelas.
 
 ---
@@ -22,7 +24,7 @@ Pembagian kerja **per job/workstream, tidak per orang** (keputusan tim). Tim beb
 | **WS-1** | Telepon & pipeline suara | Pipecat, Twilio Media Streams, Scribe STT, TTS, VAD, barge-in, fallback WebRTC, konferensi |
 | **WS-2** | Dialog & keselamatan | State machine, prompt, tool calling, Safety Agent (rules + LLM), memori |
 | **WS-3** | Data & backend | Skema Supabase, seed, API internal (mulai panggilan, simpan observasi) |
-| **WS-4** | Web | Daftar Tilik Hari Ini, Board IGD, konsol demo (tombol "Tilik sekarang"), UI telepon fallback |
+| **WS-4** | Web | Daftar Kring Hari Ini, Board IGD, konsol demo (tombol "Kring sekarang"), UI telepon fallback |
 | **WS-5** | WhatsApp | Rapor + bahan obrolan, alert 🔴, webhook titip pesan (teks & suara) |
 | **WS-6** | Evaluasi | Harness E1, persona, laporan angka, E2 terbatas |
 | **WS-7** | Konten klinis & bahasa | Skrip ID/JV, aturan tanda bahaya, edukasi, briefing, data RS & waktu tempuh |
@@ -60,10 +62,10 @@ Urutan prioritas, kalau waktu terpotong: **P-A** (wajib untuk demo inti) → **P
 ### Kamis, 16 Okt: "Satu panggilan utuh"
 | Job | Target hari ini | Prioritas |
 |---|---|---|
-| WS-1 | Panggilan keluar tersambung (PSTN atau WebRTC), TILIK bisa bicara & mendengar, barge-in | P-A |
+| WS-1 | Panggilan keluar tersambung (PSTN atau WebRTC), KRING bisa bicara & mendengar, barge-in | P-A |
 | WS-2 | State machine GREETING → CLOSING dengan tool calling (obat, tensi, gejala) | P-A |
 | WS-3 | Skema + seed (Bu Sri, kontak, RS, waktu tempuh) | P-A |
-| WS-4 | Kerangka web + Daftar Tilik (baca dari DB) | P-B |
+| WS-4 | Kerangka web + Daftar Kring (baca dari DB) | P-B |
 | WS-5 | Kirim pesan WA dari nomor tes ke nomor tim | P-B |
 | WS-7 | Skrip final MVP (ID + frasa JV), daftar aturan draf | P-A |
 | WS-9 | Kerangka proposal & deck (struktur slide) | P-C |
@@ -74,7 +76,7 @@ Urutan prioritas, kalau waktu terpotong: **P-A** (wajib untuk demo inti) → **P
 | Job | Target | Prioritas |
 |---|---|---|
 | WS-2 | Safety Agent (rules + LLM, OR-gate), STROKE_SCREEN, last known well, memori sederhana | P-A |
-| WS-1 | Konferensi (alihkan panggilan + panggil Sahabat Tilik & anak + briefing) | P-A |
+| WS-1 | Konferensi (alihkan panggilan + panggil Sahabat Kring & anak + briefing) | P-A |
 | WS-4 | Board IGD realtime + tampilan alert | P-A |
 | WS-5 | Alert 🔴 (RS ber-CT + ETA) + rapor + bahan obrolan + titip pesan (webhook) | P-A / P-B |
 | WS-6 | Harness E1 jalan untuk ≥ 10 persona | P-B |

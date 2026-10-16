@@ -1,5 +1,7 @@
 # 14 · Rencana Deliverable
 
+> **Pembaruan 16 Okt 2026 (prototipe & framing).** Nama produk: **KRING** (dulu TILIK). Framing utama: **teman bicara + jembatan keluarga dua arah**, kesehatan dan jalur cepat stroke sebagai lapis kedua dan ketiga. Kanal WhatsApp dan web Next.js digantikan **satu aplikasi KRING** (Flutter, 5 peran); lansia tetap lewat telepon biasa. Prototipe memakai FastAPI + SQLite (Supabase = rencana produksi). Lihat [03 §0](03_ARSITEKTUR_TEKNIS.md) dan [Laporan Konsep Kerja](../LAPORAN_KONSEP_KERJA.md).
+
 Deliverable wajib dari panitia (lihat [`penjelasan_lomba.md`](../../penjelasan_lomba.md)): **video ≤ 2 menit, proposal A4 ≤ 10 halaman, pitch deck (wajib berisi penggunaan AI), repo GitHub + README, prototype.**
 Tenggat internal: **18 Okt** (D-12). Tenggat resmi: Q-01.
 
@@ -11,7 +13,7 @@ Tenggat internal: **18 Okt** (D-12). Tenggat resmi: Q-01.
 |---|---|
 | Inovasi Solusi (25) | Deck: peta ATM + matriks pembeda + "first mile Code Stroke". Proposal §Inovasi |
 | Implementasi Teknis (30) | Repo + README (arsitektur, cara menjalankan) + **tabel hasil evaluasi** + diagram |
-| Fungsionalitas & Desain (20) | Video demo + screenshot Daftar Tilik/Board IGD/rapor WA + desain suara untuk lansia |
+| Fungsionalitas & Desain (20) | Video demo + screenshot Daftar Kring/Board IGD/rapor WA + desain suara untuk lansia |
 | Dampak & Kelayakan (15) | Data masalah, model biaya, jalur adopsi (Prolanis/RPPT, keluarga), regulasi (KMK 951/2026), etika |
 | Presentasi & Demonstrasi (10) | Video + koreografi demo final |
 
@@ -21,11 +23,11 @@ Tenggat internal: **18 Okt** (D-12). Tenggat resmi: Q-01.
 |---|---|---|
 | 0–10 | Rumah di desa, HP di meja; lalu anak di kota sedang bekerja (footage sendiri) | "Kapan terakhir kamu menelepon ibumu?" |
 | 10–25 | Kartu angka: stroke #1, hanya 1 dari 10 tiba tepat waktu, DIY provinsi paling tua | Narasi singkat |
-| 25–55 | **Babak 1**: HP berdering → TILIK menyapa (disclosure + kata sandi) → pesan suara anak → obat/tensi → cerita | Audio panggilan asli |
-| 55–65 | Rapor WA anak + "Bahan obrolan" + tombol telepon | "TILIK membuat anak lebih sering menelepon, bukan lebih jarang" |
+| 25–55 | **Babak 1**: HP berdering → KRING menyapa (disclosure + kata sandi) → pesan suara anak → obat/tensi → cerita | Audio panggilan asli |
+| 55–65 | Rapor WA anak + "Bahan obrolan" + tombol telepon | "KRING membuat anak lebih sering menelepon, bukan lebih jarang" |
 | 65–100 | **Babak 2**: bicara pelo → skrining → HP Bu Tini & HP Mas Dika berdering → konferensi → Board IGD menyala → WA RS ber-CT | Audio panggilan asli + teks waktu |
 | 100–112 | Tabel hasil evaluasi + diagram arsitektur singkat | |
-| 112–120 | Logo TILIK + tagline | "Jalur cepat stroke dimulai dari rumah." |
+| 112–120 | Logo KRING + tagline | "Jalur cepat stroke dimulai dari rumah." |
 
 - Tidak memakai cuplikan film *Tilik* (CMP-01).
 - Kalau transport PSTN tidak tersedia (S-01), babak telepon direkam dengan **UI telepon WebRTC** dan disebut terang-terangan sebagai prototype.
@@ -34,7 +36,7 @@ Tenggat internal: **18 Okt** (D-12). Tenggat resmi: Q-01.
 
 | Hal | Isi |
 |---|---|
-| 1 | Cover: TILIK · tim IRIS-Heisenberg · tema Healthcare · subtema |
+| 1 | Cover: KRING · tim IRIS-Heisenberg · tema Healthcare · subtema |
 | 2 | Ringkasan eksekutif + latar belakang masalah (data) |
 | 3 | Analisis masalah & pengguna (persona, jalur keterlambatan stroke, Prolanis/RPPT) |
 | 4 | Solusi: Cegah–Deteksi–Arahkan + alur pengguna |
@@ -52,7 +54,7 @@ Tenggat internal: **18 Okt** (D-12). Tenggat resmi: Q-01.
 | 1 | Hook: "Kapan terakhir kamu telepon ibumu?" + DIY 17,83% lansia | 0:30 |
 | 2 | Masalah: stroke #1, 16,5 jam vs 4,5 jam, lansia sendiri | 1:00 |
 | 3 | Kenapa telepon (26% lansia internet) & kenapa sekarang | 0:30 |
-| 4 | Solusi TILIK: Cegah–Deteksi–Arahkan | 0:45 |
+| 4 | Solusi KRING: Cegah–Deteksi–Arahkan | 0:45 |
 | 5 | Peta ATM (CareCall, Emory, Polaris, Cordio, Code Stroke UGM) | 0:45 |
 | 6 | **DEMO LIVE** (babak 1 & 2) | 4:00 |
 | 7 | Arsitektur + constellation | 0:45 |
@@ -79,7 +81,7 @@ Mulai catat **hari ini** di tabel ini, lalu salin ke deck:
 ## 6. README (wajib lomba: alur + cara menjalankan)
 
 Isi akhir README (diperbarui di Stage 1):
-1. Apa itu TILIK (1 paragraf) + demo video
+1. Apa itu KRING (1 paragraf) + demo video
 2. Alur sistem (diagram)
 3. Struktur repo
 4. Prasyarat (akun, versi Python/Node)

@@ -1,6 +1,38 @@
 # 03 · Arsitektur Teknis
 
-Status: **rancangan Stage 0.** Bagian bertanda 🧪 harus divalidasi lewat spike di [09_STAGE0_CHECKLIST.md](09_STAGE0_CHECKLIST.md) sebelum dikunci.
+Status: **rancangan Stage 0**, dengan §0 berisi arsitektur prototipe yang benar-benar berjalan. Bagian bertanda 🧪 harus divalidasi lewat spike di [09_STAGE0_CHECKLIST.md](09_STAGE0_CHECKLIST.md) sebelum dikunci.
+
+
+## 0. Arsitektur prototipe yang berjalan (16 Okt 2026)
+
+Bagian §1 dan seterusnya adalah **rancangan Stage 0**. Prototipe yang benar-benar dibangun berbeda di beberapa tempat:
+
+```
+HP lansia (telepon biasa) ── Twilio PSTN (kode siap, belum dipakai ke +62)
+Browser (WebRTC, jalur demo) ─┐
+                              ▼
+apps/voice  Pipecat: Silero VAD → ElevenLabs Scribe Realtime → KRING Brain → ElevenLabs Flash v2.5
+                              │ HTTP, satu giliran = POST /v1/calls/{sid}/turns
+                              ▼
+apps/api    FastAPI + SQLite: dialog.py (state machine, kalimat dari content/scripts.json) · nlu.py (aturan,
+            Indonesia + Jawa) · safety.py (aturan ∥ gpt-5.4-mini, OR-gate, batas 6 s) · escalation.py (event-driven)
+            · vitals.py (jam tangan) · care.py (obat, jadwal, rapor) · protocol.py (tidak diangkat)
+                              │ HTTP/JSON, polling 2 detik
+                              ▼
+apps/mobile Flutter (Android, iOS, web): HP Mbah (simulator) · Keluarga · Sahabat Kring · Puskesmas · IGD
+            + mode luring (logika API di-port ke Dart) + Health Connect / Apple Health
+```
+
+| Rencana Stage 0 | Prototipe | Alasan |
+|---|---|---|
+| LLM menyusun kalimat lewat tool call | Kalimat dari **skrip JSON** yang bisa diaudit; LLM hanya klasifikasi tanda bahaya + ekstraksi memori | Lebih aman dan murah; LLM tidak bisa mengarang nasihat medis |
+| WhatsApp Cloud API (rapor, titip pesan, alert) | **Aplikasi KRING** peran Keluarga & Sahabat Kring (rapor, bahan obrolan, pesan teks/suara, panggilan darurat) | D-36: satu aplikasi lebih kaya dan tidak butuh template WA |
+| Web Next.js (Daftar Kring, Board IGD) | **Aplikasi KRING** peran Puskesmas & IGD | D-36 |
+| Supabase (Postgres + Realtime + Storage) | SQLite + polling 2 detik; audio pesan suara di tabel `message_audio` | Bisa jalan lokal/luring; Supabase tetap rencana produksi |
+| Event bus + Memory Agent terpisah | Fungsi di API yang dipanggil per giliran / akhir panggilan | Cukup untuk skala prototipe |
+| Konferensi Twilio | Disimulasikan sebagai panggilan darurat layar penuh di aplikasi | Twilio belum dikonfigurasi |
+
+Latensi terukur (WebRTC, 12 giliran): p50 1,78 s (VAD 0,70 · STT 0,34 · API 0,008 · TTS pertama 0,16), p95 5,1 s. Detail: [07 §6](07_EVALUASI.md).
 
 ---
 
@@ -49,7 +81,7 @@ flowchart LR
     OA[(OpenAI LLM)]
     SB[(Supabase<br/>DB + Realtime + Storage)]
     WA[(WhatsApp Cloud API)]
-    VC[Next.js di Vercel<br/>Daftar Tilik · Board IGD · webhook WA]
+    VC[Next.js di Vercel<br/>Daftar Kring · Board IGD · webhook WA]
   end
   HP <-->|PSTN| TV
   TV <-->|WebSocket μ-law 8 kHz| PC
@@ -96,9 +128,9 @@ Twilio audio (μ-law 8k) → TwilioFrameSerializer → Silero VAD
 
 ### 2.4 Escalation Service (🔴), rancangan 🧪
 Panggilan pasien berjalan sebagai *bidirectional Media Stream*. Untuk menyambungkan orang lain:
-1. TILIK memberi tahu pasien ("Bu, kula sambungaken kalih Bu Tini lan Mas Dika").
-2. Panggilan pasien **dialihkan** (Twilio REST update) ke TwiML `<Dial><Conference>`. Pada saat ini TILIK keluar dari percakapan suara.
-3. Panggilan keluar ke Sahabat Tilik dan anak: **briefing pendek** (audio TTS ElevenLabs yang di-generate per insiden, diputar dengan `<Play>`), lalu `<Dial><Conference>` ke ruang yang sama.
+1. KRING memberi tahu pasien ("Bu, kula sambungaken kalih Bu Tini lan Mas Dika").
+2. Panggilan pasien **dialihkan** (Twilio REST update) ke TwiML `<Dial><Conference>`. Pada saat ini KRING keluar dari percakapan suara.
+3. Panggilan keluar ke Sahabat Kring dan anak: **briefing pendek** (audio TTS ElevenLabs yang di-generate per insiden, diputar dengan `<Play>`), lalu `<Dial><Conference>` ke ruang yang sama.
 4. Paralel: WA alert (ringkasan + jam onset + RS ber-CT + ETA statis) dan insert `alerts` ke Supabase → Board IGD (realtime).
 
 > Pada Twilio trial, **semua peserta harus nomor terverifikasi** (maksimal 5 nomor). Lihat [10](10_ANGGARAN_KUOTA.md).
@@ -120,8 +152,8 @@ flowchart LR
   C[Tombol SOS GSM] -.Stage 3.-> E
   D[Jam tangan: jatuh / ritme / tensi] -.Stage 2 simulasi, Stage 3 nyata.-> E
   F[Scheduler: tidak diangkat] --> E
-  E -->|🟡| P[Daftar Tilik Puskesmas]
-  E -->|🔴| Q[Telepon pasien → Sahabat Tilik → anak → Board IGD]
+  E -->|🟡| P[Daftar Kring Puskesmas]
+  E -->|🔴| Q[Telepon pasien → Sahabat Kring → anak → Board IGD]
 ```
 
 - **MVP:** sumber = panggilan harian (+ scheduler tidak diangkat kalau sempat).
@@ -140,7 +172,7 @@ flowchart LR
 ### 3.1 Panggilan harian (🟢)
 ```mermaid
 sequenceDiagram
-  participant W as Web (tombol Tilik sekarang)
+  participant W as Web (tombol Kring sekarang)
   participant V as Server suara
   participant T as Twilio
   participant M as HP Mbah
@@ -156,7 +188,7 @@ sequenceDiagram
   V->>DB: observations, call_session, transcript ringkas
   V->>DB: memories (fakta baru)
   V->>WA: rapor + bahan obrolan ke anak
-  DB-->>W: Daftar Tilik ter-update (realtime)
+  DB-->>W: Daftar Kring ter-update (realtime)
 ```
 
 ### 3.2 Darurat (🔴)
@@ -166,7 +198,7 @@ sequenceDiagram
   participant V as Server suara
   participant S as Safety Agent
   participant T as Twilio
-  participant N as Sahabat Tilik
+  participant N as Sahabat Kring
   participant A as Anak
   participant DB as Supabase
   participant IGD as Board IGD
@@ -177,7 +209,7 @@ sequenceDiagram
   V->>DB: alert {onset, skrining, obat}
   DB-->>IGD: pre-alert (realtime)
   V->>T: redirect panggilan Mbah ke Conference
-  V->>T: call Sahabat Tilik (briefing → Conference)
+  V->>T: call Sahabat Kring (briefing → Conference)
   V->>T: call Anak (briefing → Conference)
   V->>A: WA alert + RS ber-CT + ETA
   V->>N: WA alert
@@ -194,7 +226,7 @@ sequenceDiagram
 | STT final (Scribe realtime) | ? 🧪 | Klaim vendor < 150 ms, harus diukur sendiri |
 | LLM time-to-first-token | ? 🧪 | Penentu utama pemilihan model OpenAI |
 | TTS time-to-first-byte | ? 🧪 | Bandingkan model ElevenLabs |
-| **Total p50 (akhir ucapan → suara TILIK)** | **≤ 1,5 s** | Final: ≤ 1,0 s |
+| **Total p50 (akhir ucapan → suara KRING)** | **≤ 1,5 s** | Final: ≤ 1,0 s |
 
 ---
 
