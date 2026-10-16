@@ -49,3 +49,6 @@ apps/mobile/android/key.properties
 
 # APK demo hasil build (dibagikan terpisah)
 dist/
+
+# Konfigurasi lokal Claude Code (path sementara per mesin)
+.claude/
