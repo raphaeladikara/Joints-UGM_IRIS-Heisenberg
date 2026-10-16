@@ -1,12 +1,30 @@
-# TILIK
+# KRING
 
 > **Jalur cepat stroke dimulai dari rumah Mbah, bukan dari pintu IGD.**
 
-TILIK adalah agen suara AI yang setiap pagi menelepon lansia penderita hipertensi lewat **telepon biasa** (tanpa aplikasi, tanpa internet). TILIK mengecek obat, tensi, dan gejala, lalu menyaring tanda stroke saat itu juga. Kalau ada tanda bahaya, TILIK menggerakkan tetangga, anak, dan IGD dengan informasi jam onset. Di hari-hari biasa, TILIK memberi anak bahan obrolan supaya mereka lebih sering menelepon orang tuanya.
+KRING adalah agen suara AI yang setiap pagi menelepon lansia penderita hipertensi lewat **telepon biasa** (tanpa aplikasi, tanpa internet). KRING mengecek obat, tensi, dan gejala, lalu menyaring tanda stroke saat itu juga. Kalau ada tanda bahaya, KRING menggerakkan tetangga, anak, dan IGD dengan informasi jam onset. Di hari-hari biasa, KRING memberi anak bahan obrolan supaya mereka lebih sering menelepon orang tuanya.
+
+*(Sebelumnya bernama TILIK; dokumen Stage 0 dan paper masih memakai nama lama.)*
 
 **Tim IRIS-Heisenberg** · Hackathon JOINTS x INSPIRE 2026 · Tema **Healthcare**
 
 ---
+
+## APK demo (offline, tanpa server)
+
+APK bawaan memakai **mode offline**: logika server (dialog, Safety Agent, eskalasi, data demo 30 hari) berjalan di dalam
+aplikasi (`apps/mobile/lib/core/local/`), jadi bisa dipasang di HP Android mana pun tanpa internet atau laptop. Data demo
+otomatis diisi ulang tiap hari; tombol **Ulang data demo** mengembalikannya. Server FastAPI tetap bisa dipakai lewat ⚙
+(pilih "Server") untuk LLM dan suara asli.
+
+```bash
+cd apps/mobile
+flutter build apk --release        # build/app/outputs/flutter-apk/app-release.apk (universal)
+```
+
+Fitur baru di aplikasi keluarga: ringkasan harian + skor sehat, streak obat & telepon, jadwal & stok obat, air & garam,
+menu rendah garam (kirim resep ke Mbah), rapor 30 hari untuk dokter, model 3D lansia realistis (MakeHuman CC0), dan
+maskot Kiki. Endpoint fitur baru (`/care`, `/meds/*`, `/intake`, `/family-calls`, `/report`) baru ada di mode offline.
 
 ## Status: Stage 1 (prototype aplikasi berjalan)
 

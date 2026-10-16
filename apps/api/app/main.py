@@ -1,4 +1,4 @@
-"""API TILIK (FastAPI). Dipakai aplikasi Flutter (semua peran) dan nanti oleh server suara Pipecat.
+"""API KRING (FastAPI). Dipakai aplikasi Flutter (semua peran) dan nanti oleh server suara Pipecat.
 
 Mode demo (DEMO_MODE=true): telepon/WA ke keluarga adalah kanal simulasi di aplikasi; tidak ada panggilan ke 119/RS.
 """
@@ -22,8 +22,8 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="TILIK API", version="0.1.0", lifespan=lifespan,
-              description="Prototype TILIK: agen telepon harian lansia hipertensi (data fiktif).")
+app = FastAPI(title="KRING API", version="0.1.0", lifespan=lifespan,
+              description="Prototype KRING: agen telepon harian lansia hipertensi (data fiktif).")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
@@ -196,7 +196,7 @@ def patient_detail(pid: str) -> dict[str, Any]:
 
 @app.get("/v1/puskesmas/today")
 def daftar_tilik() -> dict[str, Any]:
-    """F-13 Daftar Tilik Hari Ini: 🔴/🟡 di paling atas."""
+    """F-13 Daftar Kring Hari Ini: 🔴/🟡 di paling atas."""
     start = _today_start()
     rows = []
     for p in db.query("SELECT * FROM patients WHERE active = 1"):
@@ -234,7 +234,7 @@ def daftar_tilik() -> dict[str, Any]:
 
 @app.post("/v1/calls")
 def start_call(body: StartCall) -> dict[str, Any]:
-    """Tombol 'Tilik sekarang' (F-01). HP Mbah (simulator) berdering; auto_answer=true langsung mengangkat."""
+    """Tombol 'Kring sekarang' (F-01). HP Mbah (simulator) berdering; auto_answer=true langsung mengangkat."""
     _patient_or_404(body.patient_id)
     for old in db.query("SELECT id FROM call_sessions WHERE patient_id = ? AND status = 'ringing'", (body.patient_id,)):
         db.execute("UPDATE call_sessions SET status = 'failed', outcome = 'superseded', ended_at = ? WHERE id = ?", (config.now().isoformat(), old["id"]))
@@ -246,7 +246,7 @@ def start_call(body: StartCall) -> dict[str, Any]:
 
 @app.get("/v1/patients/{pid}/incoming")
 def incoming(pid: str) -> dict[str, Any]:
-    """Dipoll oleh simulator HP Mbah: apakah ada panggilan TILIK yang sedang berdering?"""
+    """Dipoll oleh simulator HP Mbah: apakah ada panggilan KRING yang sedang berdering?"""
     s = db.one("SELECT id, trigger, started_at FROM call_sessions WHERE patient_id = ? AND status = 'ringing' ORDER BY started_at DESC LIMIT 1", (pid,))
     return {"ringing": s is not None, "session": s}
 
@@ -313,7 +313,7 @@ def calls_live() -> list[dict[str, Any]]:
 def post_event(body: EventIn) -> dict[str, Any]:
     _patient_or_404(body.patient_id)
     if body.type == "fall_detected":
-        # TILIK menelepon pasien dulu. Tidak diangkat / tidak ada jawaban jelas → 🔴 otomatis.
+        # KRING menelepon pasien dulu. Tidak diangkat / tidak ada jawaban jelas → 🔴 otomatis.
         db.execute("INSERT INTO events (id, patient_id, source, type, payload, occurred_at, handled_level) VALUES (?,?,?,?,?,?, 'pending')",
                    (db.new_id(), body.patient_id, body.source, body.type, db.dumps(body.payload), config.now().isoformat()))
         s = dialog.create_session(body.patient_id, trigger="fall")
@@ -398,7 +398,7 @@ def hospitals() -> list[dict[str, Any]]:
     return db.query("SELECT id, name, regency, has_ct_24h, code_stroke_network FROM hospitals ORDER BY name")
 
 
-# ---------- keluarga & Sahabat Tilik ----------
+# ---------- keluarga & Sahabat Kring ----------
 
 @app.get("/v1/contacts")
 def contacts() -> list[dict[str, Any]]:
@@ -420,7 +420,7 @@ def contact_feed(cid: str) -> dict[str, Any]:
                    (p["id"], _today_start()))
     return {
         "contact": {k: c[k] for k in ("id", "role", "name", "relation")},
-        "patient": {**_public_patient(p), "phone": p["phone_e164"]},  # nomor hanya untuk keluarga & Sahabat Tilik
+        "patient": {**_public_patient(p), "phone": p["phone_e164"]},  # nomor hanya untuk keluarga & Sahabat Kring
         "today": today,
         "latest_report": report,
         "bp_history": _bp_history(p["id"], 7),
@@ -563,7 +563,7 @@ def notification_action(nid: str, body: NotificationAction) -> dict[str, Any]:
 
 @app.post("/v1/patients/{pid}/family-messages")
 def family_message(pid: str, body: FamilyMessageIn) -> dict[str, Any]:
-    """F-03 Titip pesan: dibacakan TILIK di panggilan berikutnya."""
+    """F-03 Titip pesan: dibacakan KRING di panggilan berikutnya."""
     _patient_or_404(pid)
     c = db.one("SELECT * FROM contacts WHERE id = ? AND patient_id = ?", (body.contact_id, pid))
     if not c:

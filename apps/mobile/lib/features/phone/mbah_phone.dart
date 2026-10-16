@@ -11,7 +11,7 @@ import '../../core/widgets.dart';
 enum _Phase { idle, ringing, inCall, ended }
 
 /// Simulator "HP jadul" Mbah. Di produksi ini adalah panggilan PSTN biasa (Twilio + Pipecat);
-/// di prototype, layar ini memutar suara TILIK (TTS) dan menerima jawaban lewat mikrofon, ketik, atau tombol.
+/// di prototype, layar ini memutar suara KRING (TTS) dan menerima jawaban lewat mikrofon, ketik, atau tombol.
 class MbahPhone extends StatefulWidget {
   const MbahPhone({super.key, required this.patientId});
   final String patientId;
@@ -172,7 +172,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
     try {
       final r = await _api.say(sid, text.trim());
       if (mounted) setState(() => _sending = false);
-      // Suara TILIK diputar tanpa mengunci tombol: pasien boleh memotong kapan saja.
+      // Suara KRING diputar tanpa mengunci tombol: pasien boleh memotong kapan saja.
       unawaited(_applyTurn(r));
     } catch (e) {
       if (mounted) {
@@ -265,7 +265,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
         title: Text('HP ${_patient?['display_name'] ?? 'Mbah'}', style: TText.h2.copyWith(color: Colors.white)),
         actions: [
           IconButton(
-            tooltip: _voice.muted ? 'Suara TILIK mati' : 'Suara TILIK nyala',
+            tooltip: _voice.muted ? 'Suara KRING mati' : 'Suara KRING nyala',
             onPressed: () => setState(() => _voice.muted = !_voice.muted),
             icon: Icon(_voice.muted ? Icons.volume_off_rounded : Icons.volume_up_rounded),
           ),
@@ -314,7 +314,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Menunggu TILIK menelepon (dijadwalkan ${_patient?['call_time_local'] ?? '07.00'} atau tombol "Tilik sekarang" di Puskesmas).',
+                  'Menunggu KRING menelepon (dijadwalkan ${_patient?['call_time_local'] ?? '07.00'} atau tombol "Kring sekarang" di Puskesmas).',
                   style: TText.small.copyWith(color: Colors.white60),
                   textAlign: TextAlign.center,
                 ),
@@ -327,7 +327,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
             style: FilledButton.styleFrom(backgroundColor: TColors.clay, minimumSize: const Size.fromHeight(54)),
             onPressed: _requestCall,
             icon: const Icon(Icons.ring_volume_rounded),
-            label: const Text('Demo: minta TILIK menelepon sekarang'),
+            label: const Text('Demo: minta KRING menelepon sekarang'),
           ),
           const SizedBox(height: 10),
           Text(
@@ -363,7 +363,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
             ),
           ),
           const SizedBox(height: 22),
-          Text('TILIK', style: TText.display.copyWith(color: Colors.white)),
+          Text('KRING', style: TText.display.copyWith(color: Colors.white)),
           Text('Puskesmas · asisten AI', style: TText.body.copyWith(color: Colors.white70)),
           const Spacer(),
           Row(
@@ -414,7 +414,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('TILIK · $mm:$ss', style: TText.h3.copyWith(color: Colors.white)),
+                    Text('KRING · $mm:$ss', style: TText.h3.copyWith(color: Colors.white)),
                     Text(_stateLabel, style: TText.small.copyWith(color: Colors.white60)),
                   ],
                 ),
@@ -434,7 +434,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Bantuan sedang dihubungi: Sahabat Tilik, keluarga, dan pre-alert IGD.',
+                    'Bantuan sedang dihubungi: Sahabat Kring, keluarga, dan pre-alert IGD.',
                     style: TText.small.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
                   ),
                 ),
@@ -536,7 +536,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
               if (_speaking) ...[
                 const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white54)),
                 const SizedBox(width: 8),
-                Text('TILIK sedang bicara', style: TText.small.copyWith(color: Colors.white54)),
+                Text('KRING sedang bicara', style: TText.small.copyWith(color: Colors.white54)),
                 const SizedBox(width: 16),
               ],
               Text('Dengar otomatis', style: TText.small.copyWith(color: Colors.white54)),
@@ -568,7 +568,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l.fromTilik ? 'TILIK' : (_patient?['display_name'] as String? ?? 'Mbah'),
+              l.fromTilik ? 'KRING' : (_patient?['display_name'] as String? ?? 'Mbah'),
               style: TText.label.copyWith(color: Colors.white54, fontSize: 10.5),
             ),
             const SizedBox(height: 2),
@@ -584,17 +584,17 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
     final (title, desc) = switch (_outcome) {
       'escalated' => (
         'Disambungkan ke konferensi',
-        'TILIK menyambungkan Mbah dengan Sahabat Tilik dan keluarga. Pre-alert sudah ada di Board IGD.',
+        'KRING menyambungkan Mbah dengan Sahabat Kring dan keluarga. Pre-alert sudah ada di Board IGD.',
       ),
       'no_answer' => (
         'Panggilan tidak diangkat',
         _helpComing
-            ? 'Jam tangan mendeteksi jatuh dan tidak ada jawaban: TILIK langsung mengeskalasi ke Sahabat Tilik, keluarga, dan IGD.'
+            ? 'Jam tangan mendeteksi jatuh dan tidak ada jawaban: KRING langsung mengeskalasi ke Sahabat Kring, keluarga, dan IGD.'
             : 'Tercatat. Dua kali berturut-turut → masuk daftar tindak lanjut Puskesmas.',
       ),
-      'wrong_person' => ('Bukan Mbah yang mengangkat', 'TILIK tidak menyebut data medis apa pun dan akan menelepon lagi nanti.'),
+      'wrong_person' => ('Bukan Mbah yang mengangkat', 'KRING tidak menyebut data medis apa pun dan akan menelepon lagi nanti.'),
       'hung_up' => ('Panggilan diakhiri', 'Data yang sudah terkumpul tetap tersimpan.'),
-      _ => ('Panggilan selesai', 'Rapor dan bahan obrolan sudah dikirim ke keluarga. Daftar Tilik Puskesmas ter-update.'),
+      _ => ('Panggilan selesai', 'Rapor dan bahan obrolan sudah dikirim ke keluarga. Daftar Kring Puskesmas ter-update.'),
     };
     return Padding(
       padding: const EdgeInsets.all(24),

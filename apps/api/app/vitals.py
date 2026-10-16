@@ -2,7 +2,7 @@
 
 Aplikasi keluarga membaca data dari HP Mbah / jam tangan lalu mengirimnya ke sini. Disimpan sebagai `observations`
 (kind = heart_rate | resting_hr | steps | sleep | spo2 | blood_pressure) dengan source = asal data.
-Perangkat konsumen bukan alat diagnosis: data ini paling tinggi memicu 🟡 (Daftar Tilik), kecuali tensi yang lewat
+Perangkat konsumen bukan alat diagnosis: data ini paling tinggi memicu 🟡 (Daftar Kring), kecuali tensi yang lewat
 aturan tensi yang sama dengan panggilan.
 """
 
@@ -35,7 +35,7 @@ def _at(raw: str | None) -> str:
 
 
 def _open_once(patient_id: str, code: str, quote: str) -> str | None:
-    """Buka alert kuning sekali per kode per hari (sinkron berulang tidak membanjiri Daftar Tilik)."""
+    """Buka alert kuning sekali per kode per hari (sinkron berulang tidak membanjiri Daftar Kring)."""
     since = config.now().replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
     for a in db.query("SELECT reasons FROM alerts WHERE patient_id = ? AND created_at >= ? AND status != 'closed'", (patient_id, since)):
         if any(r.get("code") == code for r in db.loads(a["reasons"], [])):

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Token warna TILIK: putih bersih + biru langit, dengan aksen aprikot dari gradien "Pipo" (lihat [PipoBackground]).
+/// Token warna KRING: putih bersih + biru langit, dengan aksen aprikot dari gradien "Pipo" (lihat [PipoBackground]).
 /// Semua teks di atas latar mana pun ≥ 4,5:1. Warna level selalu ditemani ikon dan teks, tidak pernah jadi
 /// satu-satunya pembawa makna (buta warna merah-hijau umum pada lansia pria).
 abstract final class TColors {

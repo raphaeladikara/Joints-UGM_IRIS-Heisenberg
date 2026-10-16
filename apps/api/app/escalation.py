@@ -1,6 +1,6 @@
 """Mesin eskalasi event-driven (D-33). Semua sumber sinyal (panggilan, jam tangan, SOS, scheduler) masuk ke sini.
 
-Mode demo: telepon & WhatsApp ke Sahabat Tilik/anak adalah kanal SIMULASI yang tampil di aplikasi (notifications).
+Mode demo: telepon & WhatsApp ke Sahabat Kring/anak adalah kanal SIMULASI yang tampil di aplikasi (notifications).
 Sistem tidak pernah memanggil 119 atau nomor RS sungguhan.
 """
 
@@ -52,7 +52,7 @@ def notify(contact: dict[str, Any], patient_id: str, kind: str, channel: str, ti
 
 
 def open_alert(patient_id: str, session_id: str | None, level: str, source: str, reasons: list[dict[str, Any]]) -> str:
-    """Buat alert. Untuk 🔴: pre-alert Board IGD + telepon Sahabat Tilik lalu anak + WA keduanya (semua simulasi)."""
+    """Buat alert. Untuk 🔴: pre-alert Board IGD + telepon Sahabat Kring lalu anak + WA keduanya (semua simulasi)."""
     patient = db.one("SELECT * FROM patients WHERE id = ?", (patient_id,))
     assert patient is not None
     now = config.now()
@@ -73,16 +73,16 @@ def open_alert(patient_id: str, session_id: str | None, level: str, source: str,
             if child:
                 _notify(conn, child, patient_id, "yellow_notice", "whatsapp_sim",
                         f"🟡 {patient['display_name']} perlu tindak lanjut",
-                        f"TILIK mencatat: {summary}. Petugas Puskesmas akan menghubungi hari ini. Tidak darurat.",
+                        f"KRING mencatat: {summary}. Petugas Puskesmas akan menghubungi hari ini. Tidak darurat.",
                         {"reasons": reasons}, alert_id=alert_id, session_id=session_id)
             return alert_id
 
         rs = f"{hospital['name']} (±{eta} menit)" if hospital else "RS ber-CT terdekat"
         wa_body = (f"🔴 DARURAT: {patient['display_name']} menunjukkan tanda bahaya ({summary}). "
                    f"Terakhir normal: menunggu jawaban. RS ber-CT terdekat: {rs}. "
-                   f"Hubungi 119 / ambulans desa. (Mode demo: TILIK tidak menelepon 119.)")
+                   f"Hubungi 119 / ambulans desa. (Mode demo: KRING tidak menelepon 119.)")
         payload = {"reasons": reasons, "hospital": hospital, "eta_minutes": eta}
-        # Urutan: Sahabat Tilik (paling dekat) lalu anak, sesuai escalation_order.
+        # Urutan: Sahabat Kring (paling dekat) lalu anak, sesuai escalation_order.
         for c in [sahabat, child]:
             if not c:
                 continue
@@ -90,7 +90,7 @@ def open_alert(patient_id: str, session_id: str | None, level: str, source: str,
             brief = content.briefing(key, sahabat=sahabat["name"] if sahabat else "tetangga", anak=child["name"] if child else "keluarga",
                                      sapaan=patient["display_name"], puskesmas=config.PUSKESMAS_NAME, lkw="belum diketahui (skrining berjalan)",
                                      ringkas=summary, rs=hospital["name"] if hospital else "RS terdekat", eta=eta or "?")
-            _notify(conn, c, patient_id, "red_call", "call_sim", f"📞 TILIK menelepon: darurat {patient['display_name']}",
+            _notify(conn, c, patient_id, "red_call", "call_sim", f"📞 KRING menelepon: darurat {patient['display_name']}",
                     brief, {**payload, "conference": f"tilik-{alert_id[:8]}"}, alert_id=alert_id, session_id=session_id, status="ringing")
             _notify(conn, c, patient_id, "red_alert", "whatsapp_sim", f"🔴 Darurat {patient['display_name']}", wa_body, payload,
                     alert_id=alert_id, session_id=session_id)
@@ -149,6 +149,6 @@ def handle_event(patient_id: str, source: str, type_: str, payload: dict[str, An
     elif type_ == "missed_checkin":
         reasons = [{"path": "event", "code": "NO_ANSWER_2X", "label": content.label("NO_ANSWER_2X"), "quote": source}]
         result.update(action="follow_up", level="yellow", alert_id=open_alert(patient_id, None, "yellow", f"event:{source}", reasons))
-    # fall_detected ditangani di main.py: TILIK langsung menelepon pasien dulu (F-18).
+    # fall_detected ditangani di main.py: KRING langsung menelepon pasien dulu (F-18).
     db.execute("UPDATE events SET handled_level = ? WHERE id = ?", (result["level"], event_id))
     return result

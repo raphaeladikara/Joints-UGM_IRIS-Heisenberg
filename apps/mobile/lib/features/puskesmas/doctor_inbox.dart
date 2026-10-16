@@ -4,7 +4,7 @@ import '../../core/api.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 
-/// Panggilan masuk dari wali untuk dokter jaga (simulasi telekonsultasi). Tampil di atas Daftar Tilik.
+/// Panggilan masuk dari wali untuk dokter jaga (simulasi telekonsultasi). Tampil di atas Daftar Kring.
 class DoctorInbox extends StatefulWidget {
   const DoctorInbox({super.key});
   @override

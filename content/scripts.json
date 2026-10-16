@@ -1,8 +1,8 @@
 {
-  "_note": "Skrip percakapan TILIK (DRAF, belum direview nakes; frasa Jawa perlu validasi penutur asli Q-07). Sumber: docs/stage-0/05_DESAIN_PERCAKAPAN.md. Placeholder {nama} diisi oleh dialog manager.",
+  "_note": "Skrip percakapan KRING (DRAF, belum direview nakes; frasa Jawa perlu validasi penutur asli Q-07). Sumber: docs/stage-0/05_DESAIN_PERCAKAPAN.md. Placeholder {nama} diisi oleh dialog manager.",
   "id": {
-    "greeting": "Selamat pagi, {sapaan}. Saya Tilik, asisten AI dari {puskesmas}. Kata sandi keluarga: {codeword}. Apakah saya sedang berbicara dengan {sapaan}?",
-    "greeting_event_fall": "{sapaan}, ini Tilik, asisten AI dari {puskesmas}. Kata sandi keluarga: {codeword}. Jam tangan Ibu mendeteksi Ibu terjatuh. Apakah {sapaan} baik-baik saja?",
+    "greeting": "Selamat pagi, {sapaan}. Saya Kring, asisten AI dari {puskesmas}. Kata sandi keluarga: {codeword}. Apakah saya sedang berbicara dengan {sapaan}?",
+    "greeting_event_fall": "{sapaan}, ini Kring, asisten AI dari {puskesmas}. Kata sandi keluarga: {codeword}. Jam tangan Ibu mendeteksi Ibu terjatuh. Apakah {sapaan} baik-baik saja?",
     "identity_retry": "Maaf, boleh saya tahu ini dengan siapa?",
     "wrong_person": "Terima kasih. Saya hanya boleh bicara langsung dengan {sapaan}. Saya akan menelepon lagi nanti. Selamat pagi.",
     "ai_disclosure": "Saya asisten AI, bukan manusia. Saya membantu {puskesmas} menanyakan kabar {sapaan} setiap pagi.",
@@ -43,7 +43,7 @@
     "not_understood": "Maaf, saya kurang menangkap. Bisa diulang pelan-pelan?"
   },
   "jv": {
-    "greeting": "Sugeng enjing, {sapaan}. Kula Tilik, asisten AI saking {puskesmas}. Tembung sandhi kulawarga: {codeword}. Leres menika kula matur kalih {sapaan}?",
+    "greeting": "Sugeng enjing, {sapaan}. Kula Kring, asisten AI saking {puskesmas}. Tembung sandhi kulawarga: {codeword}. Leres menika kula matur kalih {sapaan}?",
     "ask_medication": "Obat tensi {obat} enjing menika sampun diunjuk, {sapaan}?",
     "confirm_bp": "{sistolik_kata} per {diastolik_kata}, leres?",
     "ask_symptoms": "Wonten keluhan menapa dinten menika, {sapaan}?",
@@ -56,7 +56,7 @@
     "Minum obat tensi setiap hari membantu mencegah stroke, walaupun badan terasa sehat."
   ],
   "briefing": {
-    "sahabat_tilik": "{sahabat}, ini Tilik dari {puskesmas}. {sapaan} kemungkinan mengalami tanda stroke. Jam terakhir normal: {lkw}. Mohon segera ke rumah beliau. Saya sambungkan sekarang.",
-    "child": "{anak}, ini Tilik. {sapaan} menunjukkan tanda stroke: {ringkas}. Jam terakhir normal: {lkw}. {sahabat} sedang menuju rumah. Rumah sakit dengan CT terdekat: {rs}, sekitar {eta} menit. Saya sambungkan sekarang."
+    "sahabat_tilik": "{sahabat}, ini Kring dari {puskesmas}. {sapaan} kemungkinan mengalami tanda stroke. Jam terakhir normal: {lkw}. Mohon segera ke rumah beliau. Saya sambungkan sekarang.",
+    "child": "{anak}, ini Kring. {sapaan} menunjukkan tanda stroke: {ringkas}. Jam terakhir normal: {lkw}. {sahabat} sedang menuju rumah. Rumah sakit dengan CT terdekat: {rs}, sekitar {eta} menit. Saya sambungkan sekarang."
   }
 }

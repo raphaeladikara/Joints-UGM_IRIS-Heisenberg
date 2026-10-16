@@ -1,0 +1,125 @@
+{
+  "_note": "Aturan tanda bahaya jalur deterministik (DRAF, wajib review nakes, lihat docs/stage-0/05_DESAIN_PERCAKAPAN.md §4). Pola = regex Python, huruf kecil. Bahasa Indonesia + Jawa sehari-hari. action: stroke_screen = masuk STROKE_SCREEN, escalate = langsung eskalasi tanpa skrining stroke, follow_up = masuk Daftar Kring, log = hanya dicatat.",
+  "negations": ["tidak", "tak", "nggak", "ngga", "gak", "enggak", "ndak", "mboten", "ora", "tanpa", "bukan", "belum", "dereng", "durung", "boten"],
+  "rules": [
+    {
+      "code": "STROKE_SPEECH",
+      "label": "Bicara pelo / sulit bicara",
+      "level": "red",
+      "action": "stroke_screen",
+      "patterns": ["pelo", "cadel", "(susah|sulit|sukar|angel|ra iso|ora iso) (ng)?omong", "(susah|sulit|sukar) bicara", "(omong|ngomong|ngomongku|bicara|bicaraku|suaraku)\\w* (kok )?(angel|susah|aneh|tidak jelas|ora cetha|pelo|kacau)", "lidah\\w* (kaku|kelu|berat|tebal)", "ilat\\w* (kaku|abot)"]
+    },
+    {
+      "code": "STROKE_MOTOR",
+      "label": "Lemah / lumpuh sesisi",
+      "level": "red",
+      "action": "stroke_screen",
+      "patterns": ["(lemas|lemes|lemah|lumpuh|kaku|mati rasa|ora iso (di)?obah|tidak bisa (di)?gerak\\w*|tidak bisa diangkat|ora iso diangkat|ora kuat) (se)?(belah|sebelah|separuh|sisih)", "(tangan|kaki|lengan|lengen|sikil|asta|suku)\\w*( \\w+){0,2} (kiri|kanan|kiwa|tengen|kiwo)\\w*( \\w+){0,2} (lemas|lemes|lemah|lumpuh|kaku|ora iso|tidak bisa|ora kuat|berat|abot|ngglewer)", "separuh badan\\w* (lemas|lemes|lemah|lumpuh|kaku)", "lumpuh"]
+    },
+    {
+      "code": "STROKE_FACE",
+      "label": "Wajah / senyum mencong",
+      "level": "red",
+      "action": "stroke_screen",
+      "patterns": ["(wajah|muka|mulut|bibir|rai|cangkem|lambe|senyum)\\w* (mencong|miring|perot|mérot|merot|mengok|moncong|turun sebelah)", "mencong", "perot"]
+    },
+    {
+      "code": "STROKE_NUMB",
+      "label": "Kebas sesisi",
+      "level": "red",
+      "action": "stroke_screen",
+      "patterns": ["(kesemutan|kebas|mati rasa|gringgingen|kemeng) (se)?(belah|sebelah|separuh|sisih)", "(tangan|kaki|lengen|sikil|wajah)\\w* (kiri|kanan|kiwa|tengen)\\w* (kesemutan|kebas|mati rasa|gringgingen)"]
+    },
+    {
+      "code": "STROKE_VISION",
+      "label": "Gangguan penglihatan mendadak",
+      "level": "red",
+      "action": "stroke_screen",
+      "patterns": ["(tiba-tiba|mendadak|ujug-ujug)\\w* (tidak bisa melihat|gelap|buta|kabur|ora iso ndelok)", "(mata|penglihatan|pandangan)\\w* (sebelah|kiri|kanan|kiwa|tengen)\\w* (gelap|buta|hilang|kabur|tidak bisa melihat)", "(penglihatan|pandangan)\\w* (dobel|ganda|double)", "(tidak bisa|ora iso) (melihat|ndelok|ningali)"]
+    },
+    {
+      "code": "SEVERE_HEADACHE",
+      "label": "Sakit kepala hebat mendadak",
+      "level": "red",
+      "action": "stroke_screen",
+      "patterns": ["(sakit|nyeri|pusing) kepala\\w* (hebat|sekali|banget|luar biasa|parah|nggak karuan|tidak tertahan)", "kepala\\w*( \\w+){0,2} (sakit|pusing|nyeri) (sekali|banget|hebat|luar biasa|parah)", "(sirah|ndas)\\w* (lara|loro|sakit|ngelu) (banget|sanget|nemen)", "ngelu (banget|sanget|nemen)", "sakit kepala paling (hebat|parah)"]
+    },
+    {
+      "code": "BALANCE",
+      "label": "Sempoyongan / sulit menelan mendadak",
+      "level": "red",
+      "action": "stroke_screen",
+      "patterns": ["sempoyongan", "(tidak bisa|ora iso|susah|sulit) (berdiri|ngadeg|jalan|mlaku|seimbang)", "(susah|sulit|tidak bisa|ora iso) (menelan|nguntal|ngulu)", "(dunia|rumah|kamar)\\w* (berputar|muter) (hebat|kencang|banget)"]
+    },
+    {
+      "code": "CHEST_PAIN",
+      "label": "Nyeri dada",
+      "level": "red",
+      "action": "escalate",
+      "patterns": ["(nyeri|sakit|panas|tertekan|ampeg) (di )?dada", "dada\\w*( \\w+){0,2} (nyeri|sakit|sesak|ampeg|tertekan|panas|kaya ditindih|seperti ditindih)", "(dodo|jaja)\\w* (lara|loro|sakit|ampeg|sesek)"]
+    },
+    {
+      "code": "SEVERE_DYSPNEA",
+      "label": "Sesak napas berat",
+      "level": "red",
+      "action": "escalate",
+      "patterns": ["sesak napas", "sesak nafas", "(susah|sulit|tidak bisa|ora iso) (bernapas|bernafas|napas|nafas|ambegan)", "ngos-ngosan (banget|berat|parah)", "ambegan\\w* (abot|sesek|angel)"]
+    },
+    {
+      "code": "SYNCOPE_FALL",
+      "label": "Pingsan / jatuh tidak bisa bangun",
+      "level": "red",
+      "action": "escalate",
+      "patterns": ["pingsan", "semaput", "(jatuh|tiba|dhawah) (dan |lan )?(tidak bisa|ora iso|mboten saged) (bangun|tangi|ngadeg)", "tidak sadar"]
+    },
+    {
+      "code": "CONFUSION",
+      "label": "Bingung",
+      "level": "yellow",
+      "action": "follow_up",
+      "patterns": ["bingung", "linglung", "lupa (hari|tanggal|jalan pulang)"]
+    },
+    {
+      "code": "MILD_SYMPTOM",
+      "label": "Keluhan ringan",
+      "level": "green",
+      "action": "log",
+      "patterns": ["pusing", "ngelu", "lemas", "lemes", "capek", "pegal", "linu", "mual", "batuk", "pilek", "tengkuk"]
+    }
+  ],
+  "bp": {
+    "_note": "Ambang tensi (mmHg). Hanya dipakai setelah angka dikonfirmasi pasien.",
+    "crisis_systolic": 180,
+    "crisis_diastolic": 120,
+    "high_systolic": 160,
+    "high_diastolic": 100,
+    "low_systolic": 90,
+    "valid_systolic": [60, 260],
+    "valid_diastolic": [30, 160]
+  },
+  "wearable": {
+    "_note": "Ambang data jam tangan / Health Connect / Apple Health (DRAF, wajib review nakes). Perangkat konsumen bukan alat diagnosis: paling tinggi memicu kuning, kecuali tensi krisis bergejala yang tetap lewat jalur tensi.",
+    "spo2_low": 90,
+    "hr_high_rest": 120,
+    "hr_low": 40,
+    "goal_steps": 4000,
+    "goal_sleep_min": 420
+  },
+  "labels": {
+    "BP_CRISIS_SYMPTOMATIC": "Krisis hipertensi bergejala",
+    "BP_CRISIS_ASYMPTOMATIC": "Tensi krisis tanpa gejala (hubungi hari ini)",
+    "BP_LOW_SYMPTOMATIC": "Tensi rendah bergejala",
+    "MED_OUT": "Obat habis",
+    "MED_MISSED": "Obat terlewat ≥ 3 hari dalam 7 hari",
+    "MED_SIDE_EFFECT": "Keluhan efek samping obat",
+    "NO_ANSWER_2X": "2× tidak diangkat",
+    "FALL_NO_RESPONSE": "Jam tangan: jatuh, tidak ada respons",
+    "SOS_PRESSED": "Tombol SOS ditekan",
+    "IRREGULAR_RHYTHM": "Jam tangan: ritme jantung tidak teratur",
+    "SPO2_LOW": "Jam tangan: saturasi oksigen rendah",
+    "HR_HIGH_REST": "Jam tangan: detak jantung istirahat sangat cepat",
+    "HR_LOW": "Jam tangan: detak jantung sangat lambat",
+    "DOSAGE_QUESTION": "Pertanyaan dosis/diagnosis (perlu nakes)",
+    "LLM_CLASSIFIER": "Klasifikasi LLM"
+  }
+}

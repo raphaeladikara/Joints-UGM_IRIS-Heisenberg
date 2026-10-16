@@ -7,7 +7,7 @@ import '../../core/pipo.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 
-/// Kartu "Hubungi dokter" di beranda wali. Menonjol (berwarna) bila TILIK menemukan hal janggal; selalu tersedia.
+/// Kartu "Hubungi dokter" di beranda wali. Menonjol (berwarna) bila KRING menemukan hal janggal; selalu tersedia.
 /// Mode demo: dokter jaga menerima panggilan di aplikasi Puskesmas, tidak ada nomor sungguhan yang ditelepon.
 class DoctorCard extends StatelessWidget {
   const DoctorCard({super.key, required this.feed, required this.contactId, required this.onChanged});

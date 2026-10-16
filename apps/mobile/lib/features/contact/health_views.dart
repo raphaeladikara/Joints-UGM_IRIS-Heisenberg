@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/api.dart';
-import '../../core/body3d.dart';
+import '../../core/human3d.dart';
 import '../../core/format.dart';
 import '../../core/health_sync.dart';
 import '../../core/health_widgets.dart';
@@ -366,7 +366,7 @@ class _SyncCardState extends State<SyncCard> {
           const SizedBox(height: 10),
           Text(
             'Samsung Health, Wear OS, Fitbit, Mi Fitness, dan Huawei Health menyalin data ke Health Connect. '
-            'TILIK hanya membaca, tidak pernah mengubah data kesehatan.',
+            'KRING hanya membaca, tidak pernah mengubah data kesehatan.',
             style: TText.small.copyWith(color: Colors.white.withValues(alpha: 0.7), fontSize: 13.5),
           ),
         ],
@@ -400,7 +400,7 @@ class _BodyViewState extends State<BodyView> {
     final brain = red != null
         ? ('red', 'TANDA BAHAYA. ${(red['reasons'] as List).map((r) => r['label']).join(', ')}.')
         : today == null
-        ? ('none', 'TILIK belum menelepon $name hari ini.')
+        ? ('none', 'KRING belum menelepon $name hari ini.')
         : today['status'] == 'completed'
         ? (today['final_level'] == 'red' ? 'red' : 'green', 'Telepon pagi: tidak ada tanda stroke (bicara, wajah, lengan, penglihatan).')
         : ('none', 'Telepon pagi belum selesai.');
@@ -500,7 +500,7 @@ class _BodyViewState extends State<BodyView> {
             gradient: const RadialGradient(center: Alignment(0, -0.2), radius: 0.9, colors: [Color(0xFFFFFFFF), Color(0xFFE6EDF7)]),
             boxShadow: TShadow.soft,
           ),
-          child: Body3D(spots: [for (final s in spots) s.$1], sex: (widget.feed['patient']['sex'] as String?) ?? 'F', selected: _sel, onSelect: (id) => setState(() => _sel = id), height: 420),
+          child: Human3D(spots: [for (final s in spots) s.$1], sex: (widget.feed['patient']['sex'] as String?) ?? 'F', selected: _sel, onSelect: (id) => setState(() => _sel = id), height: 460),
         ),
         const SizedBox(height: 12),
         SizedBox(

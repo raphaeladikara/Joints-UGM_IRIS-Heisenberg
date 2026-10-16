@@ -46,3 +46,6 @@ apps/mobile/.dart_tool/
 apps/mobile/android/key.properties
 *.jks
 *.iml
+
+# APK demo hasil build (dibagikan terpisah)
+dist/

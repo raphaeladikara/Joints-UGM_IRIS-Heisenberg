@@ -5,14 +5,14 @@ import 'package:health/health.dart';
 
 import 'api.dart';
 
-/// Sinkron data jam tangan ke server TILIK.
+/// Sinkron data jam tangan ke server KRING.
 ///
 /// * Android: Health Connect. Jam Samsung (Samsung Health), Wear OS, Fitbit, Xiaomi/Mi Fitness, Huawei Health, dll.
-///   sudah menyalin datanya ke Health Connect, jadi TILIK cukup membaca satu sumber.
+///   sudah menyalin datanya ke Health Connect, jadi KRING cukup membaca satu sumber.
 /// * iOS: Apple Health (HealthKit) dengan Apple Watch atau jam lain yang menulis ke Apple Health.
 /// * Web / laptop demo: tidak ada akses kesehatan perangkat, pakai [simulate].
 ///
-/// TILIK hanya MEMBACA (tidak pernah menulis) dan hanya tipe yang dipakai skrining.
+/// KRING hanya MEMBACA (tidak pernah menulis) dan hanya tipe yang dipakai skrining.
 class HealthSync {
   HealthSync._();
   static final instance = HealthSync._();

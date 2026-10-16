@@ -1,4 +1,4 @@
-# TILIK: sistem desain aplikasi
+# KRING: sistem desain aplikasi
 
 Pengguna: anak (sering di atas 40 tahun), kader/tetangga lansia, perawat Puskesmas. Dibaca di HP, sering di luar
 ruangan atau di bawah lampu redup. Prinsipnya: teks besar, kontras tinggi, satu aksi utama per layar, warna tidak
@@ -29,9 +29,15 @@ Sudut 26 untuk panel/ubin, 30 untuk kartu utama, 18 untuk tombol dan input. Baya
 
 ## Komponen
 - `MetricTile`, `MiniBars`, `HeartLine`, `ActivityRings`, `BpGauge`, `PillNav` di `lib/core/health_widgets.dart`.
-- `Body3D` di `lib/core/body3d.dart`: mesh prosedural lansia sesuai `sex` pasien. Pria: peci, kemeja batik biru,
-  celana, tongkat. Wanita: sanggul uban, kebaya biru muda, kain jarik navy. Warna bahan per verteks × Lambert +
-  cahaya tepi biru; titik status berdenyut (merah lebih cepat). Putaran otomatis berhenti bila pengguna mematikan animasi.
+- `Human3D` di `lib/core/human3d.dart`: model GLB lansia realistis (MakeHuman CC0, dibangun `tool/build_elder_glb.py`,
+  titik organ dari `tool/glb_anchors.py` → `assets/models/anchors.json`) di `<model-viewer>` (WebView, offline). Titik
+  status = hotspot berdenyut; ketuk → panel detail, kamera menghadap titik. Desktop jatuh ke `Body3D` prosedural.
+- Maskot **Kiki** (burung kutilang biru, `lib/core/mascot.dart`): ekspresi mengikuti status (senang/cemas/siaga/ngantuk),
+  dipakai di hero, kartu pasien, jadwal obat, layar kosong, dan rapor (`TiliSays`).
+- Fitur keluarga di `lib/features/contact/care_views.dart`: `StreakBar` (🔥 obat rutin, 💙 telepon/minggu), `SummaryCard`
+  (kartu gelap + cincin skor sehat, ala kartu "Summary"), `IntakeCard` (gelas air + takaran garam), `MedsView` (jam
+  obat ala fasting tracker, stok, kalender 30 hari), `MonthlyReportPage` (tren tensi 30 hari, salin ringkasan dokter).
+- Menu rendah garam di `lib/features/contact/recipes.dart` (filter ala aplikasi resep, kirim resep lewat titip pesan).
 - `DoctorCard` / `DoctorCallScreen` (`lib/features/contact/doctor.dart`) dan `DoctorInbox` (Puskesmas).
 - Layar kesehatan keluarga di `lib/features/contact/health_views.dart`.
 

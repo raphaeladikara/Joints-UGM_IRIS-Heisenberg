@@ -6,7 +6,7 @@ import '../../core/theme.dart';
 import '../../core/voice.dart';
 import '../../core/widgets.dart';
 
-/// Panggilan darurat dari TILIK ke Sahabat Tilik / anak: briefing ≤ 15 detik lalu masuk konferensi.
+/// Panggilan darurat dari KRING ke Sahabat Kring / anak: briefing ≤ 15 detik lalu masuk konferensi.
 /// Prototype: konferensi disimulasikan; di pipeline telepon ini Twilio `<Conference>`.
 class EmergencyCall extends StatefulWidget {
   const EmergencyCall({super.key, required this.notification, required this.contact, required this.patient});
@@ -73,7 +73,7 @@ class _EmergencyCallState extends State<EmergencyCall> with SingleTickerProvider
         ),
       ),
       const SizedBox(height: 22),
-      Text('TILIK', style: TText.display.copyWith(color: Colors.white)),
+      Text('KRING', style: TText.display.copyWith(color: Colors.white)),
       Text('Tanda bahaya: $patientName', style: TText.h3.copyWith(color: Colors.white)),
       const Spacer(),
       Row(
@@ -106,9 +106,9 @@ class _EmergencyCallState extends State<EmergencyCall> with SingleTickerProvider
     final people = [
       (patientName, 'Pasien', Icons.elderly_rounded),
       if (widget.contact['role'] == 'sahabat_tilik')
-        (me, 'Anda · Sahabat Tilik', Icons.volunteer_activism_rounded)
+        (me, 'Anda · Sahabat Kring', Icons.volunteer_activism_rounded)
       else
-        ('Sahabat Tilik', 'Tetangga', Icons.volunteer_activism_rounded),
+        ('Sahabat Kring', 'Tetangga', Icons.volunteer_activism_rounded),
       if (widget.contact['role'] == 'child')
         (me, 'Anda · Keluarga', Icons.family_restroom_rounded)
       else
@@ -127,7 +127,7 @@ class _EmergencyCallState extends State<EmergencyCall> with SingleTickerProvider
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Briefing TILIK', style: TText.label.copyWith(color: Colors.white60)),
+              Text('Briefing KRING', style: TText.label.copyWith(color: Colors.white60)),
               const SizedBox(height: 6),
               Text(widget.notification['body'] as String, style: TText.body.copyWith(color: Colors.white)),
             ],
@@ -151,7 +151,7 @@ class _EmergencyCallState extends State<EmergencyCall> with SingleTickerProvider
             backgroundColor: Colors.white12,
             child: Icon(Icons.support_agent_rounded, color: Colors.white38),
           ),
-          title: Text('TILIK', style: TText.h3.copyWith(color: Colors.white38)),
+          title: Text('KRING', style: TText.h3.copyWith(color: Colors.white38)),
           subtitle: Text('Keluar setelah menyambungkan', style: TText.small.copyWith(color: Colors.white38)),
         ),
         if (hospital != null) ...[
@@ -170,7 +170,7 @@ class _EmergencyCallState extends State<EmergencyCall> with SingleTickerProvider
   }
 }
 
-/// Detail darurat untuk keluarga / Sahabat Tilik: hitung mundur golden period, RS tujuan, langkah.
+/// Detail darurat untuk keluarga / Sahabat Kring: hitung mundur golden period, RS tujuan, langkah.
 class EmergencyDetail extends StatefulWidget {
   const EmergencyDetail({super.key, required this.alertId, required this.contactId, required this.isChild});
   final String alertId;
@@ -248,7 +248,7 @@ class _EmergencyDetailState extends State<EmergencyDetail> with Poller<Emergency
                                 in (widget.isChild
                                         ? [
                                             'Tetap tersambung di konferensi dan tenangkan ${a['patient']['display_name']}.',
-                                            'Putuskan bersama Sahabat Tilik: bawa ke ${a['hospital']?['name'] ?? 'RS ber-CT'} sekarang.',
+                                            'Putuskan bersama Sahabat Kring: bawa ke ${a['hospital']?['name'] ?? 'RS ber-CT'} sekarang.',
                                             'Hubungi 119 / ambulans desa. Sebutkan jam terakhir normal.',
                                             'Bila memakai obat pengencer darah, sampaikan ke IGD.',
                                           ]

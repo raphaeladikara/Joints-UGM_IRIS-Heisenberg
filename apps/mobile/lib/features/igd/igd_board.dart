@@ -73,7 +73,7 @@ class _IgdBoardState extends State<IgdBoard> with Poller<IgdBoard> {
                   const Icon(Icons.monitor_heart_outlined, color: Colors.white24, size: 64),
                   const SizedBox(height: 12),
                   Text('Tidak ada pre-alert aktif.', style: TText.h3.copyWith(color: Colors.white60)),
-                  Text('Kartu muncul otomatis saat TILIK mendeteksi tanda bahaya.', style: TText.small.copyWith(color: Colors.white38)),
+                  Text('Kartu muncul otomatis saat KRING mendeteksi tanda bahaya.', style: TText.small.copyWith(color: Colors.white38)),
                 ],
               ),
             )

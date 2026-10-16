@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/api.dart';
-import '../../core/body3d.dart';
+import '../../core/mascot.dart';
 import '../../core/pipo.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -10,8 +10,8 @@ import '../igd/igd_board.dart';
 import '../phone/mbah_phone.dart';
 import '../puskesmas/daftar_tilik.dart';
 
-/// Pilih peran. Satu APK untuk demo: HP Mbah (simulator telepon biasa), keluarga, Sahabat Tilik, Puskesmas, IGD.
-/// Di produksi, Mbah tidak butuh aplikasi apa pun: TILIK menelepon nomor HP biasa.
+/// Pilih peran. Satu APK untuk demo: HP Mbah (simulator telepon biasa), keluarga, Sahabat Kring, Puskesmas, IGD.
+/// Di produksi, Mbah tidak butuh aplikasi apa pun: KRING menelepon nomor HP biasa.
 class RoleGate extends StatefulWidget {
   const RoleGate({super.key});
   @override
@@ -66,31 +66,44 @@ class _RoleGateState extends State<RoleGate> {
   }
 
   Future<void> _settings() async {
-    final ctrl = TextEditingController(text: Api.instance.base);
+    final ctrl = TextEditingController(text: Api.instance.isOffline ? '' : Api.instance.base);
+    var offline = Api.instance.isOffline;
     final saved = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Alamat server'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: ctrl,
-              decoration: const InputDecoration(hintText: 'http://192.168.1.10:8080'),
-            ),
-            const SizedBox(height: 8),
-            Text('Kosongkan untuk kembali ke bawaan: ${Api.platformDefault}', style: TText.small),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: const Text('Sumber data'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment(value: true, icon: Icon(Icons.phone_android_rounded), label: Text('Offline')),
+                  ButtonSegment(value: false, icon: Icon(Icons.dns_rounded), label: Text('Server')),
+                ],
+                selected: {offline},
+                onSelectionChanged: (v) => setLocal(() => offline = v.first),
+              ),
+              const SizedBox(height: 12),
+              if (offline)
+                Text('Semua data demo disimpan di HP ini. Tidak butuh internet atau laptop.', style: TText.small)
+              else ...[
+                TextField(controller: ctrl, decoration: InputDecoration(hintText: Api.serverHint)),
+                const SizedBox(height: 8),
+                Text('Server KRING (FastAPI) untuk LLM dan suara asli. HP dan laptop harus satu Wi-Fi.', style: TText.small),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Simpan')),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Simpan')),
-        ],
       ),
     );
     if (saved == true) {
-      await Api.instance.setBase(ctrl.text);
+      await Api.instance.setBase(offline ? Api.offline : (ctrl.text.trim().isEmpty ? Api.serverHint : ctrl.text));
       _check();
     }
   }
@@ -132,10 +145,10 @@ class _RoleGateState extends State<RoleGate> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(color: TColors.brand, borderRadius: BorderRadius.circular(16)),
-                      child: const Icon(Icons.phone_in_talk_rounded, color: Colors.white, size: 26),
+                      child: const Icon(Icons.ring_volume_rounded, color: Colors.white, size: 26),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(child: Text('TILIK', style: TText.h1)),
+                    const Expanded(child: Text('KRING', style: TText.h1)),
                     IconButton(
                       onPressed: _settings,
                       icon: const Icon(Icons.settings_rounded),
@@ -164,7 +177,7 @@ class _RoleGateState extends State<RoleGate> {
                         ink: TColors.peachInk,
                         title: 'HP Mbah',
                         who: 'Bu Sri',
-                        subtitle: 'TILIK menelepon, Mbah menjawab dengan suara.',
+                        subtitle: 'KRING menelepon, Mbah menjawab dengan suara.',
                         onTap: () => _open(const MbahPhone(patientId: 'p-sri')),
                       ),
                       _RoleTile(
@@ -181,7 +194,7 @@ class _RoleGateState extends State<RoleGate> {
                         icon: Icons.volunteer_activism_rounded,
                         color: TColors.lavender,
                         ink: TColors.lavenderInk,
-                        title: 'Sahabat Tilik',
+                        title: 'Sahabat Kring',
                         who: 'Bu Tini',
                         subtitle: 'Tetangga yang dihubungi pertama saat darurat.',
                         onTap: () => _open(const ContactHome(contactId: 'c-tini')),
@@ -193,7 +206,7 @@ class _RoleGateState extends State<RoleGate> {
                         ink: TColors.sageInk,
                         title: 'Puskesmas',
                         who: 'Wonosari I',
-                        subtitle: 'Daftar Tilik Hari Ini dan simulasi jam tangan.',
+                        subtitle: 'Daftar Kring Hari Ini dan simulasi jam tangan.',
                         onTap: () => _open(const DaftarTilik()),
                       ),
                     ];
@@ -240,7 +253,7 @@ class _RoleGateState extends State<RoleGate> {
     );
   }
 
-  /// Blok pembuka: janji produk di kiri, tubuh 3D yang berputar pelan di kanan.
+  /// Blok pembuka: janji produk di kiri, maskot melambai di kanan.
   Widget _hero() {
     return DecoratedBox(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), boxShadow: TShadow.soft),
@@ -248,13 +261,7 @@ class _RoleGateState extends State<RoleGate> {
         borderRadius: BorderRadius.circular(30),
         child: Stack(
           children: [
-            const Positioned(
-              right: -18,
-              top: 0,
-              bottom: 0,
-              width: 170,
-              child: IgnorePointer(child: Body3D(spots: [], sex: 'F', height: 250)),
-            ),
+            const Positioned(right: 4, bottom: 6, child: Tili(size: 132, waving: true)),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 22, 138, 22),
               child: Column(
@@ -320,11 +327,15 @@ class _RoleGateState extends State<RoleGate> {
       decoration: BoxDecoration(color: ok ? TColors.greenTint : TColors.yellowTint, borderRadius: BorderRadius.circular(16)),
       child: Row(
         children: [
-          Icon(ok ? Icons.cloud_done_rounded : Icons.cloud_off_rounded, color: ok ? TColors.green : TColors.yellow, size: 22),
+          Icon(ok ? (_health!['offline'] == true ? Icons.offline_bolt_rounded : Icons.cloud_done_rounded) : Icons.cloud_off_rounded, color: ok ? TColors.green : TColors.yellow, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              ok ? 'Server tersambung${_health!['llm'] == true ? ' · LLM aktif' : ' · jalur aturan'}' : (_error ?? 'Memeriksa server…'),
+              ok
+                  ? (_health!['offline'] == true
+                      ? 'Mode offline · data demo tersimpan di HP ini'
+                      : 'Server tersambung${_health!['llm'] == true ? ' · LLM aktif' : ' · jalur aturan'}')
+                  : (_error ?? 'Memeriksa server…'),
               style: TText.small.copyWith(color: TColors.ink),
             ),
           ),

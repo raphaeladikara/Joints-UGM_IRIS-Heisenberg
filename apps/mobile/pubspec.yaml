@@ -1,5 +1,5 @@
 name: tilik
-description: "TILIK: aplikasi keluarga, Sahabat Tilik, Puskesmas, dan IGD (prototype)."
+description: "KRING: aplikasi keluarga, Sahabat Kring, Puskesmas, dan IGD (prototype)."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -40,6 +40,10 @@ dependencies:
   shared_preferences: ^2.5.6
   url_launcher: ^6.3.3
   health: ^13.3.2
+  model_viewer_plus: ^1.10.0
+  web: ^1.1.1
+  webview_flutter: ^4.14.1
+  webview_flutter_android: ^4.14.1
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +62,9 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
+  assets:
+    - assets/content/
+    - assets/models/
   # Font dibundel supaya tampil tanpa internet (OFL, lihat assets/fonts/OFL-*.txt).
   fonts:
     - family: Jakarta

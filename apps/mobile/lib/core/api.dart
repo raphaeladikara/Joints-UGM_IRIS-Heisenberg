@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'local/backend.dart';
+
 typedef Json = Map<String, dynamic>;
 
 class ApiException implements Exception {
@@ -14,7 +16,8 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-/// Klien API TILIK. Alamat server: isian Pengaturan > --dart-define=TILIK_API > bawaan per platform.
+/// Klien API KRING. Bawaan: **mode offline** (backend di dalam aplikasi, data demo, tanpa server).
+/// Server sungguhan bisa dipilih dari Pengaturan atau `--dart-define=TILIK_API=http://IP:8080`.
 /// Selalu IP eksplisit, bukan "localhost" (Windows mencoba IPv6 dulu).
 class Api {
   Api._();
@@ -23,14 +26,16 @@ class Api {
   static const _buildDefault = String.fromEnvironment('TILIK_API');
   static const _prefKey = 'tilik_api_base';
 
+  static const offline = 'offline';
+
   String _base = '';
   String get base => _base;
+  bool get isOffline => _base == offline;
 
-  static String get platformDefault {
-    if (_buildDefault.isNotEmpty) return _buildDefault;
-    if (kIsWeb) return 'http://127.0.0.1:8080';
-    return 'http://10.0.2.2:8080'; // emulator Android → laptop
-  }
+  static String get platformDefault => _buildDefault.isNotEmpty ? _buildDefault : offline;
+
+  /// Contoh alamat server untuk isian Pengaturan.
+  static String get serverHint => kIsWeb ? 'http://127.0.0.1:8080' : 'http://10.0.2.2:8080';
 
   Future<void> load() async {
     try {
@@ -45,6 +50,11 @@ class Api {
   Future<void> setBase(String value) async {
     final v = value.trim().replaceAll(RegExp(r'/+$'), '');
     _base = v.isEmpty ? platformDefault : v;
+    if (v == platformDefault) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefKey);
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (v.isEmpty) {
       await prefs.remove(_prefKey);
@@ -54,6 +64,13 @@ class Api {
   }
 
   Future<dynamic> _send(String method, String path, [Object? body]) async {
+    if (isOffline) {
+      try {
+        return await LocalBackend.instance.handle(method, path, body);
+      } on LocalHttpError catch (e) {
+        throw ApiException('Gagal (${e.status}): ${e.detail}');
+      }
+    }
     final uri = Uri.parse('$_base$path');
     final headers = {'Content-Type': 'application/json'};
     late http.Response res;
@@ -120,6 +137,15 @@ class Api {
   Future<List<dynamic>> activeConsults() => list('/v1/doctor-consults');
   Future<Json> setConsultStatus(String id, String status, {String note = ''}) =>
       post('/v1/doctor-consults/$id/status', {'status': status, 'note': note});
+  // Fitur keluarga: jadwal & stok obat, air & garam, streak, rapor bulanan.
+  Future<Json> care(String patientId) => get('/v1/patients/$patientId/care');
+  Future<Json> logDose(String patientId, String name, String time, {String status = 'taken'}) =>
+      post('/v1/patients/$patientId/meds/dose', {'name': name, 'time': time, 'status': status});
+  Future<Json> refillMeds(String patientId, {String? name}) => post('/v1/patients/$patientId/meds/refill', {'name': ?name});
+  Future<Json> logIntake(String patientId, String kind, num delta) => post('/v1/patients/$patientId/intake', {'kind': kind, 'delta': delta});
+  Future<Json> logFamilyCall(String patientId, String contactId) => post('/v1/patients/$patientId/family-calls', {'contact_id': contactId});
+  Future<Json> report(String patientId, {int days = 30}) => get('/v1/patients/$patientId/report?days=$days');
+
   Future<Json> postVitals(String patientId, String source, String device, List<Json> samples) =>
       post('/v1/patients/$patientId/vitals', {'source': source, 'device': device, 'samples': samples});
 }

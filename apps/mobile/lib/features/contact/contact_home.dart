@@ -4,14 +4,17 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/api.dart';
 import '../../core/format.dart';
 import '../../core/health_widgets.dart';
+import '../../core/mascot.dart';
 import '../../core/pipo.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import 'doctor.dart';
 import 'emergency.dart';
+import 'care_views.dart';
 import 'health_views.dart';
+import 'recipes.dart';
 
-/// Aplikasi keluarga (anak) dan Sahabat Tilik. Di produksi kanal utamanya WhatsApp; di prototype,
+/// Aplikasi keluarga (anak) dan Sahabat Kring. Di produksi kanal utamanya WhatsApp; di prototype,
 /// pesan "WA" dan panggilan konferensi disimulasikan di sini (kanal *_sim dari server).
 class ContactHome extends StatefulWidget {
   const ContactHome({super.key, required this.contactId});
@@ -55,6 +58,9 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
   Future<void> _callPatient() async {
     final phone = _feed?['patient']?['phone'] as String?;
     if (phone == null) return;
+    if (_isChild) {
+      Api.instance.logFamilyCall(_feed!['patient']['id'] as String, widget.contactId).then((_) => refreshNow()).catchError((_) => <String, dynamic>{});
+    }
     final ok = await launchUrl(Uri(scheme: 'tel', path: phone)).catchError((_) => false);
     if (!ok && mounted) showError(context, 'Tidak bisa membuka aplikasi telepon. (Nomor demo fiktif: $phone)');
   }
@@ -69,7 +75,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
       if (mounted) {
         FocusScope.of(context).unfocus();
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Pesan dititipkan. TILIK akan membacakannya di panggilan berikutnya.')));
+            .showSnackBar(const SnackBar(content: Text('Pesan dititipkan. KRING akan membacakannya di panggilan berikutnya.')));
       }
       refreshNow();
     } catch (e) {
@@ -81,11 +87,13 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
   Widget build(BuildContext context) {
     final f = _feed;
     final unread = ((f?['notifications'] as List?) ?? const []).where((n) => n['read_at'] == null).length;
+    final hasCare = f?['care'] != null;
     final tabs = [
       const PillNavItem(Icons.home_rounded, 'Beranda'),
       if (_isChild) const PillNavItem(Icons.accessibility_new_rounded, 'Tubuh'),
+      if (_isChild && hasCare) const PillNavItem(Icons.medication_rounded, 'Obat'),
+      if (_isChild) const PillNavItem(Icons.restaurant_rounded, 'Menu'),
       PillNavItem(Icons.chat_rounded, 'Pesan', badge: unread),
-      if (_isChild) const PillNavItem(Icons.edit_note_rounded, 'Titip'),
     ];
     if (_tab >= tabs.length) _tab = 0;
     final page = tabs[_tab].label;
@@ -108,8 +116,9 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
                         child: switch (page) {
                           'Beranda' => _isChild ? _homeChild(f) : _homeSahabat(f),
                           'Tubuh' => BodyView(f, onSynced: refreshNow),
-                          'Pesan' => _inbox(f),
-                          _ => _compose(f),
+                          'Obat' => MedsView(feed: f, onChanged: refreshNow),
+                          'Menu' => RecipesView(feed: f, contactId: widget.contactId, onSent: refreshNow),
+                          _ => _inbox(f),
                         },
                       ),
                     ],
@@ -148,7 +157,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(color: TColors.panel, borderRadius: BorderRadius.circular(99), border: Border.all(color: TColors.line)),
-            child: Text(_isChild ? 'Keluarga' : 'Sahabat Tilik', style: TText.small.copyWith(color: TColors.ink, fontWeight: FontWeight.w800)),
+            child: Text(_isChild ? 'Keluarga' : 'Sahabat Kring', style: TText.small.copyWith(color: TColors.ink, fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -223,13 +232,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
         children: [
           Row(
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), shape: BoxShape.circle),
-                child: Icon(p['sex'] == 'M' ? Icons.elderly_rounded : Icons.elderly_woman_rounded, size: 36, color: TColors.brandDeep),
-              ),
+              Tili(mood: moodForLevel(status), size: 76),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -255,7 +258,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Hari ini: ${s.label}', style: TText.h3.copyWith(color: s.fg == TColors.grey ? TColors.ink : s.fg)),
-                      Text('TILIK menelepon setiap pukul ${p['call_time_local']}', style: TText.small),
+                      Text('KRING menelepon setiap pukul ${p['call_time_local']}', style: TText.small),
                     ],
                   ),
                 ),
@@ -291,8 +294,16 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
         children: [
+          if (f['care'] != null) ...[
+            StreakBar(f['care'] as Json, onTap: _openReport),
+            const SizedBox(height: 12),
+          ],
           _patientHero(f),
           const SizedBox(height: 14),
+          if (f['care'] != null) ...[
+            SummaryCard(f),
+            const SizedBox(height: 14),
+          ],
           DoctorCard(feed: f, contactId: widget.contactId, onChanged: refreshNow),
           const SizedBox(height: 14),
           // Bahan obrolan: alasan anak menelepon, letaknya di atas angka-angka.
@@ -322,8 +333,13 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
               ],
             ),
           ),
+          if (f['care'] != null) ...[
+            const SizedBox(height: 22),
+            _heading('Air & garam'),
+            IntakeCard(feed: f, onChanged: refreshNow),
+          ],
           const SizedBox(height: 22),
-          _heading('Tensi & obat'),
+          _heading('Tensi & obat', trailing: f['care'] != null ? 'Rapor 30 hari' : null, onTrailing: _openReport),
           BpCard(f),
           const SizedBox(height: 12),
           HealthPanel(
@@ -369,6 +385,12 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
     );
   }
 
+  void _openReport() {
+    final p = _feed?['patient'] as Json?;
+    if (p == null) return;
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => MonthlyReportPage(patientId: p['id'] as String, patientName: p['display_name'] as String)));
+  }
+
   Widget _heading(String text, {String? trailing, VoidCallback? onTrailing}) => Padding(
     padding: const EdgeInsets.fromLTRB(4, 0, 0, 10),
     child: Row(
@@ -387,7 +409,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
       (Icons.event_seat_rounded, 'Temani dan posisikan aman', 'Duduk atau berbaring miring. Jangan ditinggal sendirian.'),
       (Icons.no_food_rounded, 'Jangan beri makan, minum, atau obat', 'Risiko tersedak bila ada gangguan menelan.'),
       (Icons.schedule_rounded, 'Catat jam terakhir normal', 'Informasi ini menentukan terapi di IGD.'),
-      (Icons.local_hospital_rounded, 'Hubungi 119 / ambulans desa', 'Bawa ke RS dengan CT yang disebut TILIK.'),
+      (Icons.local_hospital_rounded, 'Hubungi 119 / ambulans desa', 'Bawa ke RS dengan CT yang disebut KRING.'),
     ];
     return RefreshIndicator(
       onRefresh: refreshNow,
@@ -399,13 +421,13 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           _heading('Peran Anda'),
           HealthPanel(
             child: Text(
-              'Anda adalah Sahabat Tilik untuk $name: orang pertama yang ditelepon TILIK saat ada tanda bahaya, '
+              'Anda adalah Sahabat Kring untuk $name: orang pertama yang ditelepon KRING saat ada tanda bahaya, '
               'karena paling dekat secara fisik. Anda tidak menerima rapor harian, hanya panggilan darurat.',
               style: TText.body,
             ),
           ),
           const SizedBox(height: 22),
-          _heading('Kalau TILIK menelepon darurat'),
+          _heading('Kalau KRING menelepon darurat'),
           HealthPanel(
             child: Column(
               children: [
@@ -450,22 +472,23 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
 
   Widget _inbox(Json f) {
     final notes = ((f['notifications'] as List?) ?? const []).cast<Json>();
-    if (notes.isEmpty) return Center(child: Text('Belum ada pesan dari TILIK.', style: TText.body.copyWith(color: TColors.muted)));
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
       itemCount: notes.length + 1,
       separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (ctx, i) {
         if (i == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Pesan TILIK', style: TText.h1),
-                Text('WhatsApp dari TILIK, disimulasikan di aplikasi ini.', style: TText.small),
-              ],
-            ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Pesan', style: TText.h1),
+              Text('WhatsApp dari KRING, disimulasikan di aplikasi ini.', style: TText.small),
+              if (_isChild) ...[const SizedBox(height: 14), _composeCard(f)],
+              const SizedBox(height: 16),
+              if (notes.isEmpty)
+                const Padding(padding: EdgeInsets.only(top: 20), child: TiliSays('Belum ada pesan. Nanti rapor pagi muncul di sini.', mood: TiliMood.sleepy)),
+              if (notes.isNotEmpty) const Text('Kotak masuk', style: TText.h2),
+            ],
           );
         }
         final n = notes[i - 1];
@@ -534,54 +557,47 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
     );
   }
 
-  Widget _compose(Json f) {
+  Widget _composeCard(Json f) {
     final name = f['patient']['display_name'] as String;
     final sent = ((f['pending_messages'] as List?) ?? const []).cast<Json>();
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
-      children: [
-        Text('Titip pesan untuk $name', style: TText.h1),
-        const SizedBox(height: 6),
-        Text(
-          'TILIK membacakannya di telepon pagi berikutnya, diawali "${f['contact']['name']} titip pesan…". '
-          'Pesan suara asli (tanpa tiruan suara) menyusul di versi pipeline telepon.',
-          style: TText.small,
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _msg,
-          maxLines: 4,
-          maxLength: 300,
-          style: TText.body,
-          decoration: const InputDecoration(hintText: 'Mis. "Bu, Sabtu Dika pulang. Jaga kesehatan, ya."'),
-        ),
-        FilledButton.icon(onPressed: _sendMessage, icon: const Icon(Icons.send_rounded), label: const Text('Titipkan')),
-        const SizedBox(height: 26),
-        _heading('Pesan terakhir'),
-        if (sent.isEmpty) Text('Belum ada.', style: TText.small),
-        for (final m in sent)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: HealthPanel(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: TColors.butter, borderRadius: BorderRadius.circular(26)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.edit_note_rounded, color: TColors.butterInk, size: 28),
+              const SizedBox(width: 8),
+              Expanded(child: Text('Titip pesan untuk $name', style: TText.h3)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text('KRING membacakannya di telepon pagi berikutnya, diawali "${f['contact']['name']} titip pesan…".',
+              style: TText.small.copyWith(color: TColors.butterInk)),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _msg,
+            maxLines: 3,
+            maxLength: 300,
+            style: TText.body,
+            decoration: const InputDecoration(hintText: 'Mis. "Bu, Sabtu Dika pulang. Jaga kesehatan, ya."'),
+          ),
+          FilledButton.icon(onPressed: _sendMessage, icon: const Icon(Icons.send_rounded), label: const Text('Titipkan')),
+          for (final m in sent.take(3))
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Row(
                 children: [
-                  Text(m['text'] as String, style: TText.body),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(child: Text('${dayLabel(m['created_at'] as String?)} · ${hm(m['created_at'] as String?)}', style: TText.small)),
-                      LevelChip(
-                        m['status'] == 'delivered' ? 'green' : 'scheduled',
-                        text: m['status'] == 'delivered' ? 'Tersampaikan' : 'Menunggu telepon',
-                      ),
-                    ],
-                  ),
+                  Expanded(child: Text('“${m['text']}”', maxLines: 2, overflow: TextOverflow.ellipsis, style: TText.small.copyWith(color: TColors.ink))),
+                  const SizedBox(width: 8),
+                  LevelChip(m['status'] == 'delivered' ? 'green' : 'scheduled', text: m['status'] == 'delivered' ? 'Tersampaikan' : 'Menunggu'),
                 ],
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

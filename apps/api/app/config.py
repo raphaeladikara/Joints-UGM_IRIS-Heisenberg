@@ -1,4 +1,4 @@
-"""Konfigurasi server TILIK dari environment variable (lihat .env.example di akar repo)."""
+"""Konfigurasi server KRING dari environment variable (lihat .env.example di akar repo)."""
 
 from __future__ import annotations
 

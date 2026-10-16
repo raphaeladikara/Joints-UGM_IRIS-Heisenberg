@@ -1,0 +1,8 @@
+Model 3D lansia (elder_female.glb, elder_male.glb)
+
+Dibangun oleh tool/build_elder_glb.py dari aset MakeHuman yang dirilis CC0 (domain publik):
+  - base mesh hm08, target makro (ras Asia, usia ±72 th), rig default  - github.com/makehumancommunity/makehuman
+  - paket "MakeHuman system assets" (kulit old_asian_*, female_elegantsuit01, male_casualsuit01,
+    shoes01/04, rambut bob02/short02, alis, mata)  - static.makehumancommunity.org/assets/assetpacks.html
+Warna baju/rambut diubah (biru tema, uban). Lisensi CC0: bebas dipakai, diubah, dan disebarkan tanpa atribusi.
+Model adalah ilustrasi, bukan pasien sungguhan.

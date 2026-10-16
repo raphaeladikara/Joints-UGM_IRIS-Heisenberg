@@ -1,0 +1,62 @@
+{
+  "_note": "Skrip percakapan KRING (DRAF, belum direview nakes; frasa Jawa perlu validasi penutur asli Q-07). Sumber: docs/stage-0/05_DESAIN_PERCAKAPAN.md. Placeholder {nama} diisi oleh dialog manager.",
+  "id": {
+    "greeting": "Selamat pagi, {sapaan}. Saya Kring, asisten AI dari {puskesmas}. Kata sandi keluarga: {codeword}. Apakah saya sedang berbicara dengan {sapaan}?",
+    "greeting_event_fall": "{sapaan}, ini Kring, asisten AI dari {puskesmas}. Kata sandi keluarga: {codeword}. Jam tangan Ibu mendeteksi Ibu terjatuh. Apakah {sapaan} baik-baik saja?",
+    "identity_retry": "Maaf, boleh saya tahu ini dengan siapa?",
+    "wrong_person": "Terima kasih. Saya hanya boleh bicara langsung dengan {sapaan}. Saya akan menelepon lagi nanti. Selamat pagi.",
+    "ai_disclosure": "Saya asisten AI, bukan manusia. Saya membantu {puskesmas} menanyakan kabar {sapaan} setiap pagi.",
+    "family_message_text": "{pengirim} titip pesan untuk {sapaan}. \"{pesan}\"",
+    "family_message_audio": "{pengirim} titip pesan suara. Saya putarkan, ya.",
+    "memory_opener": "Kemarin {sapaan} cerita: {fakta}. Bagaimana kelanjutannya?",
+    "ask_medication": "Obat tensi {obat} pagi ini sudah diminum, {sapaan}?",
+    "ask_med_reason": "Boleh saya tahu, kenapa belum diminum? Lupa, obatnya habis, atau ada alasan lain?",
+    "med_reason_feel_healthy": "Baik, saya catat. Tekanan darah tinggi sering tidak terasa, {sapaan}. Obatnya membantu menjaga tensi tetap stabil. Keputusannya tetap di tangan {sapaan} dan dokter.",
+    "med_reason_out": "Baik, saya catat obatnya habis. Petugas Puskesmas akan menindaklanjuti hari ini.",
+    "med_reason_forgot": "Tidak apa-apa. Kalau sempat, obatnya bisa diminum sekarang sesuai anjuran dokter.",
+    "med_reason_side_effect": "Baik, saya catat ada keluhan setelah minum obat. Ini akan saya sampaikan ke perawat Puskesmas. Jangan mengubah dosis sendiri, ya.",
+    "med_reason_other": "Baik, terima kasih sudah cerita. Saya catat.",
+    "med_ack_yes": "Bagus sekali, {sapaan}.",
+    "ask_bp": "Kalau sudah mengukur tensi pagi ini, berapa angkanya?",
+    "confirm_bp": "{sistolik_kata} per {diastolik_kata}, betul begitu?",
+    "bp_retry": "Maaf, boleh diulang angka tensinya pelan-pelan? Misalnya seratus empat puluh per sembilan puluh.",
+    "bp_skip": "Tidak apa-apa kalau belum mengukur.",
+    "bp_ack": "Terima kasih, sudah saya catat.",
+    "bp_high_note": "Angkanya cukup tinggi. Saya catat untuk perawat Puskesmas.",
+    "ask_symptoms": "Ada keluhan apa hari ini, {sapaan}? Misalnya pusing, lemas, atau yang lain?",
+    "symptom_ack_none": "Syukurlah.",
+    "symptom_ack_mild": "Baik, saya catat keluhannya.",
+    "ask_story": "Ada kabar atau cerita apa hari ini, {sapaan}?",
+    "story_ack": "Wah, senang mendengarnya.",
+    "closing": "Terima kasih, {sapaan}. {edukasi} Kalau ada apa-apa, {sapaan} boleh menelepon nomor ini kapan saja. Selamat pagi.",
+    "closing_yellow": "Terima kasih, {sapaan}. Petugas Puskesmas akan menghubungi {sapaan} hari ini. {edukasi} Kalau ada apa-apa, telepon nomor ini kapan saja.",
+    "stroke_calm": "{sapaan}, saya akan bertanya beberapa hal singkat. {sapaan} tidak sendirian, bantuan sedang saya hubungi.",
+    "stroke_speech": "Coba {sapaan} ulangi kalimat ini: Langit biru di atas desa.",
+    "stroke_arms": "Sekarang coba angkat kedua tangan lurus ke depan dan tahan sebentar. Ada yang turun atau lemas?",
+    "stroke_lkw": "Jam berapa terakhir kali {sapaan} merasa normal, sebelum keluhan ini muncul?",
+    "stroke_lkw_retry": "Kira-kira saja, {sapaan}. Misalnya jam enam pagi, atau waktu bangun tidur?",
+    "stroke_transfer": "Terima kasih, {sapaan}. Saya sambungkan sekarang dengan {sahabat} dan {anak}. Tetap duduk atau berbaring, jangan makan atau minum dulu. Bantuan sedang menuju ke sana.",
+    "urgent_transfer": "{sapaan}, ini perlu pertolongan segera. Saya sambungkan sekarang dengan {sahabat} dan {anak}. Tetap duduk atau berbaring, jangan sendirian.",
+    "fall_no_answer": "Tidak ada jawaban.",
+    "dosage_refusal": "Pertanyaan itu sebaiknya ditanyakan ke dokter atau perawat Puskesmas. Saya catat supaya ditindaklanjuti.",
+    "off_topic_refusal": "Maaf, saya hanya bisa membantu soal kabar, obat, tensi, dan keluhan kesehatan {sapaan}.",
+    "not_understood": "Maaf, saya kurang menangkap. Bisa diulang pelan-pelan?"
+  },
+  "jv": {
+    "greeting": "Sugeng enjing, {sapaan}. Kula Kring, asisten AI saking {puskesmas}. Tembung sandhi kulawarga: {codeword}. Leres menika kula matur kalih {sapaan}?",
+    "ask_medication": "Obat tensi {obat} enjing menika sampun diunjuk, {sapaan}?",
+    "confirm_bp": "{sistolik_kata} per {diastolik_kata}, leres?",
+    "ask_symptoms": "Wonten keluhan menapa dinten menika, {sapaan}?",
+    "closing": "Matur nuwun, {sapaan}. {edukasi} Menawi wonten menapa-menapa, panjenengan saged nelpon nomer menika kapan mawon."
+  },
+  "education": [
+    "Ingat SeGeRa Ke RS: senyum mencong, gerak separuh badan lemah, bicara pelo, kebas separuh badan, rabun mendadak, sakit kepala hebat, dan sempoyongan. Kalau ada satu saja, segera ke rumah sakit.",
+    "Kalau tiba-tiba bicara pelo atau tangan lemas sebelah, jangan ditunggu sampai besok. Segera telepon keluarga dan ke rumah sakit.",
+    "Waktu sangat penting untuk stroke. Pertolongan di bawah empat setengah jam bisa menyelamatkan otak.",
+    "Minum obat tensi setiap hari membantu mencegah stroke, walaupun badan terasa sehat."
+  ],
+  "briefing": {
+    "sahabat_tilik": "{sahabat}, ini Kring dari {puskesmas}. {sapaan} kemungkinan mengalami tanda stroke. Jam terakhir normal: {lkw}. Mohon segera ke rumah beliau. Saya sambungkan sekarang.",
+    "child": "{anak}, ini Kring. {sapaan} menunjukkan tanda stroke: {ringkas}. Jam terakhir normal: {lkw}. {sahabat} sedang menuju rumah. Rumah sakit dengan CT terdekat: {rs}, sekitar {eta} menit. Saya sambungkan sekarang."
+  }
+}

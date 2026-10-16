@@ -1,4 +1,4 @@
-"""Dialog Manager TILIK: state machine eksplisit (docs/stage-0/05_DESAIN_PERCAKAPAN.md §2).
+"""Dialog Manager KRING: state machine eksplisit (docs/stage-0/05_DESAIN_PERCAKAPAN.md §2).
 
 GREETING → MEDICATION (→ MED_REASON) → BLOOD_PRESSURE (→ BP_CONFIRM) → SYMPTOMS → STORY → CLOSING
 Darurat dari state mana pun: STROKE_SCREEN (speech → arms → lkw) → ESCALATING, atau langsung ESCALATING.
@@ -447,7 +447,7 @@ def _start_emergency(s, ctx, patient, say, findings: list[safety.Finding], text:
     ctx["level"] = "red"
     reasons = [f.as_reason() for f in findings]
     if not ctx.get("alert_id"):
-        # Skrining tidak menunda eskalasi: pre-alert IGD & panggilan ke Sahabat Tilik/anak dimulai sekarang.
+        # Skrining tidak menunda eskalasi: pre-alert IGD & panggilan ke Sahabat Kring/anak dimulai sekarang.
         ctx["alert_id"] = escalation.open_alert(patient["id"], s["id"], "red", "call", reasons)
     hints = ["escalation_started"]
     if any(f.action == "stroke_screen" for f in findings):
@@ -538,7 +538,7 @@ def _summary(ctx: dict[str, Any], outcome: str) -> str:
     flags = [r["label"] for r in ctx["findings"]]
     parts.append("Tanda: " + ", ".join(flags) if flags else "Tidak ada keluhan berarti")
     if outcome == "escalated":
-        parts.append("Dieskalasi ke Sahabat Tilik, keluarga, dan IGD")
+        parts.append("Dieskalasi ke Sahabat Kring, keluarga, dan IGD")
     elif outcome == "wrong_person":
         parts = ["Yang mengangkat bukan pasien, tidak ada data medis dibahas"]
     return ". ".join(parts) + "."

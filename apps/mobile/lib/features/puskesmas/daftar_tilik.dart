@@ -9,7 +9,7 @@ import '../phone/mbah_phone.dart';
 import 'call_transcript.dart';
 import 'doctor_inbox.dart';
 
-/// F-13 Daftar Tilik Hari Ini untuk perawat Prolanis: 🔴/🟡 di paling atas, alasan tindak lanjut, tensi, kepatuhan.
+/// F-13 Daftar Kring Hari Ini untuk perawat Prolanis: 🔴/🟡 di paling atas, alasan tindak lanjut, tensi, kepatuhan.
 class DaftarTilik extends StatefulWidget {
   const DaftarTilik({super.key});
   @override
@@ -39,7 +39,7 @@ class _DaftarTilikState extends State<DaftarTilik> with Poller<DaftarTilik> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Daftar Tilik Hari Ini'),
+            const Text('Daftar Kring Hari Ini'),
             Text(d == null ? '' : '${d['puskesmas']} · ${dayLabel('${d['date']}T08:00:00+07:00')}', style: TText.small),
           ],
         ),
@@ -182,7 +182,7 @@ class _DaftarTilikState extends State<DaftarTilik> with Poller<DaftarTilik> {
   }
 }
 
-/// Detail pasien untuk nakes: tren tensi, kepatuhan, memori, riwayat panggilan, "Tilik sekarang", simulasi sinyal.
+/// Detail pasien untuk nakes: tren tensi, kepatuhan, memori, riwayat panggilan, "Kring sekarang", simulasi sinyal.
 class PatientDetail extends StatefulWidget {
   const PatientDetail({super.key, required this.patientId});
   final String patientId;
@@ -225,9 +225,9 @@ class _PatientDetailState extends State<PatientDetail> with Poller<PatientDetail
       final r = await Api.instance.event(widget.patientId, type, source: source, payload: payload);
       if (!mounted) return;
       final msg = switch (r['action']) {
-        'calling_patient' => 'Jam tangan: jatuh terdeteksi. TILIK langsung menelepon pasien (cek HP Mbah).',
-        'escalated' => 'Sinyal darurat → eskalasi 🔴 ke Sahabat Tilik, keluarga, dan IGD.',
-        'follow_up' => 'Sinyal dicatat → masuk Daftar Tilik (🟡).',
+        'calling_patient' => 'Jam tangan: jatuh terdeteksi. KRING langsung menelepon pasien (cek HP Mbah).',
+        'escalated' => 'Sinyal darurat → eskalasi 🔴 ke Sahabat Kring, keluarga, dan IGD.',
+        'follow_up' => 'Sinyal dicatat → masuk Daftar Kring (🟡).',
         _ => 'Sinyal dicatat.',
       };
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -267,7 +267,7 @@ class _PatientDetailState extends State<PatientDetail> with Poller<PatientDetail
                               style: TText.body,
                             ),
                             Text(
-                              'Kontak: ${(p['contacts'] as List).map((c) => '${c['name']} (${c['role'] == 'child' ? 'anak' : 'Sahabat Tilik'})').join(' · ')}',
+                              'Kontak: ${(p['contacts'] as List).map((c) => '${c['name']} (${c['role'] == 'child' ? 'anak' : 'Sahabat Kring'})').join(' · ')}',
                               style: TText.small,
                             ),
                             const SizedBox(height: 12),
@@ -277,7 +277,7 @@ class _PatientDetailState extends State<PatientDetail> with Poller<PatientDetail
                                   child: FilledButton.icon(
                                     onPressed: () => _tilikNow(here: false),
                                     icon: const Icon(Icons.phone_forwarded_rounded),
-                                    label: const Text('Tilik sekarang'),
+                                    label: const Text('Kring sekarang'),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -340,7 +340,7 @@ class _PatientDetailState extends State<PatientDetail> with Poller<PatientDetail
                       child: Padding(padding: const EdgeInsets.all(16), child: AdherenceRow(p['adherence_7d']['days'] as List)),
                     ),
                     if ((p['memories'] as List).isNotEmpty) ...[
-                      const SectionTitle('Memori TILIK'),
+                      const SectionTitle('Memori KRING'),
                       Card(
                         child: Column(
                           children: [

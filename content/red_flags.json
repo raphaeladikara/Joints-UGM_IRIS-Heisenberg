@@ -1,5 +1,5 @@
 {
-  "_note": "Aturan tanda bahaya jalur deterministik (DRAF, wajib review nakes, lihat docs/stage-0/05_DESAIN_PERCAKAPAN.md §4). Pola = regex Python, huruf kecil. Bahasa Indonesia + Jawa sehari-hari. action: stroke_screen = masuk STROKE_SCREEN, escalate = langsung eskalasi tanpa skrining stroke, follow_up = masuk Daftar Tilik, log = hanya dicatat.",
+  "_note": "Aturan tanda bahaya jalur deterministik (DRAF, wajib review nakes, lihat docs/stage-0/05_DESAIN_PERCAKAPAN.md §4). Pola = regex Python, huruf kecil. Bahasa Indonesia + Jawa sehari-hari. action: stroke_screen = masuk STROKE_SCREEN, escalate = langsung eskalasi tanpa skrining stroke, follow_up = masuk Daftar Kring, log = hanya dicatat.",
   "negations": ["tidak", "tak", "nggak", "ngga", "gak", "enggak", "ndak", "mboten", "ora", "tanpa", "bukan", "belum", "dereng", "durung", "boten"],
   "rules": [
     {

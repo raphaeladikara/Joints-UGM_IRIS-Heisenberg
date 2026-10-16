@@ -15,6 +15,6 @@ class TilikApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'TILIK', debugShowCheckedModeBanner: false, theme: buildTheme(), home: const RoleGate());
+    return MaterialApp(title: 'KRING', debugShowCheckedModeBanner: false, theme: buildTheme(), home: const RoleGate());
   }
 }

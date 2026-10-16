@@ -21,7 +21,7 @@ class Voice {
     if (_ttsReady) return;
     try {
       await _tts.setLanguage('id-ID').timeout(const Duration(seconds: 3));
-      // Tempo pelan untuk lansia (prinsip suara TILIK).
+      // Tempo pelan untuk lansia (prinsip suara KRING).
       await _tts.setSpeechRate(kIsWeb ? 0.85 : 0.42).timeout(const Duration(seconds: 3));
       await _tts.setPitch(1.0).timeout(const Duration(seconds: 3));
       await _tts.awaitSpeakCompletion(true).timeout(const Duration(seconds: 3));
@@ -59,7 +59,7 @@ class Voice {
   /// Dengarkan satu ucapan. [onPartial] untuk teks sementara; future selesai dengan teks final (atau '').
   Future<String> listenOnce({void Function(String)? onPartial}) async {
     if (!await initStt()) return '';
-    await stop(); // barge-in: pasien bicara → TILIK berhenti
+    await stop(); // barge-in: pasien bicara → KRING berhenti
     final done = Completer<String>();
     var last = '';
     try {
