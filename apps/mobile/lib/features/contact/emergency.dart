@@ -229,7 +229,7 @@ class _EmergencyDetailState extends State<EmergencyDetail> with Poller<Emergency
                     const SectionTitle('Bawa ke'),
                     Card(
                       child: ListTile(
-                        leading: const Icon(Icons.local_hospital_rounded, color: TColors.leaf),
+                        leading: const Icon(Icons.local_hospital_rounded, color: TColors.brand),
                         title: Text(a['hospital']?['name'] as String? ?? 'RS ber-CT terdekat', style: TText.h3),
                         subtitle: Text(
                           a['eta_minutes'] != null ? '±${a['eta_minutes']} menit perjalanan · CT 24 jam (simulasi, perlu verifikasi)' : '–',

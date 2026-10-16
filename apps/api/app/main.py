@@ -13,7 +13,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 
-from . import config, db, dialog, escalation, safety, seed
+from . import config, db, dialog, escalation, safety, seed, vitals
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -54,6 +54,20 @@ class FamilyMessageIn(Strict):
 
 class NotificationAction(Strict):
     action: Literal["answer", "decline", "read"]
+
+
+class VitalSample(Strict):
+    type: Literal["heart_rate", "resting_hr", "steps", "sleep", "spo2", "blood_pressure"]
+    value: float | None = Field(default=None, ge=0, le=100000)
+    systolic: int | None = Field(default=None, ge=40, le=300)
+    diastolic: int | None = Field(default=None, ge=20, le=200)
+    at: str | None = None
+
+
+class VitalsIn(Strict):
+    source: Literal["health_connect", "apple_health", "watch_sim"]
+    device: str = Field(default="", max_length=60)
+    samples: list[VitalSample] = Field(min_length=1, max_length=2000)
 
 
 class AckIn(Strict):
@@ -163,6 +177,7 @@ def patient_detail(pid: str) -> dict[str, Any]:
         "bp_history": _bp_history(pid, 14),
         "adherence_7d": _adherence(pid),
         "memories": db.query("SELECT fact, category, created_at FROM memories WHERE patient_id = ? ORDER BY created_at DESC LIMIT 5", (pid,)),
+        "vitals": vitals.summary(pid),
         "sessions": sessions,
         "alerts": [_alert_view(a) for a in db.query("SELECT * FROM alerts WHERE patient_id = ? ORDER BY created_at DESC LIMIT 5", (pid,))],
     }
@@ -305,6 +320,30 @@ def post_event(body: EventIn) -> dict[str, Any]:
     return escalation.handle_event(body.patient_id, body.source, body.type, body.payload)
 
 
+# ---------- jam tangan & aplikasi kesehatan ----------
+
+@app.post("/v1/patients/{pid}/vitals")
+def post_vitals(pid: str, body: VitalsIn) -> dict[str, Any]:
+    """Sinkron dari Health Connect (Android), Apple Health (iOS), atau simulasi jam tangan."""
+    _patient_or_404(pid)
+    samples = []
+    for s in body.samples:
+        if s.type == "blood_pressure":
+            if s.systolic is None or s.diastolic is None:
+                raise HTTPException(422, "Tensi butuh systolic dan diastolic")
+        elif s.value is None:
+            raise HTTPException(422, f"Sampel {s.type} butuh value")
+        samples.append(s.model_dump())
+    result = vitals.ingest(pid, body.source, body.device or vitals.SOURCE_LABEL[body.source], samples)
+    return {**result, "summary": vitals.summary(pid)}
+
+
+@app.get("/v1/patients/{pid}/vitals")
+def get_vitals(pid: str, days: int = 7) -> dict[str, Any]:
+    _patient_or_404(pid)
+    return vitals.summary(pid, max(1, min(days, 30)))
+
+
 # ---------- IGD ----------
 
 @app.get("/v1/alerts")
@@ -375,6 +414,7 @@ def contact_feed(cid: str) -> dict[str, Any]:
         "latest_report": report,
         "bp_history": _bp_history(p["id"], 7),
         "adherence_7d": _adherence(p["id"]),
+        "vitals": vitals.summary(p["id"]),
         "red_alert": _alert_view(red) if red else None,
         "incoming_call": ringing,
         "notifications": notes,

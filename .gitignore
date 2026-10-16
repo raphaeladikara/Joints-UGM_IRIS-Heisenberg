@@ -39,6 +39,8 @@ apps/api/data/
 *.db
 *.db-shm
 *.db-wal
+apps/voice/logs/
+apps/voice/sim_audio/
 apps/mobile/build/
 apps/mobile/.dart_tool/
 apps/mobile/android/key.properties

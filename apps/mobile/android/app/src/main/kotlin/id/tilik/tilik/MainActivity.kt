@@ -1,5 +1,6 @@
 package id.tilik.tilik
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity()
+// FragmentActivity: dialog izin Health Connect memakai registerForActivityResult.
+class MainActivity : FlutterFragmentActivity()

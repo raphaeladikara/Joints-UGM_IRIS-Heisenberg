@@ -355,9 +355,9 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: TColors.leaf,
+                color: TColors.brand,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: TColors.leaf.withValues(alpha: 0.5), blurRadius: 40, spreadRadius: 6)],
+                boxShadow: [BoxShadow(color: TColors.brand.withValues(alpha: 0.5), blurRadius: 40, spreadRadius: 6)],
               ),
               child: const Icon(Icons.phone_in_talk_rounded, size: 56, color: Colors.white),
             ),
@@ -406,7 +406,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
           child: Row(
             children: [
               const CircleAvatar(
-                backgroundColor: TColors.leaf,
+                backgroundColor: TColors.brand,
                 child: Icon(Icons.support_agent_rounded, color: Colors.white),
               ),
               const SizedBox(width: 10),
@@ -556,7 +556,7 @@ class _MbahPhoneState extends State<MbahPhone> with Poller<MbahPhone>, SingleTic
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: l.fromTilik ? const Color(0xFF1F2D27) : TColors.leaf,
+          color: l.fromTilik ? const Color(0xFF1F2D27) : TColors.brand,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),

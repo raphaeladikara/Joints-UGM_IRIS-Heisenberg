@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TILIK · HP Mbah</title>
+<style>
+  :root { --bg:#f6f3ee; --fg:#1f1d1a; --muted:#6b655c; --card:#fff; --line:#e4ded4; --accent:#2f6b4f; --red:#b3372f; --yellow:#b8860b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  main { max-width:560px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  p.sub { margin:0 0 20px; color:var(--muted); font-size:14px; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  select, button { font:inherit; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:inherit; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.hang { background:var(--red); border-color:var(--red); color:#fff; }
+  button:disabled { opacity:.5; }
+  #status { font-size:14px; color:var(--muted); }
+  #log { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+  #log li { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+  #log .meta { font-size:12px; color:var(--muted); }
+  .lvl-red { border-left:4px solid var(--red) !important; }
+  .lvl-yellow { border-left:4px solid var(--yellow) !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>HP Mbah (simulasi)</h1>
+  <p class="sub">Panggilan TILIK lewat browser (SmallWebRTC). Data pasien fiktif. Pakai headset supaya suara TILIK tidak terekam ulang.</p>
+  <div class="row">
+    <select id="patient"><option value="p-sri">Bu Sri</option></select>
+    <button id="call" class="primary">Angkat telepon TILIK</button>
+    <button id="hang" class="hang" disabled>Tutup</button>
+  </div>
+  <div id="status">Siap.</div>
+  <audio id="audio" autoplay></audio>
+  <ul id="log"></ul>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let pc = null, pcId = null, poll = null, since = 0;
+
+fetch("/api/patients").then(r => r.ok ? r.json() : []).then(list => {
+  if (!list.length) return;
+  $("patient").innerHTML = list.map(p => `<option value="${p.id}"${p.id === "p-sri" ? " selected" : ""}>${p.display_name} (${p.preferred_language})</option>`).join("");
+}).catch(() => {});
+
+function setStatus(t) { $("status").textContent = t; }
+
+function addLine(ev) {
+  const li = document.createElement("li");
+  if (ev.level === "red" || ev.level === "yellow") li.className = "lvl-" + ev.level;
+  li.innerHTML = `<div class="meta"></div><div class="text"></div>`;
+  li.querySelector(".meta").textContent = `TILIK · ${ev.state_label || ev.state || ""} · ${ev.level || ""}`;
+  li.querySelector(".text").textContent = ev.tilik_text || "(tanpa ucapan)";
+  $("log").appendChild(li);
+}
+
+async function waitIce(pc) {
+  if (pc.iceGatheringState === "complete") return;
+  await new Promise(res => {
+    const t = setTimeout(res, 2000);
+    pc.addEventListener("icegatheringstatechange", () => { if (pc.iceGatheringState === "complete") { clearTimeout(t); res(); } });
+  });
+}
+
+async function startCall() {
+  $("call").disabled = true; $("log").innerHTML = ""; since = 0;
+  try {
+    setStatus("Meminta izin mikrofon…");
+    const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+    mic.getTracks().forEach(t => pc.addTrack(t, mic));
+    pc.createDataChannel("chat");
+    pc.ontrack = (e) => { $("audio").srcObject = e.streams[0] || new MediaStream([e.track]); };
+    pc.onconnectionstatechange = () => {
+      setStatus("Koneksi: " + pc.connectionState);
+      if (["failed", "closed", "disconnected"].includes(pc.connectionState)) stopCall(false);
+    };
+    await pc.setLocalDescription(await pc.createOffer());
+    await waitIce(pc);
+    setStatus("Menyambungkan…");
+    const r = await fetch("/api/offer", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sdp: pc.localDescription.sdp, type: pc.localDescription.type, request_data: { patient_id: $("patient").value } }) });
+    if (!r.ok) throw new Error("offer ditolak: " + r.status);
+    const answer = await r.json();
+    pcId = answer.pc_id;
+    await pc.setRemoteDescription(answer);
+    $("hang").disabled = false;
+    poll = setInterval(pollEvents, 600);
+  } catch (e) {
+    setStatus("Gagal: " + e.message);
+    stopCall(false);
+  }
+}
+
+async function pollEvents() {
+  if (!pcId) return;
+  const r = await fetch(`/api/events/${encodeURIComponent(pcId)}?since=${since}`);
+  if (!r.ok) return;
+  const data = await r.json();
+  since = data.next;
+  for (const ev of data.events) {
+    if (ev.type === "tilik") addLine(ev);
+    if (ev.type === "ended") { setStatus("Panggilan selesai."); stopCall(true); }
+  }
+}
+
+function stopCall(keepLog) {
+  if (poll) { clearInterval(poll); poll = null; }
+  if (pc) { pc.getSenders().forEach(s => s.track && s.track.stop()); pc.close(); pc = null; }
+  $("call").disabled = false; $("hang").disabled = true;
+}
+
+$("call").onclick = startCall;
+$("hang").onclick = () => { setStatus("Ditutup."); stopCall(true); };
+</script>
+</body>
+</html>

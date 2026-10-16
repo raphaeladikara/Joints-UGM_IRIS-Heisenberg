@@ -162,7 +162,7 @@ class BpChart extends StatelessWidget {
           children: [
             _legend(TColors.clay, 'Sistolik'),
             const SizedBox(width: 16),
-            _legend(TColors.leaf, 'Diastolik'),
+            _legend(TColors.brand, 'Diastolik'),
             const SizedBox(width: 16),
             _legend(TColors.line, 'Batas 140/90', dashed: true),
           ],
@@ -236,7 +236,7 @@ class _BpPainter extends CustomPainter {
     }
 
     series('systolic', TColors.clay);
-    series('diastolic', TColors.leaf);
+    series('diastolic', TColors.brand);
   }
 
   @override

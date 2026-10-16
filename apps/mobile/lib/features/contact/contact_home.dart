@@ -187,7 +187,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           children: [
             CircleAvatar(
               radius: 26,
-              backgroundColor: TColors.leafTint,
+              backgroundColor: TColors.brandTint,
               child: Text((p['display_name'] as String).split(' ').last[0], style: TText.h2),
             ),
             const SizedBox(width: 14),
@@ -266,7 +266,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
           ),
           const SectionTitle('Bahan obrolan'),
           Card(
-            color: TColors.leafTint,
+            color: TColors.brandTint,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -274,10 +274,10 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.forum_rounded, color: TColors.leafDeep),
+                      const Icon(Icons.forum_rounded, color: TColors.brandDeep),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text('Tadi $name cerita…', style: TText.h3.copyWith(color: TColors.leafDeep)),
+                        child: Text('Tadi $name cerita…', style: TText.h3.copyWith(color: TColors.brandDeep)),
                       ),
                     ],
                   ),
@@ -370,7 +370,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
                 for (final (i, s) in steps.indexed)
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: TColors.leafTint,
+                      backgroundColor: TColors.brandTint,
                       child: Text('${i + 1}', style: TText.h3),
                     ),
                     title: Text(s.$2, style: TText.h3),
@@ -422,7 +422,7 @@ class _ContactHomeState extends State<ContactHome> with Poller<ContactHome> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(call ? Icons.phone_callback_rounded : Icons.chat_bubble_rounded, color: red ? TColors.red : TColors.leaf),
+                  Icon(call ? Icons.phone_callback_rounded : Icons.chat_bubble_rounded, color: red ? TColors.red : TColors.brand),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

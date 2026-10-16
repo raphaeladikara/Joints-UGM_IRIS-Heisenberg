@@ -129,7 +129,7 @@ class _RoleGateState extends State<RoleGate> {
                     Container(
                       width: 52,
                       height: 52,
-                      decoration: BoxDecoration(color: TColors.leaf, borderRadius: BorderRadius.circular(16)),
+                      decoration: BoxDecoration(color: TColors.brand, borderRadius: BorderRadius.circular(16)),
                       child: const Icon(Icons.phone_in_talk_rounded, color: Colors.white, size: 28),
                     ),
                     const SizedBox(width: 14),
@@ -148,7 +148,7 @@ class _RoleGateState extends State<RoleGate> {
                 const SizedBox(height: 16),
                 Text(
                   'Jalur cepat stroke dimulai dari rumah Mbah, bukan dari pintu IGD.',
-                  style: TText.h3.copyWith(color: TColors.leafDeep),
+                  style: TText.h3.copyWith(color: TColors.brandDeep),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -168,7 +168,7 @@ class _RoleGateState extends State<RoleGate> {
                 ),
                 _RoleCard(
                   icon: Icons.family_restroom_rounded,
-                  color: TColors.leaf,
+                  color: TColors.brand,
                   title: 'Keluarga (Mas Dika)',
                   subtitle: 'Rapor pagi, bahan obrolan, titip pesan, alert darurat.',
                   onTap: () => _open(const ContactHome(contactId: 'c-dika')),

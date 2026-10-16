@@ -97,6 +97,14 @@
     "valid_systolic": [60, 260],
     "valid_diastolic": [30, 160]
   },
+  "wearable": {
+    "_note": "Ambang data jam tangan / Health Connect / Apple Health (DRAF, wajib review nakes). Perangkat konsumen bukan alat diagnosis: paling tinggi memicu kuning, kecuali tensi krisis bergejala yang tetap lewat jalur tensi.",
+    "spo2_low": 90,
+    "hr_high_rest": 120,
+    "hr_low": 40,
+    "goal_steps": 4000,
+    "goal_sleep_min": 420
+  },
   "labels": {
     "BP_CRISIS_SYMPTOMATIC": "Krisis hipertensi bergejala",
     "BP_CRISIS_ASYMPTOMATIC": "Tensi krisis tanpa gejala (hubungi hari ini)",
@@ -108,6 +116,9 @@
     "FALL_NO_RESPONSE": "Jam tangan: jatuh, tidak ada respons",
     "SOS_PRESSED": "Tombol SOS ditekan",
     "IRREGULAR_RHYTHM": "Jam tangan: ritme jantung tidak teratur",
+    "SPO2_LOW": "Jam tangan: saturasi oksigen rendah",
+    "HR_HIGH_REST": "Jam tangan: detak jantung istirahat sangat cepat",
+    "HR_LOW": "Jam tangan: detak jantung sangat lambat",
     "DOSAGE_QUESTION": "Pertanyaan dosis/diagnosis (perlu nakes)",
     "LLM_CLASSIFIER": "Klasifikasi LLM"
   }

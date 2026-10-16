@@ -141,12 +141,37 @@ def run() -> None:
                 _alert(conn, p["id"], sid, t, [{"path": "rule", "code": "BP_CRISIS_ASYMPTOMATIC",
                                                 "label": "Tensi krisis tanpa gejala (hubungi hari ini)", "quote": "seratus delapan puluh empat per seratus empat"}])
 
+        # Jam tangan Bu Sri (simulasi): 7 hari langkah, tidur, detak, SpO2. Pasien lain belum punya perangkat.
+        _watch(conn, rng, "p-sri", today, now)
+
         # Memori & titip pesan untuk Bu Sri (babak 1 demo).
         conn.execute("INSERT INTO memories (id, patient_id, fact, category, created_at) VALUES (?,?,?,?,?)",
                      (db.new_id(), "p-sri", "Tomat di kebun belakang sudah merah, sebentar lagi panen", "hobby", (today - timedelta(days=1)).isoformat()))
         conn.execute("INSERT INTO family_messages (id, patient_id, from_contact_id, kind, text, status, created_at) VALUES (?,?,?,?,?,?,?)",
                      (db.new_id(), "p-sri", "c-dika", "text", "Bu, Rani minggu depan wisuda. Sabtu Dika jemput Ibu, ya. Jaga kesehatan.", "pending",
                       (now - timedelta(hours=10)).isoformat()))
+
+
+def _watch(conn, rng: random.Random, pid: str, today: datetime, now: datetime) -> None:
+    device, source = "Jam tangan Bu Sri (simulasi)", "watch_sim"
+
+    def obs(kind: str, value: dict[str, Any], at: datetime) -> None:
+        conn.execute("INSERT INTO observations VALUES (?,?,?,?,?,?,?,?)", (db.new_id(), pid, None, kind, db.dumps(value), device, source, at.isoformat()))
+
+    for d in range(6, -1, -1):
+        day = today - timedelta(days=d)
+        # Hari ini baru separuh jalan: langkah dihitung sampai jam sekarang.
+        frac = 1.0 if d else max(0.15, min(1.0, (now.hour * 60 + now.minute - 300) / 900))
+        steps = int((3100 + rng.randint(-900, 1600)) * frac)
+        obs("steps", {"value": steps, "date": day.date().isoformat()}, day.replace(hour=12) if d else now)
+        obs("sleep", {"value": 360 + rng.randint(-50, 70), "date": day.date().isoformat()}, day.replace(hour=5, minute=30))
+        obs("resting_hr", {"value": float(70 + rng.randint(-4, 5))}, day.replace(hour=6))
+        obs("spo2", {"value": float(96 + rng.randint(-1, 2))}, day.replace(hour=4))
+        last_hour = 21 if d else max(6, now.hour)
+        for h in range(6, last_hour + 1, 2):
+            obs("heart_rate", {"value": float(72 + rng.randint(-6, 14) + (8 if 8 <= h <= 10 else 0))}, day.replace(hour=h, minute=10))
+    conn.execute("INSERT INTO device_syncs (id, patient_id, source, device, sample_count, synced_at) VALUES (?,?,?,?,?,?)",
+                 (db.new_id(), pid, source, device, 60, (now - timedelta(minutes=12)).isoformat()))
 
 
 def _bp(rng: random.Random, base: tuple[int, int] | None) -> tuple[int, int] | None:

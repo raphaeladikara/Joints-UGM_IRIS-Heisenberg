@@ -156,13 +156,21 @@ CREATE TABLE IF NOT EXISTS events (
   occurred_at TEXT NOT NULL,
   handled_level TEXT
 );
+CREATE TABLE IF NOT EXISTS device_syncs (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT NOT NULL REFERENCES patients(id),
+  source TEXT NOT NULL,
+  device TEXT NOT NULL,
+  sample_count INTEGER NOT NULL,
+  synced_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_obs_patient ON observations(patient_id, observed_at);
 CREATE INDEX IF NOT EXISTS idx_calls_patient ON call_sessions(patient_id, started_at);
 CREATE INDEX IF NOT EXISTS idx_notif_contact ON notifications(contact_id, created_at);
 """
 
 TABLES = [
-    "notifications", "events", "family_messages", "memories", "alerts", "travel_times", "hospitals",
+    "device_syncs", "notifications", "events", "family_messages", "memories", "alerts", "travel_times", "hospitals",
     "observations", "call_turns", "call_sessions", "contacts", "patients",
 ]
 

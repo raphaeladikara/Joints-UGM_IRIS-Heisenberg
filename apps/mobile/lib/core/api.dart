@@ -113,4 +113,7 @@ class Api {
   Future<Json> notificationAction(String id, String action) => post('/v1/notifications/$id/action', {'action': action});
   Future<Json> sendFamilyMessage(String patientId, String contactId, String text) =>
       post('/v1/patients/$patientId/family-messages', {'contact_id': contactId, 'text': text});
+  Future<Json> vitals(String patientId) => get('/v1/patients/$patientId/vitals');
+  Future<Json> postVitals(String patientId, String source, String device, List<Json> samples) =>
+      post('/v1/patients/$patientId/vitals', {'source': source, 'device': device, 'samples': samples});
 }
